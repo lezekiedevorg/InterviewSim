@@ -20,15 +20,24 @@ export async function POST(req: Request): Promise<Response> {
   const history = body.history ?? [];
 
   try {
+    const iterator = askModelStream(systemPrompt, history)[Symbol.asyncIterator]();
+    const first = await iterator.next(); // a pre-output 429 throws HERE, before headers are sent
+
     const encoder = new TextEncoder();
-    const stream = new ReadableStream({
+    const stream = new ReadableStream<Uint8Array>({
       async start(controller) {
         try {
-          for await (const chunk of askModelStream(systemPrompt, history)) {
-            controller.enqueue(encoder.encode(chunk));
+          if (!first.done && first.value) {
+            controller.enqueue(encoder.encode(first.value));
+          }
+          let r = await iterator.next();
+          while (!r.done) {
+            if (r.value) controller.enqueue(encoder.encode(r.value));
+            r = await iterator.next();
           }
           controller.close();
         } catch (err) {
+          // ponytail: 200 already sent here; can't remap to 429 mid-stream. Abort so the client sees a hard error.
           controller.error(err);
         }
       },
@@ -37,7 +46,7 @@ export async function POST(req: Request): Promise<Response> {
       headers: { "Content-Type": "text/plain; charset=utf-8" },
     });
   } catch (err: unknown) {
-    return mapError(err);
+    return mapError(err); // now reachable for errors thrown before the first chunk (429, etc.)
   }
 }
 
