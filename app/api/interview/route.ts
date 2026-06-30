@@ -1,6 +1,7 @@
 import { validateContext } from "@/lib/validate";
 import { buildRecruiterPrompt } from "@/lib/prompts";
 import { askModelStream } from "@/lib/askModel";
+import { isRateLimitError } from "@/lib/mapModelError";
 import type { InterviewContext, ChatMessage } from "@/lib/types";
 
 export async function POST(req: Request): Promise<Response> {
@@ -18,9 +19,13 @@ export async function POST(req: Request): Promise<Response> {
 
   const systemPrompt = buildRecruiterPrompt(body.context);
   const history = body.history ?? [];
+  // ponytail: Gemini rejects contents:[]; seed a candidate turn server-only so the UI history is untouched
+  const modelHistory = history.length > 0
+    ? history
+    : [{ role: "candidate" as const, text: "Bonjour, je suis prêt à commencer l'entretien." }];
 
   try {
-    const iterator = askModelStream(systemPrompt, history)[Symbol.asyncIterator]();
+    const iterator = askModelStream(systemPrompt, modelHistory)[Symbol.asyncIterator]();
     const first = await iterator.next(); // a pre-output 429 throws HERE, before headers are sent
 
     const encoder = new TextEncoder();
@@ -51,9 +56,7 @@ export async function POST(req: Request): Promise<Response> {
 }
 
 function mapError(err: unknown): Response {
-  const msg = String((err as { message?: string })?.message ?? err);
-  const status = (err as { status?: number })?.status;
-  if (status === 429 || /429|RESOURCE_EXHAUSTED/i.test(msg)) {
+  if (isRateLimitError(err)) {
     return new Response(
       "L'IA est momentanément surchargée, réessaie dans quelques instants.",
       { status: 429 }

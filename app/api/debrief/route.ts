@@ -2,6 +2,7 @@ import { validateContext } from "@/lib/validate";
 import { buildDebriefPrompt } from "@/lib/prompts";
 import { askModelText } from "@/lib/askModel";
 import { parseDebrief } from "@/lib/parseDebrief";
+import { isRateLimitError } from "@/lib/mapModelError";
 import type { InterviewContext, ChatMessage } from "@/lib/types";
 
 export async function POST(req: Request): Promise<Response> {
@@ -19,23 +20,24 @@ export async function POST(req: Request): Promise<Response> {
 
   const prompt = buildDebriefPrompt(body.context, body.transcript ?? []);
 
+  // ponytail: Gemini rejects contents:[]; seed provides required user content; server-only, not shown to UI
+  const seed = [{ role: "candidate" as const, text: "Génère le débrief de cet entretien." }];
+
   try {
     // Premier essai
-    let raw = await askModelText(prompt, []);
+    let raw = await askModelText(prompt, seed);
     let debrief = parseDebrief(raw);
 
     // Un seul re-essai si le JSON est malformé
     if (!debrief) {
-      raw = await askModelText(prompt, []);
+      raw = await askModelText(prompt, seed);
       debrief = parseDebrief(raw);
     }
 
     if (debrief) return Response.json({ debrief });
     return Response.json({ raw }); // fallback texte brut
   } catch (err: unknown) {
-    const msg = String((err as { message?: string })?.message ?? err);
-    const status = (err as { status?: number })?.status;
-    if (status === 429 || /429|RESOURCE_EXHAUSTED/i.test(msg)) {
+    if (isRateLimitError(err)) {
       return Response.json(
         { error: "L'IA est momentanément surchargée, réessaie dans quelques instants." },
         { status: 429 }
