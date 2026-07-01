@@ -21,6 +21,7 @@ Règles :
 - Pose une question à la fois, puis attends la réponse du candidat.
 - Rebondis sur les réponses du candidat et sur son CV : creuse, demande des précisions, mets en situation.
 - Reste dans le personnage du recruteur. Ne donne pas de feedback pendant l'entretien (il sera donné à la fin).
+- Si un détail n'est pas fourni (ton nom, le nom de l'entreprise, etc.), invente-le naturellement. N'écris JAMAIS de crochets ni de champs à remplir du type « [Nom du recruteur] » ou « [entreprise] » dans tes réponses.
 - Réponds dans la langue de l'entretien indiquée ci-dessus.`;
 }
 
