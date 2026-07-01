@@ -3,6 +3,10 @@
 import { useState } from "react";
 import type { InterviewContext, ChatMessage, Debrief } from "@/lib/types";
 import { validateContext } from "@/lib/validate";
+import { Button } from "@/app/components/ui/Button";
+import { Card } from "@/app/components/ui/Card";
+import { Field } from "@/app/components/ui/Field";
+import { Debrief as DebriefComponent } from "@/app/components/Debrief";
 
 type Phase = "form" | "chat" | "debrief";
 
@@ -93,12 +97,12 @@ export default function Home() {
   }
 
   return (
-    <main style={{ maxWidth: 720, margin: "0 auto", padding: 24, fontFamily: "system-ui" }}>
-      <h1>InterviewSim</h1>
+    <main className="mx-auto max-w-2xl px-4 py-8">
+      <h1 className="font-heading text-2xl font-bold text-slate-900 mb-6">InterviewSim</h1>
 
       {phase === "form" && (
-        <section>
-          <p>Décris ton entretien, colle ton CV, puis lance la simulation.</p>
+        <Card>
+          <p className="mb-4 text-sm text-slate-600">Décris ton entretien, colle ton CV, puis lance la simulation.</p>
           <Field label="Poste visé *" value={context.poste}
             onChange={(v) => setContext({ ...context, poste: v })} />
           <Field label="Entreprise / type" value={context.entreprise ?? ""}
@@ -109,95 +113,74 @@ export default function Home() {
             onChange={(v) => setContext({ ...context, niveau: v })} />
           <Field label="Langue" value={context.langue ?? ""}
             onChange={(v) => setContext({ ...context, langue: v })} />
-          <Area label="CV (collé) *" value={context.cv}
+          <Field label="CV (collé) *" value={context.cv} textarea rows={5}
             onChange={(v) => setContext({ ...context, cv: v })} />
-          <Area label="Offre d'emploi (collée)" value={context.offre ?? ""}
+          <Field label="Offre d'emploi (collée)" value={context.offre ?? ""} textarea rows={5}
             onChange={(v) => setContext({ ...context, offre: v })} />
-          <button disabled={formErrors.length > 0} onClick={startInterview}>
-            Démarrer l&apos;entretien
-          </button>
           {formErrors.length > 0 && (
-            <p style={{ color: "#a00" }}>{formErrors.join(" ")}</p>
+            <p className="mb-3 text-sm text-red-600">{formErrors.join(" ")}</p>
           )}
-        </section>
+          <Button disabled={formErrors.length > 0} onClick={startInterview}>
+            Démarrer l&apos;entretien
+          </Button>
+        </Card>
       )}
 
       {phase === "chat" && (
-        <section>
-          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+        <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-3">
             {history.map((m, i) => (
-              <div key={i} style={{
-                alignSelf: m.role === "recruiter" ? "flex-start" : "flex-end",
-                background: m.role === "recruiter" ? "#eef" : "#efe",
-                padding: 10, borderRadius: 8, maxWidth: "85%", whiteSpace: "pre-wrap",
-              }}>
-                <strong>{m.role === "recruiter" ? "Recruteur" : "Toi"}</strong>
-                <div>{m.text}</div>
+              <div key={i} className={`max-w-[85%] rounded-xl p-3 text-sm whitespace-pre-wrap ${
+                m.role === "recruiter"
+                  ? "self-start bg-slate-100 text-slate-800"
+                  : "self-end bg-brand-50 text-slate-800"
+              }`}>
+                <strong className="block mb-1 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                  {m.role === "recruiter" ? "Recruteur" : "Toi"}
+                </strong>
+                {m.text}
               </div>
             ))}
           </div>
-          {errorMsg && <p style={{ color: "#a00" }}>{errorMsg}</p>}
-          <div style={{ marginTop: 16 }}>
-            <textarea value={currentAnswer} disabled={streaming}
+          {errorMsg && <p className="text-sm text-red-600">{errorMsg}</p>}
+          <Card>
+            <textarea
+              className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:border-brand-600 focus:ring-2 focus:ring-brand-100 mb-3"
+              value={currentAnswer}
+              disabled={streaming}
               onChange={(e) => setCurrentAnswer(e.target.value)}
-              rows={3} style={{ width: "100%" }} placeholder="Ta réponse..." />
-            <div style={{ display: "flex", gap: 8, marginTop: 8 }}>
-              <button onClick={sendAnswer} disabled={streaming || currentAnswer.trim() === ""}>
+              rows={3}
+              placeholder="Ta réponse..."
+            />
+            <div className="flex gap-2">
+              <Button onClick={sendAnswer} disabled={streaming || currentAnswer.trim() === ""}>
                 Envoyer
-              </button>
-              <button onClick={finishInterview} disabled={streaming}>
+              </Button>
+              <Button variant="secondary" onClick={finishInterview} disabled={streaming}>
                 Terminer l&apos;entretien
-              </button>
+              </Button>
             </div>
-          </div>
-        </section>
+          </Card>
+        </div>
       )}
 
       {phase === "debrief" && (
-        <section>
-          <h2>Débrief</h2>
+        <div className="flex flex-col gap-4">
           {errorMsg && (
-            <>
-              <p style={{ color: "#a00" }}>{errorMsg}</p>
-              <button onClick={finishInterview}>Réessayer</button>
-            </>
+            <Card>
+              <p className="mb-3 text-sm text-red-600">{errorMsg}</p>
+              <Button onClick={finishInterview}>Réessayer</Button>
+            </Card>
           )}
-          {!errorMsg && !debrief && !debriefRaw && <p>Génération du débrief…</p>}
-          {debrief && (
-            <div>
-              <p><strong>Score de confiance :</strong> {debrief.scoreConfiance}/100</p>
-              <p>{debrief.syntheseGenerale}</p>
-              <h3>Points forts</h3>
-              <ul>{debrief.pointsForts.map((x, i) => <li key={i}>{x}</li>)}</ul>
-              <h3>À travailler</h3>
-              <ul>{debrief.pointsATravailler.map((x, i) => <li key={i}>{x}</li>)}</ul>
-              <h3>Reformulations suggérées</h3>
-              <ul>{debrief.reformulations.map((x, i) => <li key={i}>{x}</li>)}</ul>
-            </div>
+          {!errorMsg && !debrief && !debriefRaw && (
+            <p className="text-sm text-slate-600">Génération du débrief…</p>
           )}
-          {debriefRaw && <pre style={{ whiteSpace: "pre-wrap" }}>{debriefRaw}</pre>}
-        </section>
+          {debrief && <DebriefComponent data={debrief} />}
+          {debriefRaw && (
+            <pre className="whitespace-pre-wrap rounded-lg bg-slate-50 p-3 text-sm">{debriefRaw}</pre>
+          )}
+        </div>
       )}
     </main>
-  );
-}
-
-function Field(props: { label: string; value: string; onChange: (v: string) => void }) {
-  return (
-    <div style={{ marginBottom: 8 }}>
-      <label style={{ display: "block", fontSize: 14 }}>{props.label}</label>
-      <input value={props.value} onChange={(e) => props.onChange(e.target.value)}
-        style={{ width: "100%" }} />
-    </div>
-  );
-}
-
-function Area(props: { label: string; value: string; onChange: (v: string) => void }) {
-  return (
-    <div style={{ marginBottom: 8 }}>
-      <label style={{ display: "block", fontSize: 14 }}>{props.label}</label>
-      <textarea value={props.value} onChange={(e) => props.onChange(e.target.value)}
-        rows={5} style={{ width: "100%" }} />
-    </div>
   );
 }
