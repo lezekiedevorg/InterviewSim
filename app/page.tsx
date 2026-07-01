@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import type { InterviewContext, ChatMessage, Debrief } from "@/lib/types";
 import { validateContext } from "@/lib/validate";
 import { Button } from "@/app/components/ui/Button";
@@ -23,6 +23,13 @@ export default function Home() {
   const [saveMsg, setSaveMsg] = useState<string | null>(null);
 
   const formErrors = validateContext(context);
+
+  // Auto-scroll la box de conversation vers le dernier message à chaque mise à jour
+  const chatScrollRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const el = chatScrollRef.current;
+    if (el) el.scrollTop = el.scrollHeight;
+  }, [history]);
 
   async function streamRecruiter(nextHistory: ChatMessage[]) {
     setStreaming(true);
@@ -157,7 +164,10 @@ export default function Home() {
 
       {phase === "chat" && (
         <div className="flex flex-col gap-4">
-          <div className="flex flex-col gap-3">
+          <div
+            ref={chatScrollRef}
+            className="flex h-[55vh] flex-col gap-3 overflow-y-auto rounded-2xl border border-slate-200 bg-white/60 p-4"
+          >
             {history.map((m, i) => (
               <div key={i} className={`max-w-[85%] rounded-xl p-3 text-sm whitespace-pre-wrap ${
                 m.role === "recruiter"
