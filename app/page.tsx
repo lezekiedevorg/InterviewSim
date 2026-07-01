@@ -7,6 +7,7 @@ import { Button } from "@/app/components/ui/Button";
 import { Card } from "@/app/components/ui/Card";
 import { Field } from "@/app/components/ui/Field";
 import { Debrief as DebriefComponent } from "@/app/components/Debrief";
+import { createBrowserSupabase } from "@/lib/supabase/client";
 
 type Phase = "form" | "chat" | "debrief";
 
@@ -19,6 +20,7 @@ export default function Home() {
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [debrief, setDebrief] = useState<Debrief | null>(null);
   const [debriefRaw, setDebriefRaw] = useState<string | null>(null);
+  const [saveMsg, setSaveMsg] = useState<string | null>(null);
 
   const formErrors = validateContext(context);
 
@@ -78,6 +80,7 @@ export default function Home() {
     setErrorMsg(null);
     setDebrief(null);
     setDebriefRaw(null);
+    setSaveMsg(null);
     try {
       const res = await fetch("/api/debrief", {
         method: "POST",
@@ -91,6 +94,32 @@ export default function Home() {
       }
       if (data.debrief) setDebrief(data.debrief);
       else setDebriefRaw(data.raw ?? "");
+      // sauvegarde best-effort si connecté (n'affecte jamais l'affichage du débrief)
+      if (data.debrief) {
+        try {
+          const supabase = createBrowserSupabase();
+          const { data: userData } = await supabase.auth.getUser();
+          if (userData.user) {
+            const { error } = await supabase.from("sessions").insert({
+              user_id: userData.user.id,
+              poste: context.poste,
+              context: {
+                poste: context.poste,
+                entreprise: context.entreprise,
+                domaine: context.domaine,
+                niveau: context.niveau,
+                langue: context.langue,
+              },
+              debrief: data.debrief,
+              score_confiance: data.debrief.scoreConfiance,
+            });
+            if (error) setSaveMsg("Impossible d'enregistrer cette session.");
+            else setSaveMsg("Session enregistrée dans ta progression.");
+          }
+        } catch {
+          setSaveMsg("Impossible d'enregistrer cette session.");
+        }
+      }
     } catch {
       setErrorMsg("Connexion interrompue. Réessaie.");
     }
@@ -176,6 +205,7 @@ export default function Home() {
             <p className="text-sm text-slate-600">Génération du débrief…</p>
           )}
           {debrief && <DebriefComponent data={debrief} />}
+          {saveMsg && <p className="text-sm text-slate-500">{saveMsg}</p>}
           {debriefRaw && (
             <pre className="whitespace-pre-wrap rounded-lg bg-slate-50 p-3 text-sm">{debriefRaw}</pre>
           )}
