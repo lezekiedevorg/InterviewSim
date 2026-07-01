@@ -15,6 +15,7 @@ Permettre à un utilisateur de **créer un compte**, de **sauvegarder ses entret
 - **Package auth complet dès ce plan** : inscription, connexion, **confirmation d'email**, **mot de passe oublié → reset**.
 - **SMTP : Brevo** (palier gratuit ~300 emails/jour) branché sur Supabase, pour ne pas dépendre de l'expéditeur intégré Supabase (fortement bridé sur le gratuit — quelques emails/heure). Le code n'appelle pas Brevo directement : c'est Supabase qui envoie via le SMTP configuré.
 - **Isolation par Row-Level Security** : la base garantit que chacun ne lit/écrit que ses propres sessions.
+- **Front : Tailwind CSS + `next/font`**, direction « Confiance calme », accent **émeraude/teal**. Léger, responsive natif, purgé au build. On restyle aussi l'écran d'accueil existant pour la cohérence.
 
 ## Ce qu'on stocke (et ce qu'on ne stocke pas)
 
@@ -76,6 +77,18 @@ App Next.js (existante)
   - **Cliquer une session** → déplie son **débrief complet** (le jsonb stocké, rendu comme sur l'accueil).
 - Calculs (deltas, points de la courbe, tri) dans `lib/progression.ts` (pur, testé).
 
+## Design visuel (frontend)
+
+Direction **« Confiance calme »** : sérieux mais encourageant, mobile-first.
+
+- **Stack** : Tailwind CSS (utilitaires, responsive `sm:`/`md:`, purgé au build, zéro runtime) + petits composants maison (pas de librairie de composants). Polices via `next/font` (auto-hébergées).
+- **Palette** : fond blanc cassé, texte gris très foncé, accent **émeraude/teal** (boutons, liens, courbe de score, éléments actifs). Badge de score coloré selon la valeur (rouge → ambre → vert).
+- **Typographie** : une police de titre avec du caractère (ex. *Sora* / *Bricolage Grotesque*) + une police de corps propre. On évite le cliché « Inter + dégradé violet ».
+- **Composants** : cartes arrondies à ombre légère (fil de discussion, sessions, débrief) ; bulles recruteur/candidat contrastées ; transitions douces.
+- **Design tokens** dans `app/globals.css` (variables CSS : couleurs, rayons) branchés dans la config Tailwind, pour un thème cohérent.
+- **Responsive** : tout tient sur téléphone (formulaire, chat, progression).
+- **Portée** : les nouveaux écrans (login, reset, progression, header) ET l'écran d'accueil existant (formulaire → chat → débrief) sont stylés de façon cohérente.
+
 ## Gestion d'erreurs
 
 - **Auth** : erreurs Supabase → messages français (« Identifiants incorrects », « Cet email est déjà utilisé », « Confirme ton email avant de te connecter »).
@@ -101,9 +114,11 @@ app/components/Header.tsx  → état connecté + liens
 app/login/page.tsx         → connexion / inscription
 app/reset/page.tsx         → nouveau mot de passe
 app/progression/page.tsx   → liste + courbe + delta + débrief
+app/components/ui/*         → composants maison Tailwind (Button, Card, Input, Badge…)
 supabase/schema.sql        → table sessions + policies RLS
+tailwind.config.ts + postcss.config → config Tailwind
 ```
-**Modifs :** `app/page.tsx` (sauvegarde au débrief si connecté), `app/layout.tsx` (header), `.env.local.example` (variables Supabase).
+**Modifs :** `app/page.tsx` (sauvegarde au débrief si connecté **+ restyle Tailwind**), `app/layout.tsx` (header + polices `next/font`), `app/globals.css` (design tokens + directives Tailwind), `.env.local.example` (variables Supabase).
 
 ## Config manuelle (hors code, détaillée dans le plan)
 
