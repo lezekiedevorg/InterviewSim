@@ -11,6 +11,10 @@ export function UserTile({ cameraOn }: { cameraOn: boolean }) {
     let stream: MediaStream | null = null;
     let cancelled = false;
     setError(false);
+    if (!navigator.mediaDevices) {
+      setError(true);
+      return;
+    }
     navigator.mediaDevices
       ?.getUserMedia({ video: true })
       .then((s) => {
@@ -21,7 +25,9 @@ export function UserTile({ cameraOn }: { cameraOn: boolean }) {
         stream = s;
         if (videoRef.current) videoRef.current.srcObject = s;
       })
-      .catch(() => setError(true));
+      .catch(() => {
+        if (!cancelled) setError(true);
+      });
     return () => {
       cancelled = true;
       stream?.getTracks().forEach((t) => t.stop());
