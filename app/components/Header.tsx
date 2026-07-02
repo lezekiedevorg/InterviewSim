@@ -26,10 +26,13 @@ export function Header() {
   }
 
   return (
-    <header className="border-b border-slate-200 bg-white">
-      <div className="mx-auto flex max-w-2xl items-center justify-between px-4 py-3">
-        <Link href="/" className="font-heading text-lg font-bold text-brand-700">
-          InterviewSim
+    <header className="sticky top-0 z-20 border-b border-slate-200/70 bg-white/80 backdrop-blur-md">
+      <div className="mx-auto flex max-w-3xl items-center justify-between px-4 py-3">
+        <Link href="/" className="group flex items-center gap-2 font-heading text-lg font-bold text-slate-900">
+          <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-brand-600 text-sm text-white shadow-brand transition-transform group-hover:scale-105">
+            IS
+          </span>
+          Interview<span className="text-brand-600">Sim</span>
         </Link>
         <nav className="flex items-center gap-3 text-sm">
           {email ? (
