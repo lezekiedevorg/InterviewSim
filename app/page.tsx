@@ -146,14 +146,6 @@ export default function Home() {
     }
   }
 
-  function onAnswerKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
-    // Entrée = envoyer, Maj+Entrée = saut de ligne
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      sendAnswer();
-    }
-  }
-
   const activeStep = STEPS.findIndex((s) => s.key === phase);
 
   return (
