@@ -71,6 +71,7 @@ export function MeetingControls({
       </div>
       <div className="flex items-end gap-2">
         <textarea
+          aria-label="Ta réponse"
           className="min-h-[48px] w-full resize-none rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm outline-none transition-shadow focus:border-brand-600 focus:ring-4 focus:ring-brand-100 disabled:bg-slate-50"
           value={currentAnswer}
           disabled={streaming}
