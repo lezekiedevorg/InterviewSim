@@ -194,8 +194,9 @@ export default function Home() {
               Passe l&apos;entretien <span className="text-brand-600">avant</span>{" "}l&apos;entretien.
             </h1>
             <p className="mx-auto mt-3 max-w-xl text-slate-600">
-              Un recruteur IA te fait passer une simulation sur mesure à partir de ton CV, puis te
-              livre un débrief actionnable. Sans jugement, autant de fois que tu veux.
+              Un recruteur IA te fait passer une simulation sur mesure à partir de ton profil
+              (CV optionnel), puis te livre un débrief actionnable. Sans jugement, autant de fois
+              que tu veux.
             </p>
           </div>
 
