@@ -32,6 +32,7 @@ export function useSpeech() {
       if (voiceRef.current) u.voice = voiceRef.current;
       u.onstart = () => setIsSpeaking(true);
       u.onend = () => setIsSpeaking(false);
+      u.onerror = () => setIsSpeaking(false);
       window.speechSynthesis.speak(u);
     },
     [supported]
