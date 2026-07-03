@@ -39,9 +39,16 @@ export function MeetingRoom({
   const baseTextRef = useRef("");
 
   // Pendant l'écoute, le texte reconnu remplit le champ (combiné à ce qui a été tapé).
+  // Les modifications manuelles pendant l'écoute sont volontairement écrasées ; l'édition se fait après avoir arrêté le micro.
   useEffect(() => {
     if (rec.listening) setCurrentAnswer(mergeTranscript(baseTextRef.current, rec.transcript));
   }, [rec.listening, rec.transcript, setCurrentAnswer]);
+
+  // Coupe le micro dès qu'il doit être bloqué (envoi en cours ou recruteur qui parle) :
+  // évite que le champ se re-remplisse après envoi et que le micro capte la voix du recruteur.
+  useEffect(() => {
+    if ((streaming || isSpeaking) && rec.listening) rec.stop();
+  }, [streaming, isSpeaking, rec.listening]);
 
   function toggleMic() {
     if (rec.listening) {
