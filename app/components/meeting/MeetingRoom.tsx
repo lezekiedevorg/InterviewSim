@@ -42,6 +42,7 @@ export function MeetingRoom({
   function voiceOptsFor(id: PersonaId | null) {
     if (!id) return undefined;
     const idx = PERSONAS.findIndex((p) => p.id === id);
+    if (idx === -1) return undefined;
     const p = PERSONAS[idx];
     const voice = voices.length ? voices[idx % voices.length] : undefined;
     return { pitch: p.pitch, rate: p.rate, voice };
@@ -98,7 +99,9 @@ export function MeetingRoom({
       len = res.spokenLen;
     }
     spokenRef.current = { index: lastIdx, len };
-  }, [history, joined, muted, speak, jury]);
+    // voices : les voix Web Speech se chargent en asynchrone ; sans cette dépendance,
+    // l'effet garderait la liste vide et perdrait la différenciation vocale du jury.
+  }, [history, joined, muted, speak, jury, voices]);
 
   // Nettoyage de la voix au démontage (fin d'entretien).
   useEffect(() => cancel, [cancel]);
