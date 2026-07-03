@@ -1,4 +1,12 @@
-export function RecruiterTile({ speaking }: { speaking: boolean }) {
+export function RecruiterTile({
+  speaking,
+  name = "Recruteur",
+  initials = "RH",
+}: {
+  speaking: boolean;
+  name?: string;
+  initials?: string;
+}) {
   return (
     <div className="relative flex aspect-video w-full items-center justify-center overflow-hidden rounded-2xl bg-gradient-to-br from-slate-800 to-slate-900 text-white shadow-soft">
       {speaking && (
@@ -10,10 +18,10 @@ export function RecruiterTile({ speaking }: { speaking: boolean }) {
             speaking ? "scale-110" : "scale-100"
           }`}
         >
-          RH
+          {initials}
         </span>
         <span className="text-sm font-medium text-slate-200">
-          Recruteur {speaking && <span className="text-brand-300">· parle…</span>}
+          {name} {speaking && <span className="text-brand-300">· parle…</span>}
         </span>
       </div>
     </div>
