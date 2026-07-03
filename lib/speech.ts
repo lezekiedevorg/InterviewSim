@@ -18,3 +18,12 @@ export function nextSpeakableChunk(
   const end = spokenLen + boundary + 1;
   return { chunk: fullText.slice(spokenLen, end).trim(), spokenLen: end };
 }
+
+// Combine le texte déjà tapé dans le champ avec le texte reconnu à la voix.
+// ponytail: jointure par une seule espace ; suffisant pour du texte libre.
+export function mergeTranscript(base: string, transcript: string): string {
+  const t = transcript.trim();
+  if (!t) return base;
+  if (!base) return t;
+  return base.replace(/\s+$/, "") + " " + t;
+}
