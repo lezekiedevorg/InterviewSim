@@ -31,6 +31,7 @@ export default function Home() {
   const [debriefRaw, setDebriefRaw] = useState<string | null>(null);
   const [saveMsg, setSaveMsg] = useState<string | null>(null);
   const [templateId, setTemplateId] = useState<string | null>(null);
+  const [jury, setJury] = useState(false);
 
   function pickTemplate(t: Template) {
     setContext({
@@ -54,7 +55,7 @@ export default function Home() {
       const res = await fetch("/api/interview", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ context, history: nextHistory }),
+        body: JSON.stringify({ context, history: nextHistory, jury }),
       });
       if (!res.ok) {
         const txt = await res.text();
@@ -222,6 +223,15 @@ export default function Home() {
             {formErrors.length > 0 && (
               <p className="mb-3 text-sm text-red-600">{formErrors.join(" ")}</p>
             )}
+            <label className="mb-3 flex items-center gap-2 text-sm text-slate-700">
+              <input
+                type="checkbox"
+                checked={jury}
+                onChange={(e) => setJury(e.target.checked)}
+                className="h-4 w-4 rounded border-slate-300 text-brand-600 focus:ring-brand-500"
+              />
+              Mode jury — 3 recruteurs (RH, Manager opérationnel, Expert métier)
+            </label>
             <Button size="lg" className="w-full" disabled={formErrors.length > 0} onClick={startInterview}>
               Démarrer l&apos;entretien →
             </Button>
@@ -238,6 +248,7 @@ export default function Home() {
           sendAnswer={sendAnswer}
           finishInterview={finishInterview}
           errorMsg={errorMsg}
+          jury={jury}
         />
       )}
 
