@@ -15,6 +15,10 @@ type Props = {
   onFinish: () => void;
   streaming: boolean;
   speechSupported: boolean;
+  recognitionSupported: boolean;
+  listening: boolean;
+  onToggleMic: () => void;
+  micDisabled: boolean;
 };
 
 const pill = "flex items-center gap-1.5 rounded-full px-3 py-2 text-sm font-medium transition-colors";
@@ -32,6 +36,10 @@ export function MeetingControls({
   onFinish,
   streaming,
   speechSupported,
+  recognitionSupported,
+  listening,
+  onToggleMic,
+  micDisabled,
 }: Props) {
   function onKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
     if (e.key === "Enter" && !e.shiftKey) {
@@ -58,6 +66,16 @@ export function MeetingControls({
         >
           💬 Transcription
         </button>
+        {recognitionSupported && (
+          <button
+            type="button"
+            onClick={onToggleMic}
+            disabled={micDisabled}
+            className={`${pill} ${listening ? "animate-pulse bg-red-100 text-red-700" : "bg-slate-100 text-slate-600"} disabled:opacity-40`}
+          >
+            {listening ? "🎤 J'écoute…" : "🎤 Parler"}
+          </button>
+        )}
         <button
           type="button"
           onClick={onToggleCamera}

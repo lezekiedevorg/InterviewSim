@@ -3,7 +3,8 @@
 import { useEffect, useRef, useState } from "react";
 import type { ChatMessage } from "@/lib/types";
 import { useSpeech } from "@/lib/useSpeech";
-import { nextSpeakableChunk } from "@/lib/speech";
+import { nextSpeakableChunk, mergeTranscript } from "@/lib/speech";
+import { useSpeechRecognition } from "@/lib/useSpeechRecognition";
 import { RecruiterTile } from "./RecruiterTile";
 import { UserTile } from "./UserTile";
 import { MeetingControls } from "./MeetingControls";
@@ -34,6 +35,22 @@ export function MeetingRoom({
   const [cameraOn, setCameraOn] = useState(false);
   const { supported, speak, cancel, muted, toggleMute, isSpeaking } = useSpeech();
   const spokenRef = useRef<{ index: number; len: number }>({ index: -1, len: 0 });
+  const rec = useSpeechRecognition();
+  const baseTextRef = useRef("");
+
+  // Pendant l'écoute, le texte reconnu remplit le champ (combiné à ce qui a été tapé).
+  useEffect(() => {
+    if (rec.listening) setCurrentAnswer(mergeTranscript(baseTextRef.current, rec.transcript));
+  }, [rec.listening, rec.transcript, setCurrentAnswer]);
+
+  function toggleMic() {
+    if (rec.listening) {
+      rec.stop();
+    } else {
+      baseTextRef.current = currentAnswer;
+      rec.start();
+    }
+  }
 
   // Fait parler le recruteur phrase par phrase, au fil du flux.
   useEffect(() => {
@@ -81,7 +98,9 @@ export function MeetingRoom({
           pour lire l&apos;entretien.
         </p>
       )}
-      {errorMsg && <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600">{errorMsg}</p>}
+      {(errorMsg || rec.error) && (
+        <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600">{errorMsg || rec.error}</p>
+      )}
 
       {showTranscript && <TranscriptPanel history={history} />}
 
@@ -98,6 +117,10 @@ export function MeetingRoom({
         onFinish={finishInterview}
         streaming={streaming}
         speechSupported={supported}
+        recognitionSupported={rec.supported}
+        listening={rec.listening}
+        onToggleMic={toggleMic}
+        micDisabled={streaming || isSpeaking}
       />
     </div>
   );
