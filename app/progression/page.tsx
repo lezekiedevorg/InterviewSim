@@ -63,6 +63,7 @@ export default function ProgressionPage() {
   async function runAnalysis() {
     setAnalyzing(true);
     setAnalyzeError(null);
+    setAnalysis(null); // évite d'afficher l'ancienne analyse pendant un re-clic
     try {
       const payload = desc.slice(0, 10).map((s) => ({
         poste: s.poste,
