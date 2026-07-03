@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { nextSpeakableChunk } from "../lib/speech";
+import { nextSpeakableChunk, mergeTranscript } from "../lib/speech";
 
 describe("nextSpeakableChunk", () => {
   it("extrait la première phrase complète et avance l'offset", () => {
@@ -29,5 +29,24 @@ describe("nextSpeakableChunk", () => {
   it("gère les points de suspension et exclamations", () => {
     expect(nextSpeakableChunk("Super !", 0).chunk).toBe("Super !");
     expect(nextSpeakableChunk("Attends…", 0).chunk).toBe("Attends…");
+  });
+});
+
+describe("mergeTranscript", () => {
+  it("renvoie le transcript seul quand le champ est vide", () => {
+    expect(mergeTranscript("", "bonjour")).toBe("bonjour");
+  });
+
+  it("joint le texte tapé et le texte reconnu par une seule espace", () => {
+    expect(mergeTranscript("Bonjour,", "je suis dev")).toBe("Bonjour, je suis dev");
+  });
+
+  it("n'ajoute pas de double espace si le champ finit déjà par une espace", () => {
+    expect(mergeTranscript("Bonjour, ", "je suis dev")).toBe("Bonjour, je suis dev");
+  });
+
+  it("garde le champ intact quand le transcript est vide", () => {
+    expect(mergeTranscript("déjà tapé", "")).toBe("déjà tapé");
+    expect(mergeTranscript("déjà tapé", "   ")).toBe("déjà tapé");
   });
 });
