@@ -20,3 +20,14 @@ export type Debrief = {
   scoreConfiance: number;
   syntheseGenerale: string;
 };
+
+export type CrossAnalysis = {
+  pointsRecurrents: string[];
+  planAction: string[];
+};
+
+export type SessionSummary = {
+  poste: string;
+  pointsATravailler: string[];
+  syntheseGenerale: string;
+};
