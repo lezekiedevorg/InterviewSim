@@ -8,6 +8,8 @@ import { Card } from "@/app/components/ui/Card";
 import { Field } from "@/app/components/ui/Field";
 import { Debrief as DebriefComponent } from "@/app/components/Debrief";
 import { createBrowserSupabase } from "@/lib/supabase/client";
+import { TemplateGallery } from "@/app/components/TemplateGallery";
+import type { Template } from "@/lib/templates";
 
 type Phase = "form" | "chat" | "debrief";
 
@@ -27,6 +29,18 @@ export default function Home() {
   const [debrief, setDebrief] = useState<Debrief | null>(null);
   const [debriefRaw, setDebriefRaw] = useState<string | null>(null);
   const [saveMsg, setSaveMsg] = useState<string | null>(null);
+  const [templateId, setTemplateId] = useState<string | null>(null);
+
+  function pickTemplate(t: Template) {
+    setContext({
+      poste: t.context.poste,
+      domaine: t.context.domaine,
+      niveau: t.context.niveau,
+      langue: t.context.langue,
+      cv: "",
+    });
+    setTemplateId(t.id);
+  }
 
   const formErrors = validateContext(context);
 
@@ -180,10 +194,13 @@ export default function Home() {
               Passe l&apos;entretien <span className="text-brand-600">avant</span>{" "}l&apos;entretien.
             </h1>
             <p className="mx-auto mt-3 max-w-xl text-slate-600">
-              Un recruteur IA te fait passer une simulation sur mesure à partir de ton CV, puis te
-              livre un débrief actionnable. Sans jugement, autant de fois que tu veux.
+              Un recruteur IA te fait passer une simulation sur mesure à partir de ton profil
+              (CV optionnel), puis te livre un débrief actionnable. Sans jugement, autant de fois
+              que tu veux.
             </p>
           </div>
+
+          <TemplateGallery onPick={pickTemplate} selectedId={templateId} />
 
           <Card>
             <div className="grid gap-x-4 sm:grid-cols-2">
@@ -205,7 +222,7 @@ export default function Home() {
                 placeholder="Français"
                 onChange={(v) => setContext({ ...context, langue: v })} />
               <div className="sm:col-span-2">
-                <Field label="CV (collé) *" value={context.cv} textarea rows={5}
+                <Field label="CV (collé)" value={context.cv} textarea rows={5}
                   placeholder="Colle ici le texte de ton CV…"
                   hint="Copié-collé brut, la mise en forme n'a pas d'importance."
                   onChange={(v) => setContext({ ...context, cv: v })} />

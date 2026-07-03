@@ -32,6 +32,20 @@ describe("buildRecruiterPrompt", () => {
     const p = buildRecruiterPrompt(minimal);
     expect(p).toContain("Vendeur");
   });
+
+  it("inclut la ligne CV quand un CV est fourni", () => {
+    expect(buildRecruiterPrompt(ctx)).toContain("CV du candidat");
+  });
+
+  it("omet la ligne CV quand aucun CV n'est fourni", () => {
+    const sansCv: InterviewContext = { poste: "Vendeur", cv: "" };
+    expect(buildRecruiterPrompt(sansCv)).not.toContain("CV du candidat");
+  });
+
+  it("donne la consigne débutant (ne pas inventer de parcours)", () => {
+    const sansCv: InterviewContext = { poste: "Vendeur", cv: "" };
+    expect(buildRecruiterPrompt(sansCv)).toContain("n'invente PAS de parcours");
+  });
 });
 
 describe("buildDebriefPrompt", () => {

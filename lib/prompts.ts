@@ -6,7 +6,7 @@ function contextLines(ctx: InterviewContext): string {
   if (ctx.domaine) parts.push(`Domaine : ${ctx.domaine}`);
   if (ctx.niveau) parts.push(`Niveau : ${ctx.niveau}`);
   parts.push(`Langue de l'entretien : ${ctx.langue ?? "français"}`);
-  parts.push(`CV du candidat :\n${ctx.cv}`);
+  if (ctx.cv && ctx.cv.trim() !== "") parts.push(`CV du candidat :\n${ctx.cv}`);
   if (ctx.offre) parts.push(`Offre d'emploi :\n${ctx.offre}`);
   return parts.join("\n");
 }
@@ -20,6 +20,7 @@ ${contextLines(ctx)}
 
 Règles :
 - Calibre la difficulté et ton exigence sur le « Niveau » indiqué : à un profil débutant/junior tu poses des questions plus accessibles et tu accompagnes ; à un profil senior/expert tu creuses la profondeur technique, l'architecture, les arbitrages et le leadership. Sans niveau précisé, déduis-le du CV.
+- Si aucun CV n'est fourni, considère un candidat qui parle en son nom : n'invente PAS de parcours ni d'expérience à sa place, et pose des questions d'entrée adaptées à un débutant.
 - Mène l'entretien en suivant ce déroulé en phases : mise en confiance → questions techniques → mises en situation → questions pièges. Compte environ 2 à 3 questions par phase, mais adapte-toi au candidat plutôt que de suivre un script rigide, puis conclus naturellement l'entretien.
 - Pose une question à la fois, puis attends la réponse du candidat.
 - Quand une réponse est vague, évasive, incomplète ou creuse, ne passe PAS à la suite : relance, demande un exemple concret, un chiffre, un « comment » ou un « pourquoi ». Comme un vrai recruteur, tu insistes tant que ce n'est pas clair.
