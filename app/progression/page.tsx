@@ -10,12 +10,18 @@ import {
   type SavedSession,
 } from "@/lib/progression";
 import { Card } from "@/app/components/ui/Card";
+import { Button } from "@/app/components/ui/Button";
 import { ScoreBadge } from "@/app/components/ui/ScoreBadge";
 import { Debrief } from "@/app/components/Debrief";
+import { CrossAnalysis } from "@/app/components/CrossAnalysis";
+import type { CrossAnalysis as CrossAnalysisType } from "@/lib/types";
 
 export default function ProgressionPage() {
   const [sessions, setSessions] = useState<SavedSession[] | null>(null);
   const [openId, setOpenId] = useState<string | null>(null);
+  const [analysis, setAnalysis] = useState<CrossAnalysisType | null>(null);
+  const [analyzing, setAnalyzing] = useState(false);
+  const [analyzeError, setAnalyzeError] = useState<string | null>(null);
   const router = useRouter();
 
   useEffect(() => {
@@ -54,6 +60,33 @@ export default function ProgressionPage() {
   const chrono = [...desc].reverse().map((s) => s.score_confiance);
   const points = sparklinePoints(chrono, 300, 60);
 
+  async function runAnalysis() {
+    setAnalyzing(true);
+    setAnalyzeError(null);
+    try {
+      const payload = desc.slice(0, 10).map((s) => ({
+        poste: s.poste,
+        pointsATravailler: s.debrief.pointsATravailler,
+        syntheseGenerale: s.debrief.syntheseGenerale,
+      }));
+      const res = await fetch("/api/analyse", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ sessions: payload }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.analysis) {
+        setAnalyzeError(data.error ?? "L'analyse n'a pas pu être générée, réessaie.");
+        return;
+      }
+      setAnalysis(data.analysis);
+    } catch {
+      setAnalyzeError("Une erreur réseau est survenue, réessaie.");
+    } finally {
+      setAnalyzing(false);
+    }
+  }
+
   return (
     <main className="mx-auto max-w-2xl px-4 py-10">
       <h1 className="mb-4 font-heading text-2xl font-bold">Ma progression</h1>
@@ -70,6 +103,29 @@ export default function ProgressionPage() {
             strokeLinejoin="round"
           />
         </svg>
+      </Card>
+
+      <Card className="mb-6">
+        <h2 className="mb-3 font-heading font-semibold">Points faibles récurrents</h2>
+        {sessions.length < 3 ? (
+          <p className="text-sm text-slate-500">
+            Fais au moins 3 entretiens pour débloquer l&apos;analyse de tes points faibles récurrents.
+          </p>
+        ) : (
+          <>
+            <Button onClick={runAnalysis} disabled={analyzing}>
+              {analyzing ? "Analyse en cours…" : "🔍 Analyser mes points faibles récurrents"}
+            </Button>
+            {analyzeError && (
+              <p className="mt-3 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600">{analyzeError}</p>
+            )}
+            {analysis && (
+              <div className="mt-4">
+                <CrossAnalysis data={analysis} />
+              </div>
+            )}
+          </>
+        )}
       </Card>
 
       <div className="flex flex-col gap-3">
