@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState } from "react";
+import { MeetingRoom } from "@/app/components/meeting/MeetingRoom";
 import type { InterviewContext, ChatMessage, Debrief } from "@/lib/types";
 import { validateContext } from "@/lib/validate";
 import { Button } from "@/app/components/ui/Button";
@@ -43,13 +44,6 @@ export default function Home() {
   }
 
   const formErrors = validateContext(context);
-
-  // Auto-scroll la box de conversation vers le dernier message à chaque mise à jour
-  const chatScrollRef = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    const el = chatScrollRef.current;
-    if (el) el.scrollTop = el.scrollHeight;
-  }, [history]);
 
   async function streamRecruiter(nextHistory: ChatMessage[]) {
     setStreaming(true);
@@ -152,14 +146,6 @@ export default function Home() {
     }
   }
 
-  function onAnswerKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
-    // Entrée = envoyer, Maj+Entrée = saut de ligne
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      sendAnswer();
-    }
-  }
-
   const activeStep = STEPS.findIndex((s) => s.key === phase);
 
   return (
@@ -244,81 +230,15 @@ export default function Home() {
       )}
 
       {phase === "chat" && (
-        <div className="flex flex-col gap-4 animate-rise">
-          {/* Barre de contexte */}
-          <div className="flex flex-wrap items-center gap-2 text-sm text-slate-600">
-            <span className="font-semibold text-slate-900">{context.poste}</span>
-            {context.entreprise && <span className="text-slate-400">·</span>}
-            {context.entreprise && <span>{context.entreprise}</span>}
-            {context.niveau && (
-              <span className="rounded-full bg-brand-50 px-2 py-0.5 text-xs font-medium text-brand-700">
-                {context.niveau}
-              </span>
-            )}
-          </div>
-
-          <div
-            ref={chatScrollRef}
-            className="flex h-[58vh] flex-col gap-4 overflow-y-auto rounded-2xl border border-slate-200/80 bg-white/70 p-4 shadow-soft backdrop-blur-sm"
-          >
-            {history.map((m, i) => {
-              const isRecruiter = m.role === "recruiter";
-              const isStreamingHere = streaming && i === history.length - 1 && isRecruiter;
-              return (
-                <div key={i} className={`flex items-start gap-2.5 animate-rise ${isRecruiter ? "" : "flex-row-reverse"}`}>
-                  <span
-                    className={`grid h-8 w-8 shrink-0 place-items-center rounded-full text-xs font-bold ${
-                      isRecruiter ? "bg-slate-200 text-slate-600" : "bg-brand-600 text-white"
-                    }`}
-                  >
-                    {isRecruiter ? "RH" : "Toi"}
-                  </span>
-                  <div
-                    className={`max-w-[80%] whitespace-pre-wrap rounded-2xl px-4 py-2.5 text-sm leading-relaxed ${
-                      isRecruiter
-                        ? "rounded-tl-sm bg-white text-slate-800 shadow-sm ring-1 ring-slate-100"
-                        : "rounded-tr-sm bg-brand-600 text-white"
-                    }`}
-                  >
-                    {isStreamingHere && m.text === "" ? (
-                      <span className="inline-flex gap-1 py-1">
-                        <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-slate-400 [animation-delay:-0.3s]" />
-                        <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-slate-400 [animation-delay:-0.15s]" />
-                        <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-slate-400" />
-                      </span>
-                    ) : (
-                      <span className={isStreamingHere ? "caret" : ""}>{m.text}</span>
-                    )}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-
-          {errorMsg && (
-            <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600">{errorMsg}</p>
-          )}
-
-          <Card className="p-4">
-            <textarea
-              className="mb-3 w-full resize-none rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm outline-none transition-shadow focus:border-brand-600 focus:ring-4 focus:ring-brand-100 disabled:bg-slate-50"
-              value={currentAnswer}
-              disabled={streaming}
-              onChange={(e) => setCurrentAnswer(e.target.value)}
-              onKeyDown={onAnswerKeyDown}
-              rows={3}
-              placeholder="Ta réponse…  (Entrée pour envoyer, Maj+Entrée pour un saut de ligne)"
-            />
-            <div className="flex items-center justify-between gap-2">
-              <Button variant="ghost" onClick={finishInterview} disabled={streaming}>
-                Terminer l&apos;entretien
-              </Button>
-              <Button onClick={sendAnswer} disabled={streaming || currentAnswer.trim() === ""}>
-                Envoyer
-              </Button>
-            </div>
-          </Card>
-        </div>
+        <MeetingRoom
+          history={history}
+          streaming={streaming}
+          currentAnswer={currentAnswer}
+          setCurrentAnswer={setCurrentAnswer}
+          sendAnswer={sendAnswer}
+          finishInterview={finishInterview}
+          errorMsg={errorMsg}
+        />
       )}
 
       {phase === "debrief" && (
