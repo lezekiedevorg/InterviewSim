@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
-import { buildRecruiterPrompt, buildDebriefPrompt } from "../lib/prompts";
-import type { InterviewContext, ChatMessage } from "../lib/types";
+import { buildRecruiterPrompt, buildDebriefPrompt, buildCrossAnalysisPrompt } from "../lib/prompts";
+import type { InterviewContext, ChatMessage, SessionSummary } from "../lib/types";
 
 const ctx: InterviewContext = {
   poste: "Développeur back-end",
@@ -65,5 +65,26 @@ describe("buildDebriefPrompt", () => {
     expect(p).toContain("pointsForts");
     expect(p).toContain("scoreConfiance");
     expect(p).toContain("syntheseGenerale");
+  });
+});
+
+describe("buildCrossAnalysisPrompt", () => {
+  const sessions: SessionSummary[] = [
+    { poste: "Dev back-end", pointsATravailler: ["réponses trop vagues"], syntheseGenerale: "Correct mais imprécis." },
+    { poste: "Dev front-end", pointsATravailler: ["manque d'exemples chiffrés"], syntheseGenerale: "Bon contact." },
+  ];
+
+  it("inclut le poste, les points à travailler et la synthèse de chaque entretien", () => {
+    const p = buildCrossAnalysisPrompt(sessions);
+    expect(p).toContain("Dev back-end");
+    expect(p).toContain("réponses trop vagues");
+    expect(p).toContain("manque d'exemples chiffrés");
+    expect(p).toContain("Correct mais imprécis.");
+  });
+
+  it("demande un JSON avec les deux champs attendus", () => {
+    const p = buildCrossAnalysisPrompt(sessions);
+    expect(p).toContain("pointsRecurrents");
+    expect(p).toContain("planAction");
   });
 });

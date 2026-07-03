@@ -1,4 +1,4 @@
-import type { InterviewContext, ChatMessage } from "./types";
+import type { InterviewContext, ChatMessage, SessionSummary } from "./types";
 
 function contextLines(ctx: InterviewContext): string {
   const parts = [`Poste visé : ${ctx.poste}`];
@@ -51,5 +51,24 @@ Réponds UNIQUEMENT par un objet JSON valide, sans texte autour, avec exactement
   "reformulations": [liste de chaînes : des réponses du candidat reformulées en mieux],
   "scoreConfiance": un entier de 0 à 100,
   "syntheseGenerale": une chaîne (2-3 phrases)
+}`;
+}
+
+export function buildCrossAnalysisPrompt(sessions: SessionSummary[]): string {
+  const entretiens = sessions
+    .map((s, i) => {
+      const points = s.pointsATravailler.map((p) => `  - ${p}`).join("\n");
+      return `Entretien ${i + 1} (${s.poste}) :\nPoints à travailler :\n${points}\nSynthèse : ${s.syntheseGenerale}`;
+    })
+    .join("\n\n");
+
+  return `Tu es un coach en recrutement. Voici les débriefs de plusieurs entretiens d'entraînement d'un même candidat. Identifie ce qui revient d'un entretien à l'autre — les points faibles RÉCURRENTS, pas les remarques isolées — puis propose un plan d'action.
+
+${entretiens}
+
+Réponds UNIQUEMENT par un objet JSON valide, sans texte autour, avec exactement ces champs :
+{
+  "pointsRecurrents": [liste de 3 à 5 chaînes : chaque thème récurrent avec une courte explication],
+  "planAction": [liste de 2 à 3 chaînes : actions concrètes à travailler en priorité]
 }`;
 }
