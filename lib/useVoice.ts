@@ -138,13 +138,14 @@ export function useVoice() {
         })();
       }
     } finally {
-      // si on sort (mute) avec un audio déjà préchargé en main, on récupère et révoque son URL
+      // On libère le verrou AVANT le nettoyage async (un nouveau speak() peut relancer pump).
+      playingRef.current = false;
+      setEdgeSpeaking(false);
+      // Si on sort (mute) avec un audio déjà préchargé en main, on récupère et révoque son URL.
       if (cur) {
         const leftover = await cur;
         if (leftover) URL.revokeObjectURL(leftover);
       }
-      playingRef.current = false;
-      setEdgeSpeaking(false);
     }
   }, []);
 
