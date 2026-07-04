@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { rankFrenchVoices } from "./speech";
 
 export function useSpeech() {
   const [supported, setSupported] = useState(false);
@@ -14,7 +15,7 @@ export function useSpeech() {
     setSupported(true);
     const pickVoice = () => {
       const voices = window.speechSynthesis.getVoices();
-      voiceRef.current = voices.find((v) => v.lang.startsWith("fr")) ?? voices[0] ?? null;
+      voiceRef.current = rankFrenchVoices(voices)[0] ?? voices[0] ?? null;
     };
     pickVoice();
     window.speechSynthesis.onvoiceschanged = pickVoice;
