@@ -140,6 +140,7 @@ export function useVoice() {
 
   return {
     supported: engine === "browser" ? browser.supported : true,
+    ready: engine !== "probing", // moteur décidé : l'UI peut commencer à parler (évite le mélange edge/navigateur)
     speak,
     cancel,
     muted: browser.muted,
