@@ -18,12 +18,21 @@ export function resolveVoicePref(rawSolo: string | null, rawPack: string | null)
 }
 
 export function getVoicePref(): VoicePref {
-  if (typeof window === "undefined") return resolveVoicePref(null, null);
-  return resolveVoicePref(localStorage.getItem(SOLO_KEY), localStorage.getItem(PACK_KEY));
+  // localStorage peut lever (WebView sandboxée, mode privé, SecurityError) — jamais planter le rendu.
+  try {
+    if (typeof window === "undefined") return resolveVoicePref(null, null);
+    return resolveVoicePref(localStorage.getItem(SOLO_KEY), localStorage.getItem(PACK_KEY));
+  } catch {
+    return resolveVoicePref(null, null);
+  }
 }
 
 export function setVoicePref(p: Partial<VoicePref>): void {
-  if (typeof window === "undefined") return;
-  if (p.soloId != null) localStorage.setItem(SOLO_KEY, p.soloId);
-  if (p.packId != null) localStorage.setItem(PACK_KEY, p.packId);
+  try {
+    if (typeof window === "undefined") return;
+    if (p.soloId != null) localStorage.setItem(SOLO_KEY, p.soloId);
+    if (p.packId != null) localStorage.setItem(PACK_KEY, p.packId);
+  } catch {
+    // stockage indisponible/plein : le choix ne sera pas mémorisé, sans casser l'entretien.
+  }
 }
