@@ -7,6 +7,7 @@ export function useSpeech() {
   const [supported, setSupported] = useState(false);
   const [muted, setMuted] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
+  const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([]);
   const voiceRef = useRef<SpeechSynthesisVoice | null>(null);
   const mutedRef = useRef(false);
 
@@ -14,8 +15,10 @@ export function useSpeech() {
     if (typeof window === "undefined" || !("speechSynthesis" in window)) return;
     setSupported(true);
     const pickVoice = () => {
-      const voices = window.speechSynthesis.getVoices();
-      voiceRef.current = rankFrenchVoices(voices)[0] ?? voices[0] ?? null;
+      const all = window.speechSynthesis.getVoices();
+      const ranked = rankFrenchVoices(all); // voix FR classées, meilleures d'abord
+      setVoices(ranked); // le jury assigne ses 3 personas sur ce classement → meilleures voix
+      voiceRef.current = ranked[0] ?? all[0] ?? null; // meilleure voix par défaut (solo)
     };
     pickVoice();
     window.speechSynthesis.onvoiceschanged = pickVoice;
@@ -26,11 +29,17 @@ export function useSpeech() {
   }, []);
 
   const speak = useCallback(
-    (text: string) => {
+    (
+      text: string,
+      opts?: { pitch?: number; rate?: number; voice?: SpeechSynthesisVoice }
+    ) => {
       if (!supported || mutedRef.current || !text.trim()) return;
       const u = new SpeechSynthesisUtterance(text);
       u.lang = "fr-FR";
-      if (voiceRef.current) u.voice = voiceRef.current;
+      if (opts?.voice) u.voice = opts.voice;
+      else if (voiceRef.current) u.voice = voiceRef.current;
+      if (opts?.pitch !== undefined) u.pitch = opts.pitch;
+      if (opts?.rate !== undefined) u.rate = opts.rate;
       u.onstart = () => setIsSpeaking(true);
       u.onend = () => setIsSpeaking(false);
       u.onerror = () => setIsSpeaking(false);
@@ -53,5 +62,5 @@ export function useSpeech() {
     });
   }, [supported]);
 
-  return { supported, speak, cancel, muted, toggleMute, isSpeaking };
+  return { supported, speak, cancel, muted, toggleMute, isSpeaking, voices };
 }

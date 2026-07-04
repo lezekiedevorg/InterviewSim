@@ -1,11 +1,11 @@
 import { validateContext } from "@/lib/validate";
-import { buildRecruiterPrompt } from "@/lib/prompts";
+import { buildRecruiterPrompt, buildJuryPrompt } from "@/lib/prompts";
 import { askModelStream } from "@/lib/askModel";
 import { isRateLimitError } from "@/lib/mapModelError";
 import type { InterviewContext, ChatMessage } from "@/lib/types";
 
 export async function POST(req: Request): Promise<Response> {
-  let body: { context: InterviewContext; history: ChatMessage[] };
+  let body: { context: InterviewContext; history: ChatMessage[]; jury?: boolean };
   try {
     body = await req.json();
   } catch {
@@ -17,7 +17,9 @@ export async function POST(req: Request): Promise<Response> {
     return new Response(errors.join(" "), { status: 400 });
   }
 
-  const systemPrompt = buildRecruiterPrompt(body.context);
+  const systemPrompt = body.jury
+    ? buildJuryPrompt(body.context)
+    : buildRecruiterPrompt(body.context);
   const history = body.history ?? [];
   // ponytail: Gemini rejects contents:[]; seed a candidate turn server-only so the UI history is untouched
   const modelHistory = history.length > 0

@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import type { ChatMessage } from "@/lib/types";
 import { useSpeech } from "@/lib/useSpeech";
 import { nextSpeakableChunk, mergeTranscript } from "@/lib/speech";
+import { PERSONAS, parseSpeaker, type PersonaId } from "@/lib/jury";
 import { useSpeechRecognition } from "@/lib/useSpeechRecognition";
 import { RecruiterTile } from "./RecruiterTile";
 import { UserTile } from "./UserTile";
@@ -19,6 +20,7 @@ type Props = {
   sendAnswer: () => void;
   finishInterview: () => void;
   errorMsg: string | null;
+  jury: boolean;
 };
 
 export function MeetingRoom({
@@ -29,11 +31,22 @@ export function MeetingRoom({
   sendAnswer,
   finishInterview,
   errorMsg,
+  jury,
 }: Props) {
   const [joined, setJoined] = useState(false);
   const [showTranscript, setShowTranscript] = useState(false);
   const [cameraOn, setCameraOn] = useState(false);
-  const { supported, speak, cancel, muted, toggleMute, isSpeaking } = useSpeech();
+  const { supported, speak, cancel, muted, toggleMute, isSpeaking, voices } = useSpeech();
+
+  // Voix + paramètres du persona courant (mode jury).
+  function voiceOptsFor(id: PersonaId | null) {
+    if (!id) return undefined;
+    const idx = PERSONAS.findIndex((p) => p.id === id);
+    if (idx === -1) return undefined;
+    const p = PERSONAS[idx];
+    const voice = voices.length ? voices[idx % voices.length] : undefined;
+    return { pitch: p.pitch, rate: p.rate, voice };
+  }
   const spokenRef = useRef<{ index: number; len: number }>({ index: -1, len: 0 });
   const rec = useSpeechRecognition();
   const baseTextRef = useRef("");
@@ -72,16 +85,23 @@ export function MeetingRoom({
     if (lastIdx === -1) return;
     if (spokenRef.current.index !== lastIdx) spokenRef.current = { index: lastIdx, len: 0 };
     const text = history[lastIdx].text;
+    const opts = jury ? voiceOptsFor(parseSpeaker(text).speaker) : undefined;
     let len = spokenRef.current.len;
     let guard = 0;
     while (guard++ < 200) {
       const res = nextSpeakableChunk(text, len);
       if (res.spokenLen === len) break;
-      if (res.chunk) speak(res.chunk);
+      if (res.chunk) {
+        // En mode jury, ne prononce pas le préfixe "Nom : " du premier chunk.
+        const chunkText = jury ? parseSpeaker(res.chunk).body : res.chunk;
+        speak(chunkText, opts);
+      }
       len = res.spokenLen;
     }
     spokenRef.current = { index: lastIdx, len };
-  }, [history, joined, muted, speak]);
+    // voices : les voix Web Speech se chargent en asynchrone ; sans cette dépendance,
+    // l'effet garderait la liste vide et perdrait la différenciation vocale du jury.
+  }, [history, joined, muted, speak, jury, voices]);
 
   // Nettoyage de la voix au démontage (fin d'entretien).
   useEffect(() => cancel, [cancel]);
@@ -90,14 +110,41 @@ export function MeetingRoom({
     return <MeetingLobby onJoin={() => setJoined(true)} />;
   }
 
+  let lastRecruiterText = "";
+  for (let i = history.length - 1; i >= 0; i--) {
+    if (history[i].role === "recruiter") {
+      lastRecruiterText = history[i].text;
+      break;
+    }
+  }
+  const currentSpeaker = jury ? parseSpeaker(lastRecruiterText).speaker : null;
+
   return (
     <div className="flex flex-col gap-4 animate-rise">
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-        <div className="sm:col-span-2">
-          <RecruiterTile speaking={isSpeaking} />
+      {jury ? (
+        <div className="flex flex-col gap-3">
+          <div className="grid grid-cols-3 gap-2">
+            {PERSONAS.map((p) => (
+              <RecruiterTile
+                key={p.id}
+                name={p.name}
+                initials={p.initials}
+                speaking={isSpeaking && currentSpeaker === p.id}
+              />
+            ))}
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-3">
+            <UserTile cameraOn={cameraOn} />
+          </div>
         </div>
-        <UserTile cameraOn={cameraOn} />
-      </div>
+      ) : (
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+          <div className="sm:col-span-2">
+            <RecruiterTile speaking={isSpeaking} />
+          </div>
+          <UserTile cameraOn={cameraOn} />
+        </div>
+      )}
 
       {!supported && (
         <p className="rounded-lg bg-amber-50 px-3 py-2 text-sm text-amber-700">

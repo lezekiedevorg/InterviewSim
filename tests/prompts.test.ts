@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { buildRecruiterPrompt, buildDebriefPrompt, buildCrossAnalysisPrompt } from "../lib/prompts";
+import { buildRecruiterPrompt, buildDebriefPrompt, buildCrossAnalysisPrompt, buildJuryPrompt } from "../lib/prompts";
 import type { InterviewContext, ChatMessage, SessionSummary } from "../lib/types";
 
 const ctx: InterviewContext = {
@@ -86,5 +86,39 @@ describe("buildCrossAnalysisPrompt", () => {
     const p = buildCrossAnalysisPrompt(sessions);
     expect(p).toContain("pointsRecurrents");
     expect(p).toContain("planAction");
+  });
+});
+
+describe("buildJuryPrompt", () => {
+  it("inclut les trois personas", () => {
+    const p = buildJuryPrompt(ctx);
+    expect(p).toContain("RH");
+    expect(p).toContain("Manager opérationnel");
+    expect(p).toContain("Expert métier");
+  });
+
+  it("impose un seul persona par tour, préfixé de son nom", () => {
+    const p = buildJuryPrompt(ctx);
+    expect(p).toContain("UN SEUL persona");
+    expect(p.toLowerCase()).toContain("nom exact");
+  });
+
+  it("inclut le poste et gère un CV absent sans planter", () => {
+    expect(buildJuryPrompt(ctx)).toContain("Développeur back-end");
+    const sansCv: InterviewContext = { poste: "Vendeur", cv: "" };
+    expect(buildJuryPrompt(sansCv)).toContain("Vendeur");
+  });
+
+  it("interdit la délibération et la mise en scène de la fin", () => {
+    const p = buildJuryPrompt(ctx).toLowerCase();
+    expect(p).toContain("délibérer");
+    expect(p).toContain("réunion close");
+    expect(p).toContain("privé");
+  });
+
+  it("cloisonne les rôles (le RH ne juge pas la technique)", () => {
+    const p = buildJuryPrompt(ctx);
+    expect(p).toContain("STRICTEMENT");
+    expect(p.toLowerCase()).toContain("passe la main");
   });
 });
