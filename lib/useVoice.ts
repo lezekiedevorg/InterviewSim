@@ -22,6 +22,7 @@ export function useVoice() {
   const playingRef = useRef(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const resolveRef = useRef<(() => void) | null>(null);
+  const abortRef = useRef<AbortController | null>(null);
   const mutedRef = useRef(false);
 
   // mutedRef suit l'état de sourdine du navigateur (source unique).
@@ -51,6 +52,8 @@ export function useVoice() {
 
   const stopEdge = useCallback(() => {
     queueRef.current = [];
+    abortRef.current?.abort(); // coupe un fetch /api/tts en cours (mute immédiat)
+    abortRef.current = null;
     if (audioRef.current) {
       audioRef.current.pause();
       audioRef.current = null;
@@ -73,30 +76,36 @@ export function useVoice() {
     try {
       while (queueRef.current.length > 0 && !mutedRef.current) {
         const item = queueRef.current.shift()!;
+        const ac = new AbortController();
+        abortRef.current = ac;
+        let url: string | null = null;
         try {
           const res = await fetch("/api/tts", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(item),
+            signal: ac.signal,
           });
           if (!res.ok) throw new Error("tts");
-          const url = URL.createObjectURL(await res.blob());
+          url = URL.createObjectURL(await res.blob());
           await new Promise<void>((resolve) => {
             resolveRef.current = resolve;
-            const audio = new Audio(url);
+            const audio = new Audio(url!);
             audioRef.current = audio;
             const done = () => {
               resolveRef.current = null;
-              URL.revokeObjectURL(url);
               resolve();
             };
             audio.onended = done;
             audio.onerror = done;
             audio.play().catch(done);
           });
-          audioRef.current = null;
         } catch {
-          // ponytail: échec ponctuel edge -> on saute cette phrase (transcription reste lisible)
+          // ponytail: échec ponctuel ou annulation edge -> on saute cette phrase (transcription reste lisible)
+        } finally {
+          if (url) URL.revokeObjectURL(url); // révoqué dans tous les cas (fin, erreur, coupure)
+          audioRef.current = null;
+          abortRef.current = null;
         }
       }
     } finally {
