@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { nextSpeakableChunk, mergeTranscript } from "../lib/speech";
+import { nextSpeakableChunk, mergeTranscript, rankFrenchVoices } from "../lib/speech";
 
 describe("nextSpeakableChunk", () => {
   it("extrait la première phrase complète et avance l'offset", () => {
@@ -48,5 +48,32 @@ describe("mergeTranscript", () => {
   it("garde le champ intact quand le transcript est vide", () => {
     expect(mergeTranscript("déjà tapé", "")).toBe("déjà tapé");
     expect(mergeTranscript("déjà tapé", "   ")).toBe("déjà tapé");
+  });
+});
+
+// Fausses voix pour les tests (seuls name/lang sont utilisés par rankFrenchVoices).
+const voice = (name: string, lang: string) => ({ name, lang }) as SpeechSynthesisVoice;
+
+describe("rankFrenchVoices", () => {
+  it("écarte les voix non françaises", () => {
+    const r = rankFrenchVoices([voice("Google français", "fr-FR"), voice("Alex", "en-US")]);
+    expect(r.map((v) => v.name)).toEqual(["Google français"]);
+  });
+
+  it("place une voix naturelle devant une voix robotique", () => {
+    const r = rankFrenchVoices([
+      voice("Microsoft Hortense", "fr-FR"),
+      voice("Microsoft Denise (Natural)", "fr-FR"),
+    ]);
+    expect(r[0].name).toBe("Microsoft Denise (Natural)");
+  });
+
+  it("conserve l'ordre d'origine à score égal", () => {
+    const r = rankFrenchVoices([voice("Voix A", "fr-FR"), voice("Voix B", "fr-FR")]);
+    expect(r.map((v) => v.name)).toEqual(["Voix A", "Voix B"]);
+  });
+
+  it("renvoie une liste vide sans voix française", () => {
+    expect(rankFrenchVoices([voice("Alex", "en-US")])).toEqual([]);
   });
 });
