@@ -2,7 +2,8 @@
 
 import { useEffect, useRef, useState } from "react";
 import type { ChatMessage } from "@/lib/types";
-import { useSpeech } from "@/lib/useSpeech";
+import { useVoice } from "@/lib/useVoice";
+import { EDGE_PERSONA_VOICE } from "@/lib/edgeVoices";
 import { nextSpeakableChunk, mergeTranscript } from "@/lib/speech";
 import { PERSONAS, parseSpeaker, type PersonaId } from "@/lib/jury";
 import { useSpeechRecognition } from "@/lib/useSpeechRecognition";
@@ -36,7 +37,7 @@ export function MeetingRoom({
   const [joined, setJoined] = useState(false);
   const [showTranscript, setShowTranscript] = useState(false);
   const [cameraOn, setCameraOn] = useState(false);
-  const { supported, speak, cancel, muted, toggleMute, isSpeaking, voices } = useSpeech();
+  const { supported, speak, cancel, muted, toggleMute, isSpeaking, voices } = useVoice();
 
   // Voix + paramètres du persona courant (mode jury).
   function voiceOptsFor(id: PersonaId | null) {
@@ -45,7 +46,7 @@ export function MeetingRoom({
     if (idx === -1) return undefined;
     const p = PERSONAS[idx];
     const voice = voices.length ? voices[idx % voices.length] : undefined;
-    return { pitch: p.pitch, rate: p.rate, voice };
+    return { pitch: p.pitch, rate: p.rate, voice, edgeVoice: EDGE_PERSONA_VOICE[id] };
   }
   const spokenRef = useRef<{ index: number; len: number }>({ index: -1, len: 0 });
   const rec = useSpeechRecognition();
