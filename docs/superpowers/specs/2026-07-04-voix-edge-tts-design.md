@@ -34,9 +34,8 @@ voix navigateur si le service edge n'est pas joignable.
   (best-voice déjà en prod). Pas de réglage utilisateur.
 - **Sélection du moteur : une seule fois** à l'entrée en réunion (probe). Le
   moteur **principal** choisi vaut pour toute la session (pas de bascule
-  permanente en cours de route). Seule exception : si une phrase edge échoue
-  ponctuellement, elle peut être lue en secours par la voix navigateur, sans
-  changer le moteur principal.
+  permanente en cours de route). Si une phrase edge échoue ponctuellement, elle
+  est **sautée** (la transcription reste lisible), sans mélanger les moteurs.
 - Nouvelle dépendance **`msedge-tts`** assumée (cœur de la feature ; le protocole
   Edge + token n'est pas réimplémentable en quelques lignes).
 - **Pas d'accent africain** (les voix FR edge sont métropolitaines/belges/
@@ -116,7 +115,7 @@ Recruteur parle (stream) → nextSpeakableChunk(phrase)
 | Cas | Comportement |
 |-----|--------------|
 | Probe edge échoue (IP bloquée, réseau) | Session en voix navigateur (best-voice). Aucune régression. |
-| `/api/tts` échoue en cours (edge choisi) | La phrase est **lue par la voix navigateur** en secours ; on continue. |
+| `/api/tts` échoue en cours (edge choisi) | La phrase est **sautée** (transcription reste lisible) ; on continue la suivante. |
 | `speechSynthesis` absent ET edge KO | Pas de voix, transcription lisible (comme aujourd'hui). |
 | Texte vide / trop long / voix hors liste | `400` ; côté client on saute (aucun audio). |
 | Microsoft coupe le service un jour | Probe échoue → repli navigateur. Le produit continue de parler. |
