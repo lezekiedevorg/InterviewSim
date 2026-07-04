@@ -106,8 +106,12 @@ export function MeetingRoom({
     // l'effet garderait la liste vide et perdrait la différenciation vocale du jury.
   }, [history, joined, muted, ready, speak, jury, voices]);
 
-  // Nettoyage de la voix au démontage (fin d'entretien).
-  useEffect(() => cancel, [cancel]);
+  // Nettoyage de la voix UNIQUEMENT au démontage (fin d'entretien).
+  // On passe par une ref pour ne pas re-déclencher le nettoyage si `cancel`
+  // change d'identité à chaque rendu (sinon la voix serait coupée en continu).
+  const cancelRef = useRef(cancel);
+  cancelRef.current = cancel;
+  useEffect(() => () => cancelRef.current(), []);
 
   if (!joined) {
     return <MeetingLobby onJoin={() => setJoined(true)} />;

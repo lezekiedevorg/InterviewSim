@@ -114,26 +114,34 @@ export function useVoice() {
     }
   }, []);
 
+  // On dépend des membres stables de `browser` (useCallback), pas de l'objet
+  // `browser` lui-même qui change d'identité à chaque rendu — sinon speak/cancel
+  // deviendraient instables et l'effet de nettoyage de MeetingRoom couperait la
+  // voix à chaque rendu (edge ET navigateur).
+  const browserSpeak = browser.speak;
+  const browserMuted = browser.muted;
+  const browserCancel = browser.cancel;
+
   const speak = useCallback(
     (text: string, opts?: SpeakOpts) => {
-      if (browser.muted || !text.trim()) return;
+      if (browserMuted || !text.trim()) return;
       if (engine === "edge") {
         queueRef.current.push({ text, voice: opts?.edgeVoice ?? EDGE_SOLO_VOICE });
         void pump();
       } else {
-        browser.speak(
+        browserSpeak(
           text,
           opts ? { pitch: opts.pitch, rate: opts.rate, voice: opts.voice } : undefined
         );
       }
     },
-    [engine, browser, pump]
+    [engine, browserSpeak, browserMuted, pump]
   );
 
   const cancel = useCallback(() => {
     stopEdge();
-    browser.cancel();
-  }, [stopEdge, browser]);
+    browserCancel();
+  }, [stopEdge, browserCancel]);
 
   // Nettoyage au démontage.
   useEffect(() => () => stopEdge(), [stopEdge]);
