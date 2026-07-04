@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import type { ChatMessage } from "@/lib/types";
 import { useVoice } from "@/lib/useVoice";
-import { EDGE_PERSONA_VOICE, soloVoiceById, juryVoicesByPack } from "@/lib/edgeVoices";
+import { soloVoiceById, juryVoicesByPack } from "@/lib/edgeVoices";
 import { getVoicePref, setVoicePref } from "@/lib/voicePrefs";
 import { nextSpeakableChunk, mergeTranscript } from "@/lib/speech";
 import { PERSONAS, parseSpeaker, type PersonaId } from "@/lib/jury";
