@@ -2,7 +2,8 @@
 
 import { useEffect, useRef, useState } from "react";
 import type { ChatMessage } from "@/lib/types";
-import { useSpeech } from "@/lib/useSpeech";
+import { useVoice } from "@/lib/useVoice";
+import { EDGE_PERSONA_VOICE } from "@/lib/edgeVoices";
 import { nextSpeakableChunk, mergeTranscript } from "@/lib/speech";
 import { PERSONAS, parseSpeaker, type PersonaId } from "@/lib/jury";
 import { useSpeechRecognition } from "@/lib/useSpeechRecognition";
@@ -36,7 +37,7 @@ export function MeetingRoom({
   const [joined, setJoined] = useState(false);
   const [showTranscript, setShowTranscript] = useState(false);
   const [cameraOn, setCameraOn] = useState(false);
-  const { supported, speak, cancel, muted, toggleMute, isSpeaking, voices } = useSpeech();
+  const { supported, ready, speak, cancel, muted, toggleMute, isSpeaking, voices } = useVoice();
 
   // Voix + paramètres du persona courant (mode jury).
   function voiceOptsFor(id: PersonaId | null) {
@@ -45,7 +46,7 @@ export function MeetingRoom({
     if (idx === -1) return undefined;
     const p = PERSONAS[idx];
     const voice = voices.length ? voices[idx % voices.length] : undefined;
-    return { pitch: p.pitch, rate: p.rate, voice };
+    return { pitch: p.pitch, rate: p.rate, voice, edgeVoice: EDGE_PERSONA_VOICE[id] };
   }
   const spokenRef = useRef<{ index: number; len: number }>({ index: -1, len: 0 });
   const rec = useSpeechRecognition();
@@ -74,7 +75,9 @@ export function MeetingRoom({
 
   // Fait parler le recruteur phrase par phrase, au fil du flux.
   useEffect(() => {
-    if (!joined || muted) return;
+    // Attend que le moteur soit décidé (probe edge/navigateur) avant de parler,
+    // sinon les premières phrases passeraient par le navigateur puis basculeraient sur edge.
+    if (!joined || muted || !ready) return;
     let lastIdx = -1;
     for (let i = history.length - 1; i >= 0; i--) {
       if (history[i].role === "recruiter") {
@@ -101,10 +104,14 @@ export function MeetingRoom({
     spokenRef.current = { index: lastIdx, len };
     // voices : les voix Web Speech se chargent en asynchrone ; sans cette dépendance,
     // l'effet garderait la liste vide et perdrait la différenciation vocale du jury.
-  }, [history, joined, muted, speak, jury, voices]);
+  }, [history, joined, muted, ready, speak, jury, voices]);
 
-  // Nettoyage de la voix au démontage (fin d'entretien).
-  useEffect(() => cancel, [cancel]);
+  // Nettoyage de la voix UNIQUEMENT au démontage (fin d'entretien).
+  // On passe par une ref pour ne pas re-déclencher le nettoyage si `cancel`
+  // change d'identité à chaque rendu (sinon la voix serait coupée en continu).
+  const cancelRef = useRef(cancel);
+  cancelRef.current = cancel;
+  useEffect(() => () => cancelRef.current(), []);
 
   if (!joined) {
     return <MeetingLobby onJoin={() => setJoined(true)} />;
