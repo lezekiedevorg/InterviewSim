@@ -3,7 +3,8 @@
 import { useEffect, useRef, useState } from "react";
 import type { ChatMessage } from "@/lib/types";
 import { useVoice } from "@/lib/useVoice";
-import { EDGE_PERSONA_VOICE } from "@/lib/edgeVoices";
+import { soloVoiceById, juryVoicesByPack } from "@/lib/edgeVoices";
+import { getVoicePref, setVoicePref } from "@/lib/voicePrefs";
 import { nextSpeakableChunk, mergeTranscript } from "@/lib/speech";
 import { PERSONAS, parseSpeaker, type PersonaId } from "@/lib/jury";
 import { useSpeechRecognition } from "@/lib/useSpeechRecognition";
@@ -37,7 +38,29 @@ export function MeetingRoom({
   const [joined, setJoined] = useState(false);
   const [showTranscript, setShowTranscript] = useState(false);
   const [cameraOn, setCameraOn] = useState(false);
-  const { supported, ready, speak, cancel, muted, toggleMute, isSpeaking, voices } = useVoice();
+  const { engine, supported, ready, speak, cancel, muted, toggleMute, isSpeaking, voices } = useVoice();
+  const [pref, setPref] = useState(() => getVoicePref());
+  function changeSolo(soloId: string) {
+    setPref((p) => ({ ...p, soloId }));
+    setVoicePref({ soloId });
+  }
+  function changePack(packId: string) {
+    setPref((p) => ({ ...p, packId }));
+    setVoicePref({ packId });
+  }
+  function previewVoice() {
+    if (!ready) return;
+    if (jury) {
+      const v = juryVoicesByPack(pref.packId);
+      speak("Bonjour, je suis la RH.", { edgeVoice: v.rh });
+      speak("Et moi le manager opérationnel.", { edgeVoice: v.manager });
+      speak("Et moi l'expert métier.", { edgeVoice: v.expert });
+    } else {
+      speak("Bonjour, installez-vous, nous allons commencer l'entretien.", {
+        edgeVoice: soloVoiceById(pref.soloId),
+      });
+    }
+  }
 
   // Voix + paramètres du persona courant (mode jury).
   function voiceOptsFor(id: PersonaId | null) {
@@ -46,7 +69,7 @@ export function MeetingRoom({
     if (idx === -1) return undefined;
     const p = PERSONAS[idx];
     const voice = voices.length ? voices[idx % voices.length] : undefined;
-    return { pitch: p.pitch, rate: p.rate, voice, edgeVoice: EDGE_PERSONA_VOICE[id] };
+    return { pitch: p.pitch, rate: p.rate, voice, edgeVoice: juryVoicesByPack(pref.packId)[id] };
   }
   const spokenRef = useRef<{ index: number; len: number }>({ index: -1, len: 0 });
   const rec = useSpeechRecognition();
@@ -88,7 +111,9 @@ export function MeetingRoom({
     if (lastIdx === -1) return;
     if (spokenRef.current.index !== lastIdx) spokenRef.current = { index: lastIdx, len: 0 };
     const text = history[lastIdx].text;
-    const opts = jury ? voiceOptsFor(parseSpeaker(text).speaker) : undefined;
+    const opts = jury
+      ? voiceOptsFor(parseSpeaker(text).speaker)
+      : { edgeVoice: soloVoiceById(pref.soloId) };
     let len = spokenRef.current.len;
     let guard = 0;
     while (guard++ < 200) {
@@ -104,7 +129,7 @@ export function MeetingRoom({
     spokenRef.current = { index: lastIdx, len };
     // voices : les voix Web Speech se chargent en asynchrone ; sans cette dépendance,
     // l'effet garderait la liste vide et perdrait la différenciation vocale du jury.
-  }, [history, joined, muted, ready, speak, jury, voices]);
+  }, [history, joined, muted, ready, speak, jury, voices, pref]);
 
   // Nettoyage de la voix UNIQUEMENT au démontage (fin d'entretien).
   // On passe par une ref pour ne pas re-déclencher le nettoyage si `cancel`
@@ -114,7 +139,19 @@ export function MeetingRoom({
   useEffect(() => () => cancelRef.current(), []);
 
   if (!joined) {
-    return <MeetingLobby onJoin={() => setJoined(true)} />;
+    return (
+      <MeetingLobby
+        onJoin={() => setJoined(true)}
+        engine={engine}
+        ready={ready}
+        jury={jury}
+        soloId={pref.soloId}
+        packId={pref.packId}
+        onChangeSolo={changeSolo}
+        onChangePack={changePack}
+        onPreview={previewVoice}
+      />
+    );
   }
 
   let lastRecruiterText = "";
