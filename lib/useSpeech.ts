@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { rankFrenchVoices } from "./speech";
 
 export function useSpeech() {
   const [supported, setSupported] = useState(false);
@@ -15,9 +16,9 @@ export function useSpeech() {
     setSupported(true);
     const pickVoice = () => {
       const all = window.speechSynthesis.getVoices();
-      const fr = all.filter((v) => v.lang.startsWith("fr"));
-      setVoices(fr);
-      voiceRef.current = fr[0] ?? all[0] ?? null;
+      const ranked = rankFrenchVoices(all); // voix FR classées, meilleures d'abord
+      setVoices(ranked); // le jury assigne ses 3 personas sur ce classement → meilleures voix
+      voiceRef.current = ranked[0] ?? all[0] ?? null; // meilleure voix par défaut (solo)
     };
     pickVoice();
     window.speechSynthesis.onvoiceschanged = pickVoice;

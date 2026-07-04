@@ -27,3 +27,25 @@ export function mergeTranscript(base: string, transcript: string): string {
   if (!base) return t;
   return base.replace(/\s+$/, "") + " " + t;
 }
+
+// Marqueurs dans le NOM de la voix (l'API speechSynthesis n'a pas de champ « qualité »).
+const VOICE_QUALITY_HINTS = ["natural", "neural", "enhanced", "premium", "google", "siri", "online"];
+const VOICE_LOW_HINTS = ["compact", "espeak", "hortense"];
+
+function scoreVoice(v: SpeechSynthesisVoice): number {
+  const name = v.name.toLowerCase();
+  let score = 0;
+  if (VOICE_QUALITY_HINTS.some((h) => name.includes(h))) score += 2;
+  if (VOICE_LOW_HINTS.some((h) => name.includes(h))) score -= 2;
+  return score;
+}
+
+// Classe les voix françaises du navigateur, meilleures d'abord.
+// ponytail: heuristique sur le nom faute de champ qualité dans l'API ; suffisant, ajustable.
+export function rankFrenchVoices(voices: SpeechSynthesisVoice[]): SpeechSynthesisVoice[] {
+  return voices
+    .filter((v) => v.lang.toLowerCase().startsWith("fr"))
+    .map((v, i) => ({ v, i, score: scoreVoice(v) }))
+    .sort((a, b) => b.score - a.score || a.i - b.i) // score décroissant, stable à score égal
+    .map((x) => x.v);
+}
