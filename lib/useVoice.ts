@@ -22,7 +22,8 @@ export function useVoice() {
   const playingRef = useRef(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const resolveRef = useRef<(() => void) | null>(null);
-  const abortRef = useRef<AbortController | null>(null);
+  // Contrôleurs des fetch /api/tts en vol (courant + préchargé) — pour tout couper d'un coup.
+  const abortsRef = useRef<Set<AbortController>>(new Set());
   const mutedRef = useRef(false);
 
   // mutedRef suit l'état de sourdine du navigateur (source unique).
@@ -52,8 +53,8 @@ export function useVoice() {
 
   const stopEdge = useCallback(() => {
     queueRef.current = [];
-    abortRef.current?.abort(); // coupe un fetch /api/tts en cours (mute immédiat)
-    abortRef.current = null;
+    abortsRef.current.forEach((ac) => ac.abort()); // coupe tous les fetch en vol (mute immédiat)
+    abortsRef.current.clear();
     if (audioRef.current) {
       audioRef.current.pause();
       audioRef.current = null;
@@ -73,12 +74,12 @@ export function useVoice() {
     if (playingRef.current) return;
     playingRef.current = true;
     setEdgeSpeaking(true);
-    try {
-      while (queueRef.current.length > 0 && !mutedRef.current) {
-        const item = queueRef.current.shift()!;
-        const ac = new AbortController();
-        abortRef.current = ac;
-        let url: string | null = null;
+
+    // Lance la fabrication de l'audio d'un item ; renvoie l'URL blob ou null (échec/annulation).
+    const fetchAudio = (item: { text: string; voice: string }): Promise<string | null> => {
+      const ac = new AbortController();
+      abortsRef.current.add(ac);
+      return (async () => {
         try {
           const res = await fetch("/api/tts", {
             method: "POST",
@@ -87,28 +88,61 @@ export function useVoice() {
             signal: ac.signal,
           });
           if (!res.ok) throw new Error("tts");
-          url = URL.createObjectURL(await res.blob());
-          await new Promise<void>((resolve) => {
-            resolveRef.current = resolve;
-            const audio = new Audio(url!);
-            audioRef.current = audio;
-            const done = () => {
-              resolveRef.current = null;
-              resolve();
-            };
-            audio.onended = done;
-            audio.onerror = done;
-            audio.play().catch(done);
-          });
+          return URL.createObjectURL(await res.blob());
         } catch {
-          // ponytail: échec ponctuel ou annulation edge -> on saute cette phrase (transcription reste lisible)
+          return null; // échec ponctuel ou annulation -> phrase sautée (transcription reste lisible)
         } finally {
-          if (url) URL.revokeObjectURL(url); // révoqué dans tous les cas (fin, erreur, coupure)
-          audioRef.current = null;
-          abortRef.current = null;
+          abortsRef.current.delete(ac);
         }
+      })();
+    };
+
+    const playUrl = (url: string): Promise<void> =>
+      new Promise<void>((resolve) => {
+        resolveRef.current = resolve;
+        const audio = new Audio(url);
+        audioRef.current = audio;
+        const done = () => {
+          resolveRef.current = null;
+          resolve();
+        };
+        audio.onended = done;
+        audio.onerror = done;
+        audio.play().catch(done);
+      });
+
+    const nextItem = () => (queueRef.current.length ? queueRef.current.shift()! : null);
+
+    // Préchargement de profondeur 1 : on fabrique la phrase N+1 pendant qu'on joue la N.
+    let cur: Promise<string | null> | null = (() => {
+      const it = nextItem();
+      return it ? fetchAudio(it) : null;
+    })();
+    try {
+      while (cur && !mutedRef.current) {
+        // démarre le fetch de la phrase suivante AVANT de jouer la courante
+        const it = nextItem();
+        const next = it ? fetchAudio(it) : null;
+
+        const url = await cur;
+        if (url) {
+          if (!mutedRef.current) await playUrl(url);
+          URL.revokeObjectURL(url);
+          audioRef.current = null;
+        }
+
+        // enchaîne sur le préchargé ; sinon la file a pu se remplir entre-temps (flux)
+        cur = next ?? (() => {
+          const it2 = nextItem();
+          return it2 ? fetchAudio(it2) : null;
+        })();
       }
     } finally {
+      // si on sort (mute) avec un audio déjà préchargé en main, on récupère et révoque son URL
+      if (cur) {
+        const leftover = await cur;
+        if (leftover) URL.revokeObjectURL(leftover);
+      }
       playingRef.current = false;
       setEdgeSpeaking(false);
     }
