@@ -8,6 +8,7 @@ import { Button } from "@/app/components/ui/Button";
 import { Card } from "@/app/components/ui/Card";
 import { Field } from "@/app/components/ui/Field";
 import { Debrief as DebriefComponent } from "@/app/components/Debrief";
+import { ShareScoreButton } from "@/app/components/ShareScoreButton";
 import { createBrowserSupabase } from "@/lib/supabase/client";
 import { TemplateGallery } from "@/app/components/TemplateGallery";
 import type { Template } from "@/lib/templates";
@@ -271,6 +272,7 @@ export default function Home() {
             </Card>
           )}
           {debrief && <DebriefComponent data={debrief} />}
+          {debrief && <ShareScoreButton poste={context.poste} score={debrief.scoreConfiance} />}
           {saveMsg && (
             <p className="text-center text-sm text-slate-500">{saveMsg}</p>
           )}

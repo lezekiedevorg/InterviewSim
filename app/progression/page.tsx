@@ -13,6 +13,7 @@ import { Card } from "@/app/components/ui/Card";
 import { Button } from "@/app/components/ui/Button";
 import { ScoreBadge } from "@/app/components/ui/ScoreBadge";
 import { Debrief } from "@/app/components/Debrief";
+import { ShareScoreButton } from "@/app/components/ShareScoreButton";
 import { CrossAnalysis } from "@/app/components/CrossAnalysis";
 import type { CrossAnalysis as CrossAnalysisType } from "@/lib/types";
 
@@ -156,6 +157,9 @@ export default function ProgressionPage() {
             {openId === r.id && (
               <div className="mt-4 border-t border-slate-100 pt-4">
                 <Debrief data={r.debrief} />
+                <div className="mt-4">
+                  <ShareScoreButton poste={r.poste} score={r.debrief.scoreConfiance} />
+                </div>
               </div>
             )}
           </Card>
