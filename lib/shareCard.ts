@@ -94,5 +94,6 @@ export async function shareScoreCard(blob: Blob): Promise<void> {
   a.href = url;
   a.download = "interviewsim-score.png";
   a.click();
-  URL.revokeObjectURL(url);
+  // Révocation différée : révoquer dans le même tick que click() rate le téléchargement sur Firefox.
+  setTimeout(() => URL.revokeObjectURL(url), 0);
 }
