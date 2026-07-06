@@ -33,7 +33,7 @@ export function ShareScoreButton({ poste, score }: { poste: string; score: numbe
         </svg>
         {busy ? "Préparation…" : "Partager mon score"}
       </Button>
-      {error && <p className="text-sm text-red-600">{error}</p>}
+      {error && <p className="text-sm text-danger-400">{error}</p>}
     </div>
   );
 }

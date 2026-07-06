@@ -24,10 +24,10 @@ export default function ResetPage() {
 
   return (
     <main className="mx-auto max-w-md px-4 py-10">
-      <Card className="animate-scale-in">
-        <h1 className="mb-4 font-heading text-xl font-bold">Nouveau mot de passe</h1>
+      <Card className="p-6 animate-rise sm:p-7">
+        <h1 className="mb-4 font-heading text-2xl font-extrabold tracking-tight text-cream">Nouveau mot de passe</h1>
         <Field label="Nouveau mot de passe" type="password" value={password} onChange={setPassword} />
-        {msg && <p className="mb-2 text-sm text-red-600">{msg}</p>}
+        {msg && <p className="mb-2 text-sm text-danger-400">{msg}</p>}
         <Button className="w-full" onClick={submit}>Enregistrer</Button>
       </Card>
     </main>
