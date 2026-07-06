@@ -1,3 +1,6 @@
+"use client";
+
+import { useRef } from "react";
 import type { Template } from "@/lib/templates";
 import { TEMPLATES } from "@/lib/templates";
 
@@ -85,6 +88,7 @@ function TemplateIcon({ id }: { id: string }) {
   );
 }
 
+// Carrousel horizontal : cartes défilables au doigt, flèches pour la souris.
 export function TemplateGallery({
   onPick,
   selectedId,
@@ -92,18 +96,46 @@ export function TemplateGallery({
   onPick: (t: Template) => void;
   selectedId?: string | null;
 }) {
+  const trackRef = useRef<HTMLDivElement>(null);
+
+  function slide(direction: 1 | -1) {
+    const track = trackRef.current;
+    if (!track) return;
+    track.scrollBy({ left: direction * track.clientWidth * 0.8, behavior: "smooth" });
+  }
+
+  const arrow =
+    "grid h-8 w-8 shrink-0 cursor-pointer place-items-center rounded-full border border-slate-200 bg-white/80 text-slate-600 backdrop-blur transition-all duration-200 hover:border-brand-300 hover:text-brand-700 hover:shadow-soft";
+
   return (
     <section className="mb-6">
-      <h2 className="mb-3 text-center text-sm font-medium text-slate-500">
-        Pas d&apos;idée ? Pars d&apos;un scénario
-      </h2>
-      <div className="stagger grid grid-cols-2 gap-3 sm:grid-cols-4">
+      <div className="mb-3 flex items-center justify-between gap-3">
+        <h2 className="text-sm font-medium text-slate-500">
+          Pas d&apos;idée ? Pars d&apos;un scénario
+        </h2>
+        <div className="flex gap-2">
+          <button type="button" onClick={() => slide(-1)} aria-label="Scénarios précédents" className={arrow}>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4" aria-hidden>
+              <polyline points="15 18 9 12 15 6" />
+            </svg>
+          </button>
+          <button type="button" onClick={() => slide(1)} aria-label="Scénarios suivants" className={arrow}>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4" aria-hidden>
+              <polyline points="9 18 15 12 9 6" />
+            </svg>
+          </button>
+        </div>
+      </div>
+      <div
+        ref={trackRef}
+        className="-mx-1 flex snap-x snap-mandatory gap-3 overflow-x-auto px-1 pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+      >
         {TEMPLATES.map((t) => (
           <button
             key={t.id}
             type="button"
             onClick={() => onPick(t)}
-            className={`group flex cursor-pointer flex-col items-start gap-2 rounded-xl border p-3 text-left transition-all duration-200 hover:-translate-y-0.5 hover:shadow-card ${
+            className={`group flex w-40 shrink-0 snap-start cursor-pointer flex-col items-start gap-2 rounded-xl border p-3 text-left transition-all duration-200 hover:-translate-y-0.5 hover:shadow-card ${
               selectedId === t.id
                 ? "border-brand-500 bg-brand-50/90 shadow-card ring-2 ring-brand-200"
                 : "border-white/70 bg-white/80 backdrop-blur hover:border-brand-200"
