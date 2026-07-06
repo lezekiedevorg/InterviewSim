@@ -77,7 +77,7 @@ function TemplateIcon({ id }: { id: string }) {
       strokeWidth="2"
       strokeLinecap="round"
       strokeLinejoin="round"
-      className="h-4 w-4 shrink-0"
+      className="h-5 w-5"
       aria-hidden
     >
       {ICON_PATHS[id] ?? FALLBACK}
@@ -85,7 +85,6 @@ function TemplateIcon({ id }: { id: string }) {
   );
 }
 
-// Pastilles compactes défilables : le formulaire reste visible sans scroller.
 export function TemplateGallery({
   onPick,
   selectedId,
@@ -94,22 +93,36 @@ export function TemplateGallery({
   selectedId?: string | null;
 }) {
   return (
-    <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-      {TEMPLATES.map((t) => (
-        <button
-          key={t.id}
-          type="button"
-          onClick={() => onPick(t)}
-          className={`flex shrink-0 cursor-pointer items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm font-medium transition-all duration-200 ${
-            selectedId === t.id
-              ? "border-brand-500 bg-brand-600 text-white shadow-brand"
-              : "border-slate-200 bg-white/80 text-slate-700 backdrop-blur hover:border-brand-300 hover:text-brand-700"
-          }`}
-        >
-          <TemplateIcon id={t.id} />
-          {t.titre}
-        </button>
-      ))}
-    </div>
+    <section className="mb-6">
+      <h2 className="mb-3 text-center text-sm font-medium text-slate-500">
+        Pas d&apos;idée ? Pars d&apos;un scénario
+      </h2>
+      <div className="stagger grid grid-cols-2 gap-3 sm:grid-cols-4">
+        {TEMPLATES.map((t) => (
+          <button
+            key={t.id}
+            type="button"
+            onClick={() => onPick(t)}
+            className={`group flex cursor-pointer flex-col items-start gap-2 rounded-xl border p-3 text-left transition-all duration-200 hover:-translate-y-0.5 hover:shadow-card ${
+              selectedId === t.id
+                ? "border-brand-500 bg-brand-50/90 shadow-card ring-2 ring-brand-200"
+                : "border-white/70 bg-white/80 backdrop-blur hover:border-brand-200"
+            }`}
+          >
+            <span
+              className={`grid h-9 w-9 place-items-center rounded-lg transition-colors duration-200 ${
+                selectedId === t.id
+                  ? "bg-brand-600 text-white"
+                  : "bg-brand-50 text-brand-700 group-hover:bg-brand-100"
+              }`}
+            >
+              <TemplateIcon id={t.id} />
+            </span>
+            <span className="text-sm font-semibold text-slate-900">{t.titre}</span>
+            <span className="text-xs text-slate-500">{t.sousTitre}</span>
+          </button>
+        ))}
+      </div>
+    </section>
   );
 }
