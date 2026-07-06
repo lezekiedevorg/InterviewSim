@@ -19,6 +19,8 @@ type Props = {
   listening: boolean;
   onToggleMic: () => void;
   micDisabled: boolean;
+  handsFree: boolean;
+  onToggleHandsFree: () => void;
 };
 
 const pill = "flex items-center gap-1.5 rounded-full px-3 py-2 text-sm font-medium transition-colors";
@@ -40,6 +42,8 @@ export function MeetingControls({
   listening,
   onToggleMic,
   micDisabled,
+  handsFree,
+  onToggleHandsFree,
 }: Props) {
   function onKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
     if (e.key === "Enter" && !e.shiftKey) {
@@ -74,6 +78,15 @@ export function MeetingControls({
             className={`${pill} ${listening ? "animate-pulse bg-red-100 text-red-700" : "bg-slate-100 text-slate-600"} disabled:opacity-40`}
           >
             {listening ? "🎤 J'écoute…" : "🎤 Parler"}
+          </button>
+        )}
+        {recognitionSupported && (
+          <button
+            type="button"
+            onClick={onToggleHandsFree}
+            className={`${pill} ${handsFree ? "bg-brand-50 text-brand-700" : "bg-slate-100 text-slate-600"}`}
+          >
+            {handsFree ? "🎙️ Mains-libres activé" : "🎙️ Mains-libres"}
           </button>
         )}
         <button
