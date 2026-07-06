@@ -8,11 +8,16 @@ import { getVoicePref, setVoicePref } from "@/lib/voicePrefs";
 import { nextSpeakableChunk, mergeTranscript } from "@/lib/speech";
 import { PERSONAS, parseSpeaker, type PersonaId } from "@/lib/jury";
 import { useSpeechRecognition } from "@/lib/useSpeechRecognition";
+import { createSilenceDetector } from "@/lib/silenceDetector";
 import { RecruiterTile } from "./RecruiterTile";
 import { UserTile } from "./UserTile";
 import { MeetingControls } from "./MeetingControls";
 import { MeetingLobby } from "./MeetingLobby";
 import { TranscriptPanel } from "./TranscriptPanel";
+
+// ponytail: seuils de conversation mains-libres — boutons de calibration (débit de parole / pauses réelles à régler).
+const SILENCE_MS = 2500; // silence sans nouveaux mots avant l'envoi automatique
+const MIC_REOPEN_MS = 400; // anti-rebond avant réouverture auto du micro (absorbe les micro-coupures d'isSpeaking entre phrases)
 
 type Props = {
   history: ChatMessage[];
@@ -74,6 +79,49 @@ export function MeetingRoom({
   const spokenRef = useRef<{ index: number; len: number }>({ index: -1, len: 0 });
   const rec = useSpeechRecognition();
   const baseTextRef = useRef("");
+  const [handsFree, setHandsFree] = useState(false);
+
+  // Refs vers les dernières valeurs/fonctions, pour que le détecteur (créé une fois) et l'effet
+  // d'ouverture utilisent toujours la version courante SANS les mettre dans les tableaux de deps
+  // (rec est recréé à chaque rendu ; currentAnswer change à chaque mot -> ne doivent pas réarmer les effets).
+  const sendRef = useRef(sendAnswer);
+  sendRef.current = sendAnswer;
+  const recStopRef = useRef(rec.stop);
+  recStopRef.current = rec.stop;
+  const currentAnswerRef = useRef(currentAnswer);
+  currentAnswerRef.current = currentAnswer;
+  const detectorRef = useRef<ReturnType<typeof createSilenceDetector> | null>(null);
+  if (detectorRef.current === null) {
+    detectorRef.current = createSilenceDetector(SILENCE_MS, () => {
+      recStopRef.current();
+      sendRef.current();
+    });
+  }
+
+  // Mains-libres : chaque mot reconnu réarme le minuteur de silence ; à échéance -> envoi auto (via detector).
+  // On bump `rec.transcript` (texte reconnu brut) : la garde non-vide porte donc sur la parole, pas sur le champ.
+  // Volontaire — pas d'envoi auto sur pur silence même si du texte a été tapé (l'envoi utilise bien currentAnswer via sendAnswer).
+  useEffect(() => {
+    const d = detectorRef.current!;
+    if (handsFree && rec.listening) d.bump(rec.transcript);
+    else d.cancel();
+  }, [handsFree, rec.listening, rec.transcript]);
+
+  // Annule tout minuteur de silence en cours au démontage (ex. clic « Terminer » pendant l'écoute) :
+  // sinon le tir différé déclencherait un envoi fantôme sur l'écran de débrief.
+  useEffect(() => () => detectorRef.current?.cancel(), []);
+
+  // Mains-libres : rouvrir le micro tout seul quand le recruteur a fini (anti-rebond contre les micro-coupures d'isSpeaking).
+  // Deps = uniquement des primitives + rec.start (stable, useCallback[]) — surtout PAS `rec` ni `currentAnswer`,
+  // qui changent d'identité à chaque rendu et réarmeraient le minuteur en boucle (le micro ne s'ouvrirait jamais).
+  useEffect(() => {
+    if (!(handsFree && joined && !muted && !streaming && !isSpeaking && !rec.listening && rec.supported)) return;
+    const t = setTimeout(() => {
+      baseTextRef.current = currentAnswerRef.current;
+      rec.start();
+    }, MIC_REOPEN_MS);
+    return () => clearTimeout(t);
+  }, [handsFree, joined, muted, streaming, isSpeaking, rec.listening, rec.supported, rec.start]);
 
   // Pendant l'écoute, le texte reconnu remplit le champ (combiné à ce qui a été tapé).
   // Les modifications manuelles pendant l'écoute sont volontairement écrasées ; l'édition se fait après avoir arrêté le micro.
@@ -94,6 +142,11 @@ export function MeetingRoom({
       baseTextRef.current = currentAnswer;
       rec.start();
     }
+  }
+
+  function toggleHandsFree() {
+    if (handsFree && rec.listening) rec.stop(); // couper le micro si on désactive en plein tour
+    setHandsFree((h) => !h);
   }
 
   // Fait parler le recruteur phrase par phrase, au fil du flux.
@@ -167,37 +220,41 @@ export function MeetingRoom({
     <div className="flex flex-col gap-4 animate-rise">
       {jury ? (
         <div className="flex flex-col gap-3">
-          <div className="grid grid-cols-3 gap-2">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
             {PERSONAS.map((p) => (
               <RecruiterTile
                 key={p.id}
                 name={p.name}
                 initials={p.initials}
+                compact
                 speaking={isSpeaking && currentSpeaker === p.id}
               />
             ))}
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-3">
-            <UserTile cameraOn={cameraOn} />
-          </div>
+          {cameraOn && (
+            <div className="grid grid-cols-2 sm:grid-cols-3">
+              <UserTile cameraOn={cameraOn} />
+            </div>
+          )}
         </div>
       ) : (
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-          <div className="sm:col-span-2">
-            <RecruiterTile speaking={isSpeaking} />
+        <div className="relative">
+          <RecruiterTile speaking={isSpeaking} />
+          {/* Médaillon « Toi » incrusté, comme dans un vrai appel vidéo */}
+          <div className={`absolute bottom-3 right-3 ${cameraOn ? "w-32 sm:w-40" : ""}`}>
+            <UserTile cameraOn={cameraOn} inset={!cameraOn} />
           </div>
-          <UserTile cameraOn={cameraOn} />
         </div>
       )}
 
       {!supported && (
-        <p className="rounded-lg bg-amber-50 px-3 py-2 text-sm text-amber-700">
+        <p className="rounded-xl border border-amber-400/45 bg-amber-400/10 px-3.5 py-2.5 text-sm text-amber-300">
           La synthèse vocale n&apos;est pas supportée sur ce navigateur. Ouvre la transcription
           pour lire l&apos;entretien.
         </p>
       )}
       {(errorMsg || rec.error) && (
-        <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600">{errorMsg || rec.error}</p>
+        <p className="rounded-xl border border-danger-400/40 bg-danger-400/10 px-3.5 py-2.5 text-sm text-danger-400">{errorMsg || rec.error}</p>
       )}
 
       {showTranscript && <TranscriptPanel history={history} />}
@@ -219,6 +276,8 @@ export function MeetingRoom({
         listening={rec.listening}
         onToggleMic={toggleMic}
         micDisabled={streaming || isSpeaking}
+        handsFree={handsFree}
+        onToggleHandsFree={toggleHandsFree}
       />
     </div>
   );

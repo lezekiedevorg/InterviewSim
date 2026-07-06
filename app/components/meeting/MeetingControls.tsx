@@ -1,6 +1,15 @@
 "use client";
 
-import { Button } from "@/app/components/ui/Button";
+import {
+  VolumeIcon,
+  VolumeOffIcon,
+  MessageIcon,
+  MicIcon,
+  RadioIcon,
+  VideoIcon,
+  PhoneOffIcon,
+  SendIcon,
+} from "@/app/components/ui/icons";
 
 type Props = {
   muted: boolean;
@@ -19,9 +28,16 @@ type Props = {
   listening: boolean;
   onToggleMic: () => void;
   micDisabled: boolean;
+  handsFree: boolean;
+  onToggleHandsFree: () => void;
 };
 
-const pill = "flex items-center gap-1.5 rounded-full px-3 py-2 text-sm font-medium transition-colors";
+// Mobile : rond icône-seule (48px). Tablette et plus : pilule avec libellé.
+const pill =
+  "flex h-12 w-12 cursor-pointer items-center justify-center gap-1.5 rounded-full border text-[13px] font-semibold transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-40 sm:h-auto sm:w-auto sm:min-h-[44px] sm:px-4 sm:py-2";
+const pillOn = "border-amber-400 bg-amber-400 text-amber-ink";
+const pillOff = "border-cream/[0.18] bg-night-700 text-muted hover:border-amber-400/60 hover:text-cream";
+const pillLabel = "hidden sm:inline";
 
 export function MeetingControls({
   muted,
@@ -40,6 +56,8 @@ export function MeetingControls({
   listening,
   onToggleMic,
   micDisabled,
+  handsFree,
+  onToggleHandsFree,
 }: Props) {
   function onKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
     if (e.key === "Enter" && !e.shiftKey) {
@@ -55,52 +73,87 @@ export function MeetingControls({
           type="button"
           onClick={onToggleMute}
           disabled={!speechSupported}
-          className={`${pill} ${muted ? "bg-slate-200 text-slate-600" : "bg-brand-50 text-brand-700"} disabled:opacity-40`}
+          aria-label={muted ? "Réactiver le son" : "Couper le son"}
+          className={`${pill} ${muted ? "border-cream/[0.18] bg-night-700 text-danger-400" : pillOff}`}
         >
-          {muted ? "🔇 Son coupé" : "🔊 Son"}
+          {muted ? <VolumeOffIcon /> : <VolumeIcon />}
+          <span className={pillLabel}>{muted ? "Son coupé" : "Son"}</span>
         </button>
         <button
           type="button"
           onClick={onToggleTranscript}
-          className={`${pill} ${showTranscript ? "bg-brand-50 text-brand-700" : "bg-slate-100 text-slate-600"}`}
+          aria-label="Transcription"
+          className={`${pill} ${showTranscript ? pillOn : pillOff}`}
         >
-          💬 Transcription
+          <MessageIcon />
+          <span className={pillLabel}>Transcription</span>
         </button>
         {recognitionSupported && (
           <button
             type="button"
             onClick={onToggleMic}
             disabled={micDisabled}
-            className={`${pill} ${listening ? "animate-pulse bg-red-100 text-red-700" : "bg-slate-100 text-slate-600"} disabled:opacity-40`}
+            className={`flex min-h-[52px] cursor-pointer items-center gap-2 rounded-full px-6 py-3 font-heading text-[15px] font-extrabold transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-40 ${
+              listening
+                ? "bg-danger-600 text-white shadow-[0_6px_20px_rgba(199,62,51,0.4)]"
+                : "bg-amber-400 text-amber-ink shadow-cta hover:-translate-y-0.5 active:translate-y-0"
+            }`}
           >
-            {listening ? "🎤 J'écoute…" : "🎤 Parler"}
+            <MicIcon />
+            {listening ? "J'écoute…" : "Parler"}
+          </button>
+        )}
+        {recognitionSupported && (
+          <button
+            type="button"
+            onClick={onToggleHandsFree}
+            aria-label="Mains-libres"
+            className={`${pill} ${handsFree ? pillOn : pillOff}`}
+          >
+            <RadioIcon />
+            <span className={pillLabel}>Mains-libres</span>
           </button>
         )}
         <button
           type="button"
           onClick={onToggleCamera}
-          className={`${pill} ${cameraOn ? "bg-brand-50 text-brand-700" : "bg-slate-100 text-slate-600"}`}
+          aria-label="Caméra"
+          className={`${pill} ${cameraOn ? pillOn : pillOff}`}
         >
-          {cameraOn ? "📷 Caméra active" : "📷 Activer la caméra"}
+          <VideoIcon />
+          <span className={pillLabel}>Caméra</span>
         </button>
-        <button type="button" onClick={onFinish} disabled={streaming} className={`${pill} bg-red-50 text-red-600 disabled:opacity-40`}>
-          ☎️ Terminer
+        <button
+          type="button"
+          onClick={onFinish}
+          disabled={streaming}
+          aria-label="Terminer l'entretien"
+          className={`${pill} border-danger-600 bg-danger-600 font-bold text-white hover:bg-danger-400 hover:border-danger-400`}
+        >
+          <PhoneOffIcon />
+          <span className={pillLabel}>Terminer</span>
         </button>
       </div>
-      <div className="flex items-end gap-2">
+      <div className="flex items-end gap-2.5">
         <textarea
           aria-label="Ta réponse"
-          className="min-h-[48px] w-full resize-none rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm outline-none transition-shadow focus:border-brand-600 focus:ring-4 focus:ring-brand-100 disabled:bg-slate-50"
+          className="min-h-[50px] w-full resize-none rounded-3xl border border-cream/[0.18] bg-night-800 px-5 py-3.5 text-base sm:text-[15px] font-medium text-cream placeholder:text-faint outline-none transition-colors duration-200 hover:border-cream/30 focus:border-amber-400 disabled:opacity-50"
           value={currentAnswer}
           disabled={streaming}
           onChange={(e) => onAnswerChange(e.target.value)}
           onKeyDown={onKeyDown}
           rows={1}
-          placeholder="Ta réponse…  (Entrée pour envoyer)"
+          placeholder="Ou écris ta réponse ici…"
         />
-        <Button onClick={onSend} disabled={streaming || currentAnswer.trim() === ""}>
-          Envoyer
-        </Button>
+        <button
+          type="button"
+          onClick={onSend}
+          disabled={streaming || currentAnswer.trim() === ""}
+          aria-label="Envoyer"
+          className="grid h-[50px] w-[50px] shrink-0 cursor-pointer place-items-center rounded-full border border-amber-400/45 bg-amber-400/10 text-amber-400 transition-colors duration-200 hover:bg-amber-400/20 disabled:cursor-not-allowed disabled:opacity-40"
+        >
+          <SendIcon className="h-[18px] w-[18px]" />
+        </button>
       </div>
     </div>
   );

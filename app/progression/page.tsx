@@ -12,6 +12,7 @@ import {
 import { Card } from "@/app/components/ui/Card";
 import { Button } from "@/app/components/ui/Button";
 import { ScoreBadge } from "@/app/components/ui/ScoreBadge";
+import { scoreColor, BAND_HEX } from "@/lib/scoreColor";
 import { Debrief } from "@/app/components/Debrief";
 import { ShareScoreButton } from "@/app/components/ShareScoreButton";
 import { CrossAnalysis } from "@/app/components/CrossAnalysis";
@@ -42,16 +43,29 @@ export default function ProgressionPage() {
   }, [router]);
 
   if (sessions === null) {
-    return <main className="mx-auto max-w-2xl px-4 py-10 text-slate-500">Chargement…</main>;
+    // squelettes de chargement : pas de saut de contenu, l'espace est réservé
+    return (
+      <main className="mx-auto max-w-2xl px-4 py-10">
+        <div className="mb-4 h-9 w-56 animate-pulse rounded-lg bg-cream/10" />
+        <div className="mb-6 h-28 animate-pulse rounded-[20px] bg-cream/10" />
+        <div className="mb-6 h-24 animate-pulse rounded-[20px] bg-cream/10 [animation-delay:.15s]" />
+        <div className="h-16 animate-pulse rounded-[20px] bg-cream/10 [animation-delay:.3s]" />
+      </main>
+    );
   }
 
   if (sessions.length === 0) {
     return (
-      <main className="mx-auto max-w-2xl px-4 py-10">
-        <h1 className="mb-2 font-heading text-2xl font-bold">Ma progression</h1>
-        <p className="text-slate-600">
-          Aucun entretien enregistré pour l&apos;instant. Fais un entretien, puis reviens ici !
-        </p>
+      <main className="mx-auto max-w-2xl px-4 py-10 animate-rise">
+        <h1 className="mb-4 font-heading text-3xl font-extrabold tracking-tight text-cream">Ma progression</h1>
+        <Card className="text-center">
+          <p className="text-muted">
+            Aucun entretien enregistré pour l&apos;instant. Fais un entretien, puis reviens ici !
+          </p>
+          <Button className="mt-4" onClick={() => router.push("/")}>
+            Démarrer un entretien →
+          </Button>
+        </Card>
       </main>
     );
   }
@@ -60,6 +74,15 @@ export default function ProgressionPage() {
   const rows = withDeltas(desc);
   const chrono = [...desc].reverse().map((s) => s.score_confiance);
   const points = sparklinePoints(chrono, 300, 60);
+  // Points colorés par bande de score (mêmes formules que sparklinePoints)
+  const dots = chrono.map((v, i) => ({
+    x: chrono.length === 1 ? 0 : (i / (chrono.length - 1)) * 300,
+    y: 60 - (v / 100) * 60,
+    c: BAND_HEX[scoreColor(v)],
+  }));
+  const first = chrono[0];
+  const last = chrono[chrono.length - 1];
+  const totalDelta = last - first;
 
   async function runAnalysis() {
     setAnalyzing(true);
@@ -90,36 +113,58 @@ export default function ProgressionPage() {
   }
 
   return (
-    <main className="mx-auto max-w-2xl px-4 py-10">
-      <h1 className="mb-4 font-heading text-2xl font-bold">Ma progression</h1>
+    <main className="stagger mx-auto max-w-2xl px-4 py-10">
+      <h1 className="font-heading text-3xl font-extrabold tracking-tight text-cream sm:text-4xl">
+        Ma progression
+      </h1>
+      <p className="mb-5 mt-2 text-sm text-muted">
+        {sessions.length} entretien{sessions.length > 1 ? "s" : ""} enregistré{sessions.length > 1 ? "s" : ""}
+        {chrono.length > 1 && (
+          <>
+            {" · "}
+            <span className={`font-semibold ${totalDelta >= 0 ? "text-ok" : "text-danger-400"}`}>
+              {totalDelta >= 0 ? `+${totalDelta}` : totalDelta} points
+            </span>
+          </>
+        )}
+      </p>
 
-      <Card className="mb-6">
-        <h2 className="mb-3 font-heading font-semibold">Évolution du score</h2>
-        <svg viewBox="0 0 300 60" className="h-16 w-full">
+      <Card className="mb-4">
+        {/* Seuils des bandes (40 / 70) en pointillés + points colorés par bande */}
+        <svg viewBox="-6 -6 312 72" className="h-20 w-full overflow-visible">
+          <line x1="0" y1="18" x2="300" y2="18" stroke="rgba(52,210,123,0.25)" strokeWidth="1" strokeDasharray="4 4" />
+          <line x1="0" y1="36" x2="300" y2="36" stroke="rgba(255,90,78,0.25)" strokeWidth="1" strokeDasharray="4 4" />
           <polyline
             points={points}
             fill="none"
-            stroke="#059669"
-            strokeWidth="2"
+            stroke="#ffb224"
+            strokeWidth="2.5"
             strokeLinecap="round"
             strokeLinejoin="round"
           />
+          {dots.map((d, i) => (
+            <circle key={i} cx={d.x} cy={d.y} r="4.5" fill={d.c} stroke="#101c1f" strokeWidth="2" />
+          ))}
         </svg>
       </Card>
 
       <Card className="mb-6">
-        <h2 className="mb-3 font-heading font-semibold">Points faibles récurrents</h2>
+        <h2 className="mb-3 font-heading font-bold text-cream">Points faibles récurrents</h2>
         {sessions.length < 3 ? (
-          <p className="text-sm text-slate-500">
+          <p className="text-sm text-faint">
             Fais au moins 3 entretiens pour débloquer l&apos;analyse de tes points faibles récurrents.
           </p>
         ) : (
           <>
-            <Button onClick={runAnalysis} disabled={analyzing}>
-              {analyzing ? "Analyse en cours…" : "🔍 Analyser mes points faibles récurrents"}
+            <Button variant="secondary" className="w-full" onClick={runAnalysis} disabled={analyzing}>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4" aria-hidden>
+                <path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z" />
+                <path d="M19 15l.9 2.1L22 18l-2.1.9L19 21l-.9-2.1L16 18l2.1-.9z" />
+              </svg>
+              {analyzing ? "Analyse en cours…" : "Analyser mes points faibles récurrents"}
             </Button>
             {analyzeError && (
-              <p className="mt-3 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600">{analyzeError}</p>
+              <p className="mt-3 rounded-xl border border-danger-400/40 bg-danger-400/10 px-3.5 py-2.5 text-sm text-danger-400">{analyzeError}</p>
             )}
             {analysis && (
               <div className="mt-4">
@@ -132,30 +177,43 @@ export default function ProgressionPage() {
 
       <div className="flex flex-col gap-3">
         {rows.map((r) => (
-          <Card key={r.id}>
+          <Card key={r.id} className="rounded-2xl p-4 transition-colors duration-200 hover:border-amber-400/40">
             <button
-              className="flex w-full items-center justify-between text-left"
+              className="flex w-full cursor-pointer items-center justify-between gap-3 text-left"
               onClick={() => setOpenId(openId === r.id ? null : r.id)}
+              aria-expanded={openId === r.id}
             >
-              <div>
-                <p className="font-medium text-slate-900">{r.poste}</p>
-                <p className="text-xs text-slate-500">
+              <div className="min-w-0">
+                <p className="truncate font-semibold text-cream">{r.poste}</p>
+                <p className="text-xs text-faint">
                   {new Date(r.created_at).toLocaleDateString("fr-FR")}
                 </p>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex shrink-0 items-center gap-2.5">
                 {r.delta !== null && (
                   <span
-                    className={`text-sm font-medium ${r.delta >= 0 ? "text-emerald-600" : "text-red-600"}`}
+                    className={`text-[13px] font-bold ${r.delta >= 0 ? "text-ok" : "text-danger-400"}`}
                   >
                     {r.delta >= 0 ? `+${r.delta}` : r.delta}
                   </span>
                 )}
                 <ScoreBadge score={r.score_confiance} />
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className={`h-3.5 w-3.5 text-faint transition-transform duration-200 ${openId === r.id ? "rotate-90" : ""}`}
+                  aria-hidden
+                >
+                  <polyline points="9 5 16 12 9 19" />
+                </svg>
               </div>
             </button>
             {openId === r.id && (
-              <div className="mt-4 border-t border-slate-100 pt-4">
+              <div className="mt-4 border-t border-cream/10 pt-4 animate-rise">
                 <Debrief data={r.debrief} />
                 <div className="mt-4">
                   <ShareScoreButton poste={r.poste} score={r.debrief.scoreConfiance} />

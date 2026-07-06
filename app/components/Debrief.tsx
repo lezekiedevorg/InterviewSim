@@ -1,47 +1,73 @@
 import type { Debrief as DebriefType } from "@/lib/types";
 import { Card } from "@/app/components/ui/Card";
-import { ScoreBadge } from "@/app/components/ui/ScoreBadge";
+import { ScoreRing } from "@/app/components/ui/ScoreRing";
+import { verdict } from "@/lib/scoreColor";
+
+function CheckIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="mt-0.5 h-[15px] w-[15px] shrink-0" aria-hidden>
+      <polyline points="4 12.5 9.5 18 20 6" />
+    </svg>
+  );
+}
+
+function TargetIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mt-0.5 h-[15px] w-[15px] shrink-0" aria-hidden>
+      <circle cx="12" cy="12" r="9" />
+      <circle cx="12" cy="12" r="3.5" />
+    </svg>
+  );
+}
 
 export function Debrief({ data }: { data: DebriefType }) {
   return (
-    <div className="flex flex-col gap-4">
-      <Card className="border-brand-200 bg-gradient-to-br from-brand-50 to-white">
-        <div className="mb-2 flex items-center justify-between gap-3">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-wide text-brand-700">Ton débrief</p>
-            <h2 className="font-heading text-xl font-bold text-slate-900">Synthèse de l&apos;entretien</h2>
-          </div>
-          <ScoreBadge score={data.scoreConfiance} />
-        </div>
-        <p className="text-sm leading-relaxed text-slate-600">{data.syntheseGenerale}</p>
-      </Card>
+    <div className="stagger flex flex-col items-center gap-4">
+      {/* La jauge : le moment récompense */}
+      <div className="flex flex-col items-center pt-2 text-center">
+        <ScoreRing score={data.scoreConfiance} />
+        <h2 className="mt-5 font-heading text-3xl font-extrabold tracking-tight text-cream sm:text-4xl">
+          {verdict(data.scoreConfiance)}
+        </h2>
+        <p className="mx-auto mt-3 max-w-md text-[15px] leading-relaxed text-muted [text-wrap:pretty]">
+          {data.syntheseGenerale}
+        </p>
+      </div>
 
-      <div className="grid gap-4 sm:grid-cols-2">
-        <Card className="border-l-4 border-l-emerald-500">
-          <h3 className="mb-2 flex items-center gap-2 font-heading font-semibold text-emerald-700">
-            <span aria-hidden>✓</span> Points forts
-          </h3>
-          <ul className="list-disc space-y-1 pl-5 text-sm text-slate-700">
-            {data.pointsForts.map((x, i) => <li key={i}>{x}</li>)}
-          </ul>
+      <div className="grid w-full gap-3.5 sm:grid-cols-2">
+        <Card className="flex flex-col gap-3">
+          <span className="text-[11px] font-bold uppercase tracking-[0.14em] text-ok">
+            Points forts
+          </span>
+          {data.pointsForts.map((x, i) => (
+            <div key={i} className="flex items-start gap-2.5 text-ok">
+              <CheckIcon />
+              <span className="text-sm leading-snug text-cream">{x}</span>
+            </div>
+          ))}
         </Card>
-        <Card className="border-l-4 border-l-amber-500">
-          <h3 className="mb-2 flex items-center gap-2 font-heading font-semibold text-amber-700">
-            <span aria-hidden>↗</span> À travailler
-          </h3>
-          <ul className="list-disc space-y-1 pl-5 text-sm text-slate-700">
-            {data.pointsATravailler.map((x, i) => <li key={i}>{x}</li>)}
-          </ul>
+        <Card className="flex flex-col gap-3">
+          <span className="text-[11px] font-bold uppercase tracking-[0.14em] text-amber-400">
+            À travailler
+          </span>
+          {data.pointsATravailler.map((x, i) => (
+            <div key={i} className="flex items-start gap-2.5 text-amber-400">
+              <TargetIcon />
+              <span className="text-sm leading-snug text-cream">{x}</span>
+            </div>
+          ))}
         </Card>
       </div>
 
-      <Card>
-        <h3 className="mb-3 font-heading font-semibold text-slate-800">Reformulations suggérées</h3>
-        <ul className="flex flex-col gap-2 text-sm text-slate-700">
-          {data.reformulations.map((x, i) => (
-            <li key={i} className="rounded-lg border border-slate-100 bg-slate-50 p-3 leading-relaxed">{x}</li>
-          ))}
-        </ul>
+      <Card className="flex w-full flex-col gap-3.5">
+        <span className="text-[11px] font-bold uppercase tracking-[0.14em] text-faint">
+          Reformulations suggérées
+        </span>
+        {data.reformulations.map((x, i) => (
+          <p key={i} className="border-l-2 border-amber-400/50 pl-3 text-sm leading-relaxed text-cream">
+            {x}
+          </p>
+        ))}
       </Card>
     </div>
   );

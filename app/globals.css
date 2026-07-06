@@ -2,50 +2,69 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --bg: #f6f9f8;
-  --text: #0f172a;
-}
-
 html {
   scroll-behavior: smooth;
 }
 
+/* Studio nuit : fond bleu-nuit + halo ambre qui tombe du haut, comme un projecteur. */
 body {
-  /* Fond « confiance calme » : dégradé émeraude très léger, quasi blanc */
-  background-color: var(--bg);
-  background-image:
-    radial-gradient(60rem 60rem at 85% -10%, #d1fae54d, transparent 60%),
-    radial-gradient(50rem 50rem at -10% 10%, #ccfbf133, transparent 55%);
-  background-attachment: fixed;
-  color: var(--text);
+  background-color: #0c1517;
+  background-image: radial-gradient(ellipse 90% 55% at 50% -12%, rgba(255, 178, 36, 0.1), transparent 65%);
+  color: #f2efe4;
   font-family: var(--font-body), system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
 }
 
 ::selection {
-  background: #a7f3d0;
-  color: #064e3b;
+  background: rgba(255, 178, 36, 0.35);
+  color: #f2efe4;
 }
 
 /* Curseur de frappe du recruteur pendant le streaming */
-@keyframes blink {
+@keyframes blink-caret {
   0%, 100% { opacity: 1; }
   50% { opacity: 0; }
 }
 .caret::after {
   content: "▍";
   margin-left: 1px;
-  color: #059669;
-  animation: blink 1s step-end infinite;
+  color: #ffb224;
+  animation: blink-caret 1s step-end infinite;
 }
 
-/* Apparition douce des bulles de chat */
+/* Apparition douce */
 @keyframes rise {
-  from { opacity: 0; transform: translateY(6px); }
+  from { opacity: 0; transform: translateY(16px); }
   to { opacity: 1; transform: translateY(0); }
 }
 .animate-rise {
-  animation: rise 0.25s ease-out both;
+  animation: rise 0.6s cubic-bezier(0.2, 0.7, 0.3, 1) both;
+}
+
+/* Apparition en cascade : à poser sur les enfants d'un bloc qui se révèle */
+.stagger > * {
+  animation: rise 0.6s cubic-bezier(0.2, 0.7, 0.3, 1) both;
+}
+.stagger > *:nth-child(2) { animation-delay: 0.08s; }
+.stagger > *:nth-child(3) { animation-delay: 0.16s; }
+.stagger > *:nth-child(4) { animation-delay: 0.24s; }
+.stagger > *:nth-child(5) { animation-delay: 0.32s; }
+.stagger > *:nth-child(6) { animation-delay: 0.4s; }
+
+/* Jauge de score : le trait part de zéro et se remplit jusqu'à sa valeur finale (inline) */
+@keyframes score-fill {
+  from { stroke-dashoffset: 339.3; }
+}
+.animate-score-fill {
+  animation: score-fill 1.2s cubic-bezier(0.2, 0.7, 0.3, 1) both;
+}
+
+/* Accessibilité : on coupe tout mouvement si l'utilisateur le demande */
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, ::before, ::after {
+    animation: none !important;
+    transition: none !important;
+  }
 }
