@@ -151,8 +151,9 @@ export default function Home() {
   const activeStep = STEPS.findIndex((s) => s.key === phase);
 
   return (
-    <main className="mx-auto max-w-3xl px-4 py-8 sm:py-12">
-      {/* Stepper */}
+    <main className={`mx-auto px-4 py-6 sm:py-10 ${phase === "form" ? "max-w-6xl" : "max-w-3xl"}`}>
+      {/* Stepper — masqué sur l'accueil pour garder le formulaire visible sans scroller */}
+      {phase !== "form" && (
       <ol className="mb-8 flex items-center justify-center gap-2 text-xs font-medium sm:gap-3">
         {STEPS.map((s, i) => (
           <li key={s.key} className="flex items-center gap-2 sm:gap-3">
@@ -186,71 +187,110 @@ export default function Home() {
           </li>
         ))}
       </ol>
+      )}
 
       {phase === "form" && (
-        <div className="stagger">
-          <div className="mb-10 text-center">
-            <p className="mb-4 inline-flex items-center gap-1.5 rounded-full border border-brand-200 bg-brand-50/80 px-3 py-1 text-xs font-semibold text-brand-700">
+        <div className="stagger grid items-center gap-8 lg:min-h-[70vh] lg:grid-cols-[1fr_1.1fr] lg:gap-12">
+          {/* Pitch — compact sur mobile pour que le formulaire reste visible */}
+          <div className="text-center lg:text-left">
+            <p className="mb-3 inline-flex items-center gap-1.5 rounded-full border border-brand-200 bg-brand-50/80 px-3 py-1 text-xs font-semibold text-brand-700">
               <span className="relative flex h-2 w-2">
                 <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-accent-400 opacity-75" />
                 <span className="relative inline-flex h-2 w-2 rounded-full bg-accent-500" />
               </span>
               Gratuit · illimité · sans jugement
             </p>
-            <h1 className="font-heading text-4xl font-bold tracking-tight text-slate-900 sm:text-5xl">
+            <h1 className="font-heading text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl lg:text-5xl">
               Passe l&apos;entretien{" "}
               <span className="text-gradient">avant l&apos;entretien</span>.
             </h1>
-            <p className="mx-auto mt-4 max-w-xl text-base text-slate-600 sm:text-lg">
-              Un recruteur IA te fait passer une simulation sur mesure à partir de ton profil
-              (CV optionnel), puis te livre un débrief actionnable. Autant de fois que tu veux.
+            <p className="mx-auto mt-3 max-w-xl text-base text-slate-600 lg:mx-0 sm:text-lg">
+              Un recruteur IA te reçoit, te questionne à la voix et te livre un débrief
+              avec un score. Autant de fois que tu veux.
             </p>
+            <ul className="mt-6 hidden flex-col gap-3 text-sm text-slate-700 lg:flex">
+              {[
+                "Un recruteur qui parle et t'écoute, comme en vrai",
+                "Débrief actionnable + score de confiance à la fin",
+                "Pense mobile et petites connexions",
+              ].map((point) => (
+                <li key={point} className="flex items-center gap-2.5">
+                  <span className="grid h-5 w-5 shrink-0 place-items-center rounded-full bg-brand-100 text-brand-700">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="h-3 w-3" aria-hidden>
+                      <polyline points="20 6 9 17 4 12" />
+                    </svg>
+                  </span>
+                  {point}
+                </li>
+              ))}
+            </ul>
           </div>
 
-          <TemplateGallery onPick={pickTemplate} selectedId={templateId} />
+          {/* La « convocation » : le formulaire, visible sans scroller */}
+          <Card className="p-6">
+            <p className="mb-4 flex items-center gap-2 border-b border-slate-100 pb-3 text-xs font-semibold uppercase tracking-wide text-slate-500">
+              <span className="relative flex h-2 w-2">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
+                <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
+              </span>
+              Prêt en 30 secondes — sans compte
+            </p>
 
-          <Card>
-            <div className="grid gap-x-4 sm:grid-cols-2">
-              <div className="sm:col-span-2">
-                <Field label="Poste visé *" value={context.poste}
-                  placeholder="Ex : Développeur back-end"
-                  onChange={(v) => setContext({ ...context, poste: v })} />
+            <Field label="Poste visé *" value={context.poste}
+              placeholder="Ex : Développeur back-end, stagiaire marketing…"
+              onChange={(v) => setContext({ ...context, poste: v })} />
+
+            <p className="mb-1.5 text-sm font-medium text-slate-700">…ou pars d&apos;un scénario</p>
+            <TemplateGallery onPick={pickTemplate} selectedId={templateId} />
+
+            {/* Champs optionnels repliés : le bouton reste au-dessus de la ligne de flottaison */}
+            <details className="group mt-3 mb-4">
+              <summary className="flex cursor-pointer list-none items-center gap-1.5 text-sm font-medium text-brand-700 transition-colors hover:text-brand-800 [&::-webkit-details-marker]:hidden">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4 transition-transform duration-200 group-open:rotate-90" aria-hidden>
+                  <polyline points="9 18 15 12 9 6" />
+                </svg>
+                Personnaliser (CV, offre, niveau…) — recommandé
+              </summary>
+              <div className="mt-4 grid gap-x-4 sm:grid-cols-2">
+                <Field label="Entreprise / type" value={context.entreprise ?? ""}
+                  placeholder="Ex : Startup fintech"
+                  onChange={(v) => setContext({ ...context, entreprise: v })} />
+                <Field label="Domaine" value={context.domaine ?? ""}
+                  placeholder="Ex : Paiement en ligne"
+                  onChange={(v) => setContext({ ...context, domaine: v })} />
+                <Field label="Niveau" value={context.niveau ?? ""}
+                  placeholder="Junior, confirmé, senior…"
+                  onChange={(v) => setContext({ ...context, niveau: v })} />
+                <Field label="Langue" value={context.langue ?? ""}
+                  placeholder="Français"
+                  onChange={(v) => setContext({ ...context, langue: v })} />
+                <div className="sm:col-span-2">
+                  <Field label="CV (collé)" value={context.cv} textarea rows={4}
+                    placeholder="Colle ici le texte de ton CV…"
+                    hint="Copié-collé brut, la mise en forme n'a pas d'importance."
+                    onChange={(v) => setContext({ ...context, cv: v })} />
+                </div>
+                <div className="sm:col-span-2">
+                  <Field label="Offre d'emploi (collée)" value={context.offre ?? ""} textarea rows={4}
+                    placeholder="Optionnel — colle l'offre pour un entretien plus ciblé."
+                    onChange={(v) => setContext({ ...context, offre: v })} />
+                </div>
               </div>
-              <Field label="Entreprise / type" value={context.entreprise ?? ""}
-                placeholder="Ex : Startup fintech"
-                onChange={(v) => setContext({ ...context, entreprise: v })} />
-              <Field label="Domaine" value={context.domaine ?? ""}
-                placeholder="Ex : Paiement en ligne"
-                onChange={(v) => setContext({ ...context, domaine: v })} />
-              <Field label="Niveau" value={context.niveau ?? ""}
-                placeholder="Junior, confirmé, senior…"
-                onChange={(v) => setContext({ ...context, niveau: v })} />
-              <Field label="Langue" value={context.langue ?? ""}
-                placeholder="Français"
-                onChange={(v) => setContext({ ...context, langue: v })} />
-              <div className="sm:col-span-2">
-                <Field label="CV (collé)" value={context.cv} textarea rows={5}
-                  placeholder="Colle ici le texte de ton CV…"
-                  hint="Copié-collé brut, la mise en forme n'a pas d'importance."
-                  onChange={(v) => setContext({ ...context, cv: v })} />
-              </div>
-              <div className="sm:col-span-2">
-                <Field label="Offre d'emploi (collée)" value={context.offre ?? ""} textarea rows={5}
-                  placeholder="Optionnel — colle l'offre pour un entretien plus ciblé."
-                  onChange={(v) => setContext({ ...context, offre: v })} />
-              </div>
-            </div>
-            {formErrors.length > 0 && (
+            </details>
+
+            {/* L'erreur n'apparaît que si l'utilisateur a tapé quelque chose d'invalide,
+                pas à l'arrivée sur la page (le bouton grisé suffit comme garde-fou). */}
+            {formErrors.length > 0 && context.poste !== "" && (
               <p className="mb-3 text-sm text-red-600">{formErrors.join(" ")}</p>
             )}
-            <label className="mb-3 flex items-center gap-2 text-sm text-slate-700">
+            <label className="mb-4 flex items-center gap-2 text-sm text-slate-700">
               <input
                 type="checkbox"
                 checked={jury}
                 onChange={(e) => setJury(e.target.checked)}
-                className="h-4 w-4 rounded border-slate-300 text-brand-600 focus:ring-brand-500"
+                className="h-4 w-4 cursor-pointer rounded border-slate-300 text-brand-600 focus:ring-brand-500"
               />
-              Mode jury — 3 recruteurs (RH, Manager opérationnel, Expert métier)
+              Mode jury — 3 recruteurs (RH, Manager, Expert métier)
             </label>
             <Button size="lg" className="w-full" disabled={formErrors.length > 0} onClick={startInterview}>
               Démarrer l&apos;entretien →
