@@ -35,12 +35,12 @@ export function UserTile({ cameraOn }: { cameraOn: boolean }) {
   }, [cameraOn]);
 
   return (
-    <div className="relative flex aspect-video w-full items-center justify-center overflow-hidden rounded-2xl bg-slate-200">
+    <div className="relative flex aspect-video w-full items-center justify-center overflow-hidden rounded-2xl border border-white/60 bg-slate-100/80 shadow-soft backdrop-blur">
       {cameraOn && !error ? (
         <video ref={videoRef} autoPlay muted playsInline className="h-full w-full object-cover" />
       ) : (
         <div className="flex flex-col items-center gap-2">
-          <span className="grid h-14 w-14 place-items-center rounded-full bg-slate-400 text-lg font-bold text-white">
+          <span className="grid h-14 w-14 place-items-center rounded-full bg-gradient-to-br from-slate-400 to-slate-500 text-lg font-bold text-white shadow-soft">
             Toi
           </span>
           {error && <span className="text-xs text-slate-500">Caméra indisponible</span>}

@@ -1,6 +1,7 @@
 "use client";
 
 import { Button } from "@/app/components/ui/Button";
+import { PlayIcon } from "@/app/components/ui/icons";
 import { EDGE_SOLO_VOICES, EDGE_JURY_PACKS } from "@/lib/edgeVoices";
 
 type Props = {
@@ -28,9 +29,12 @@ export function MeetingLobby({
 }: Props) {
   const showVoiceChoice = engine === "edge";
   return (
-    <div className="flex flex-col items-center gap-6 rounded-2xl border border-slate-200 bg-white/80 p-10 text-center shadow-soft animate-rise">
-      <span className="grid h-20 w-20 place-items-center rounded-full bg-brand-600 text-2xl font-bold text-white shadow-brand">
-        RH
+    <div className="flex flex-col items-center gap-6 rounded-2xl border border-white/70 bg-white/80 p-10 text-center shadow-card ring-1 ring-brand-600/5 backdrop-blur-xl animate-scale-in">
+      <span className="relative grid place-items-center">
+        <span className="absolute inset-0 animate-pulse-ring rounded-full bg-brand-300/50" aria-hidden />
+        <span className="grid h-20 w-20 place-items-center rounded-full bg-gradient-to-br from-brand-600 to-accent-500 text-2xl font-bold text-white shadow-brand">
+          RH
+        </span>
       </span>
       <div>
         <h2 className="font-heading text-xl font-bold text-slate-900">Prêt pour ton entretien ?</h2>
@@ -49,7 +53,7 @@ export function MeetingLobby({
               <select
                 value={packId}
                 onChange={(e) => onChangePack(e.target.value)}
-                className="flex-1 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900"
+                className="flex-1 cursor-pointer rounded-lg border border-slate-200 bg-white/90 px-3 py-2 text-sm text-slate-900 outline-none transition-colors duration-200 hover:border-slate-300 focus:border-brand-500 focus:ring-4 focus:ring-brand-100"
               >
                 {EDGE_JURY_PACKS.map((p) => (
                   <option key={p.id} value={p.id}>
@@ -61,7 +65,7 @@ export function MeetingLobby({
               <select
                 value={soloId}
                 onChange={(e) => onChangeSolo(e.target.value)}
-                className="flex-1 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900"
+                className="flex-1 cursor-pointer rounded-lg border border-slate-200 bg-white/90 px-3 py-2 text-sm text-slate-900 outline-none transition-colors duration-200 hover:border-slate-300 focus:border-brand-500 focus:ring-4 focus:ring-brand-100"
               >
                 {EDGE_SOLO_VOICES.map((v) => (
                   <option key={v.id} value={v.id}>
@@ -71,7 +75,8 @@ export function MeetingLobby({
               </select>
             )}
             <Button variant="secondary" onClick={onPreview} disabled={!ready}>
-              ▶ Écouter
+              <PlayIcon />
+              Écouter
             </Button>
           </div>
         </div>

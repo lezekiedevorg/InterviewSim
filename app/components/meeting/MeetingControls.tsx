@@ -1,6 +1,16 @@
 "use client";
 
 import { Button } from "@/app/components/ui/Button";
+import {
+  VolumeIcon,
+  VolumeOffIcon,
+  MessageIcon,
+  MicIcon,
+  RadioIcon,
+  VideoIcon,
+  PhoneOffIcon,
+  SendIcon,
+} from "@/app/components/ui/icons";
 
 type Props = {
   muted: boolean;
@@ -23,7 +33,10 @@ type Props = {
   onToggleHandsFree: () => void;
 };
 
-const pill = "flex items-center gap-1.5 rounded-full px-3 py-2 text-sm font-medium transition-colors";
+const pill =
+  "flex cursor-pointer items-center gap-1.5 rounded-full px-3 py-2 text-sm font-medium transition-all duration-200 hover:shadow-soft";
+const pillOn = "bg-brand-100 text-brand-800 ring-1 ring-brand-200";
+const pillOff = "bg-white/80 text-slate-600 ring-1 ring-slate-200 backdrop-blur hover:text-slate-900";
 
 export function MeetingControls({
   muted,
@@ -59,51 +72,63 @@ export function MeetingControls({
           type="button"
           onClick={onToggleMute}
           disabled={!speechSupported}
-          className={`${pill} ${muted ? "bg-slate-200 text-slate-600" : "bg-brand-50 text-brand-700"} disabled:opacity-40`}
+          className={`${pill} ${muted ? "bg-slate-200 text-slate-600" : pillOn} disabled:opacity-40`}
         >
-          {muted ? "🔇 Son coupé" : "🔊 Son"}
+          {muted ? <VolumeOffIcon /> : <VolumeIcon />}
+          {muted ? "Son coupé" : "Son"}
         </button>
         <button
           type="button"
           onClick={onToggleTranscript}
-          className={`${pill} ${showTranscript ? "bg-brand-50 text-brand-700" : "bg-slate-100 text-slate-600"}`}
+          className={`${pill} ${showTranscript ? pillOn : pillOff}`}
         >
-          💬 Transcription
+          <MessageIcon />
+          Transcription
         </button>
         {recognitionSupported && (
           <button
             type="button"
             onClick={onToggleMic}
             disabled={micDisabled}
-            className={`${pill} ${listening ? "animate-pulse bg-red-100 text-red-700" : "bg-slate-100 text-slate-600"} disabled:opacity-40`}
+            className={`${pill} relative ${
+              listening ? "bg-red-100 text-red-700 ring-1 ring-red-200" : pillOff
+            } disabled:opacity-40`}
           >
-            {listening ? "🎤 J'écoute…" : "🎤 Parler"}
+            {listening && (
+              <span className="absolute inset-0 animate-pulse-ring rounded-full bg-red-300/50" aria-hidden />
+            )}
+            <MicIcon />
+            {listening ? "J'écoute…" : "Parler"}
           </button>
         )}
         {recognitionSupported && (
           <button
             type="button"
             onClick={onToggleHandsFree}
-            className={`${pill} ${handsFree ? "bg-brand-50 text-brand-700" : "bg-slate-100 text-slate-600"}`}
+            className={`${pill} ${handsFree ? pillOn : pillOff}`}
           >
-            {handsFree ? "🎙️ Mains-libres activé" : "🎙️ Mains-libres"}
+            <RadioIcon />
+            {handsFree ? "Mains-libres activé" : "Mains-libres"}
           </button>
         )}
+        <button type="button" onClick={onToggleCamera} className={`${pill} ${cameraOn ? pillOn : pillOff}`}>
+          <VideoIcon />
+          {cameraOn ? "Caméra active" : "Activer la caméra"}
+        </button>
         <button
           type="button"
-          onClick={onToggleCamera}
-          className={`${pill} ${cameraOn ? "bg-brand-50 text-brand-700" : "bg-slate-100 text-slate-600"}`}
+          onClick={onFinish}
+          disabled={streaming}
+          className={`${pill} bg-red-50 text-red-600 ring-1 ring-red-100 hover:bg-red-100 disabled:opacity-40`}
         >
-          {cameraOn ? "📷 Caméra active" : "📷 Activer la caméra"}
-        </button>
-        <button type="button" onClick={onFinish} disabled={streaming} className={`${pill} bg-red-50 text-red-600 disabled:opacity-40`}>
-          ☎️ Terminer
+          <PhoneOffIcon />
+          Terminer
         </button>
       </div>
       <div className="flex items-end gap-2">
         <textarea
           aria-label="Ta réponse"
-          className="min-h-[48px] w-full resize-none rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm outline-none transition-shadow focus:border-brand-600 focus:ring-4 focus:ring-brand-100 disabled:bg-slate-50"
+          className="min-h-[48px] w-full resize-none rounded-xl border border-slate-200 bg-white/90 px-3.5 py-2.5 text-base sm:text-sm outline-none transition-all duration-200 backdrop-blur hover:border-slate-300 focus:border-brand-500 focus:ring-4 focus:ring-brand-100 disabled:bg-slate-50"
           value={currentAnswer}
           disabled={streaming}
           onChange={(e) => onAnswerChange(e.target.value)}
@@ -112,6 +137,7 @@ export function MeetingControls({
           placeholder="Ta réponse…  (Entrée pour envoyer)"
         />
         <Button onClick={onSend} disabled={streaming || currentAnswer.trim() === ""}>
+          <SendIcon />
           Envoyer
         </Button>
       </div>
