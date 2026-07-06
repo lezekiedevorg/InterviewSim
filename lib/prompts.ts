@@ -1,4 +1,5 @@
 import type { InterviewContext, ChatMessage, SessionSummary } from "./types";
+import { CRITERES } from "./score";
 
 function contextLines(ctx: InterviewContext): string {
   const parts = [`Poste visé : ${ctx.poste}`];
@@ -39,18 +40,56 @@ export function buildDebriefPrompt(
     .map((m) => `${m.role === "recruiter" ? "Recruteur" : "Candidat"}: ${m.text}`)
     .join("\n");
 
-  return `Tu es un coach en recrutement. Analyse l'entretien ci-dessous (pour le poste de ${ctx.poste}) et produis un débrief exploitable pour le candidat.
+  // Barème par tranche pour chaque critère de la grille (ids alignés sur lib/score.ts).
+  const baremes: Record<string, string> = {
+    structure:
+      "80+ = réponses organisées (situation → action → résultat) ; 50 = organisation partielle, des digressions ; 20 = décousu, coq-à-l'âne.",
+    concret:
+      "80+ = exemples réels précis avec chiffres ou résultats mesurables ; 50 = exemples vagues sans mesure ; 20 = généralités, aucune expérience citée.",
+    adequation:
+      "80+ = réponses collées au poste et à l'offre, vocabulaire du métier juste ; 50 = lien partiel avec le poste ; 20 = hors sujet, réponses passe-partout.",
+    communication:
+      "80+ = clair, concis, adapté à l'oral ; 50 = compréhensible mais confus ou trop long ; 20 = laconique, incompréhensible ou tunnel interminable.",
+    pression:
+      "80+ = garde son calme, répond avec précision aux relances et questions pièges ; 50 = se défend mais s'embrouille ; 20 = élude, se contredit ou s'effondre.",
+  };
+  const grille = CRITERES.map(
+    (c) => `- "${c.id}" (${c.label}) : ${baremes[c.id]}`
+  ).join("\n");
+
+  return `Tu es un évaluateur de recrutement froid, factuel et exigeant. Tu notes l'entretien ci-dessous (poste : ${ctx.poste}) comme un VRAI processus de recrutement compétitif, pas comme un professeur bienveillant. La complaisance rend l'évaluation inutile pour le candidat.
+
+ANCRAGE DU BARÈME (à respecter strictement) :
+- 50 = candidat moyen qui ne serait PAS retenu.
+- 70+ = candidat convaincant, embauche probable — exige des preuves solides.
+- 85+ = exceptionnel, quasi jamais atteint en entraînement.
+- Une réponse vague, générique ou sans exemple se note SOUS 50.
+
+CRITÈRES — note chacun de 0 à 100 :
+${grille}
+
+RÈGLES DE PREUVE :
+- Pour CHAQUE critère, cite dans "preuve" une phrase EXACTE du candidat (la plus représentative de ta note). Ne cite JAMAIS le recruteur.
+- Aucune citation pertinente → mets "preuve": "" (la note sera plafonnée).
+- N'attribue JAMAIS plus de 55 à un critère sans citation précise qui le justifie.
+- Ne calcule AUCUN score global : il est calculé ailleurs à partir de tes 5 notes.
 
 Entretien :
 ${conversation}
 
 Réponds UNIQUEMENT par un objet JSON valide, sans texte autour, avec exactement ces champs :
 {
+  "criteres": [
+    { "id": "structure", "note": entier 0-100, "preuve": "citation exacte du candidat", "commentaire": "1 phrase de justification" },
+    { "id": "concret", "note": …, "preuve": …, "commentaire": … },
+    { "id": "adequation", "note": …, "preuve": …, "commentaire": … },
+    { "id": "communication", "note": …, "preuve": …, "commentaire": … },
+    { "id": "pression", "note": …, "preuve": …, "commentaire": … }
+  ],
   "pointsForts": [liste de chaînes],
   "pointsATravailler": [liste de chaînes],
   "reformulations": [liste de chaînes : des réponses du candidat reformulées en mieux],
-  "scoreConfiance": un entier de 0 à 100,
-  "syntheseGenerale": une chaîne (2-3 phrases)
+  "syntheseGenerale": une chaîne (2-3 phrases, ton direct et honnête)
 }`;
 }
 

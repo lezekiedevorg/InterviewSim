@@ -60,11 +60,21 @@ describe("buildDebriefPrompt", () => {
     expect(p).toContain("Je suis développeur.");
   });
 
-  it("demande un JSON avec les champs attendus", () => {
+  it("demande le JSON v2 avec critères et preuves, sans score global", () => {
     const p = buildDebriefPrompt(ctx, transcript);
+    expect(p).toContain('"criteres"');
+    expect(p).toContain('"preuve"');
     expect(p).toContain("pointsForts");
-    expect(p).toContain("scoreConfiance");
     expect(p).toContain("syntheseGenerale");
+    expect(p).not.toContain("scoreConfiance");
+  });
+
+  it("contient l'ancrage marché réel et les 5 critères de la grille", () => {
+    const p = buildDebriefPrompt(ctx, transcript);
+    expect(p).toContain("ne serait PAS retenu");
+    for (const id of ["structure", "concret", "adequation", "communication", "pression"]) {
+      expect(p).toContain(`"${id}"`);
+    }
   });
 });
 
