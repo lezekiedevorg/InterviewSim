@@ -24,7 +24,14 @@ export function ShareScoreButton({ poste, score }: { poste: string; score: numbe
   return (
     <div className="flex flex-col items-center gap-2">
       <Button variant="secondary" onClick={onClick} disabled={busy}>
-        {busy ? "…" : "📲 Partager mon score"}
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4" aria-hidden>
+          <circle cx="18" cy="5" r="3" />
+          <circle cx="6" cy="12" r="3" />
+          <circle cx="18" cy="19" r="3" />
+          <line x1="8.59" x2="15.42" y1="13.51" y2="17.49" />
+          <line x1="15.41" x2="8.59" y1="6.51" y2="10.49" />
+        </svg>
+        {busy ? "Préparation…" : "Partager mon score"}
       </Button>
       {error && <p className="text-sm text-red-600">{error}</p>}
     </div>
