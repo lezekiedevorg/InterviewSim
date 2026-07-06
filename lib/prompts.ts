@@ -1,4 +1,4 @@
-import type { InterviewContext, ChatMessage, SessionSummary } from "./types";
+import type { InterviewContext, ChatMessage, SessionSummary, CritereId } from "./types";
 import { CRITERES } from "./score";
 
 function contextLines(ctx: InterviewContext): string {
@@ -41,7 +41,7 @@ export function buildDebriefPrompt(
     .join("\n");
 
   // Barème par tranche pour chaque critère de la grille (ids alignés sur lib/score.ts).
-  const baremes: Record<string, string> = {
+  const baremes: Record<CritereId, string> = {
     structure:
       "80+ = réponses organisées (situation → action → résultat) ; 50 = organisation partielle, des digressions ; 20 = décousu, coq-à-l'âne.",
     concret:

@@ -38,7 +38,9 @@ export async function POST(req: Request): Promise<Response> {
 
     // Un seul re-essai si le JSON est malformé
     if (!debrief) {
-      raw = await askModelText(prompt, seed, { temperature: 0 });
+      // Re-essai à température légèrement relevée : à 0 le modèle est déterministe,
+      // il reproduirait le même JSON cassé.
+      raw = await askModelText(prompt, seed, { temperature: 0.2 });
       debrief = parseDebrief(raw);
     }
 

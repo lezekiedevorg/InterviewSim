@@ -53,7 +53,7 @@ Le prompt de débrief exige :
 3. **Plafonds côté code** (`lib/score.ts`, testés) :
    - `preuve` absente ou vide pour un critère → note plafonnée à 40 ;
    - note hors [0, 100] → bornée ;
-   - critère manquant dans la réponse IA → note 0 pour ce critère (et le parse le signale).
+   - critère manquant dans la réponse IA → le débrief entier est rejeté par le parse (null → re-essai, puis repli texte brut) ; la branche « critère absent = 0 » de computeScore n'est qu'une défense en profondeur ;
 4. **Température 0** sur l'appel débrief (correcteur froid et régulier) — les autres appels (entretien) ne changent pas.
 5. **Le global vient du code** : l'IA ne peut plus « offrir » un 75 incohérent avec son propre détail.
 
