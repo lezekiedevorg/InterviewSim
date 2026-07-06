@@ -12,8 +12,7 @@ import {
 import { Card } from "@/app/components/ui/Card";
 import { Button } from "@/app/components/ui/Button";
 import { ScoreBadge } from "@/app/components/ui/ScoreBadge";
-import { BAND_HEX } from "@/app/components/ui/ScoreRing";
-import { scoreColor } from "@/lib/scoreColor";
+import { scoreColor, BAND_HEX } from "@/lib/scoreColor";
 import { Debrief } from "@/app/components/Debrief";
 import { ShareScoreButton } from "@/app/components/ShareScoreButton";
 import { CrossAnalysis } from "@/app/components/CrossAnalysis";

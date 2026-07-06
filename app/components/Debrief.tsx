@@ -1,13 +1,7 @@
 import type { Debrief as DebriefType } from "@/lib/types";
 import { Card } from "@/app/components/ui/Card";
 import { ScoreRing } from "@/app/components/ui/ScoreRing";
-
-// Verdict en un mot, calé sur les bandes de score.
-function verdict(score: number): string {
-  if (score >= 70) return "Solide.";
-  if (score >= 40) return "En progrès.";
-  return "On remet ça.";
-}
+import { verdict } from "@/lib/scoreColor";
 
 function CheckIcon() {
   return (

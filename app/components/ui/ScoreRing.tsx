@@ -1,11 +1,4 @@
-import { scoreColor } from "@/lib/scoreColor";
-
-// Bandes de score « Studio nuit » : rouge < 40, ambre < 70, vert ≥ 70.
-export const BAND_HEX: Record<string, string> = {
-  rouge: "#ff5a4e",
-  ambre: "#ffb224",
-  vert: "#34d27b",
-};
+import { scoreColor, BAND_HEX } from "@/lib/scoreColor";
 
 /** Grande jauge circulaire animée — le trait se remplit jusqu'au score au chargement (CSS pur). */
 export function ScoreRing({ score }: { score: number }) {
