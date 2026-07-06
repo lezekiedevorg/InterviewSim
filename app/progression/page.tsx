@@ -42,16 +42,29 @@ export default function ProgressionPage() {
   }, [router]);
 
   if (sessions === null) {
-    return <main className="mx-auto max-w-2xl px-4 py-10 text-slate-500">Chargement…</main>;
+    // squelettes de chargement : pas de saut de contenu, l'espace est réservé
+    return (
+      <main className="mx-auto max-w-2xl px-4 py-10">
+        <div className="mb-4 h-8 w-48 animate-pulse rounded-lg bg-slate-200/70" />
+        <div className="mb-6 h-28 animate-pulse rounded-2xl bg-slate-200/70" />
+        <div className="mb-6 h-24 animate-pulse rounded-2xl bg-slate-200/70 [animation-delay:.15s]" />
+        <div className="h-16 animate-pulse rounded-2xl bg-slate-200/70 [animation-delay:.3s]" />
+      </main>
+    );
   }
 
   if (sessions.length === 0) {
     return (
-      <main className="mx-auto max-w-2xl px-4 py-10">
+      <main className="mx-auto max-w-2xl px-4 py-10 animate-rise">
         <h1 className="mb-2 font-heading text-2xl font-bold">Ma progression</h1>
-        <p className="text-slate-600">
-          Aucun entretien enregistré pour l&apos;instant. Fais un entretien, puis reviens ici !
-        </p>
+        <Card className="text-center">
+          <p className="text-slate-600">
+            Aucun entretien enregistré pour l&apos;instant. Fais un entretien, puis reviens ici !
+          </p>
+          <Button className="mt-4" onClick={() => router.push("/")}>
+            Démarrer un entretien →
+          </Button>
+        </Card>
       </main>
     );
   }
@@ -90,17 +103,25 @@ export default function ProgressionPage() {
   }
 
   return (
-    <main className="mx-auto max-w-2xl px-4 py-10">
-      <h1 className="mb-4 font-heading text-2xl font-bold">Ma progression</h1>
+    <main className="stagger mx-auto max-w-2xl px-4 py-10">
+      <h1 className="mb-4 font-heading text-2xl font-bold">
+        Ma <span className="text-gradient">progression</span>
+      </h1>
 
       <Card className="mb-6">
         <h2 className="mb-3 font-heading font-semibold">Évolution du score</h2>
         <svg viewBox="0 0 300 60" className="h-16 w-full">
+          <defs>
+            <linearGradient id="spark" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0%" stopColor="#059669" />
+              <stop offset="100%" stopColor="#2dd4bf" />
+            </linearGradient>
+          </defs>
           <polyline
             points={points}
             fill="none"
-            stroke="#059669"
-            strokeWidth="2"
+            stroke="url(#spark)"
+            strokeWidth="2.5"
             strokeLinecap="round"
             strokeLinejoin="round"
           />
@@ -116,7 +137,11 @@ export default function ProgressionPage() {
         ) : (
           <>
             <Button onClick={runAnalysis} disabled={analyzing}>
-              {analyzing ? "Analyse en cours…" : "🔍 Analyser mes points faibles récurrents"}
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4" aria-hidden>
+                <circle cx="11" cy="11" r="8" />
+                <path d="m21 21-4.3-4.3" />
+              </svg>
+              {analyzing ? "Analyse en cours…" : "Analyser mes points faibles récurrents"}
             </Button>
             {analyzeError && (
               <p className="mt-3 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600">{analyzeError}</p>
@@ -132,10 +157,11 @@ export default function ProgressionPage() {
 
       <div className="flex flex-col gap-3">
         {rows.map((r) => (
-          <Card key={r.id}>
+          <Card key={r.id} className="transition-shadow duration-200 hover:shadow-glow">
             <button
-              className="flex w-full items-center justify-between text-left"
+              className="flex w-full cursor-pointer items-center justify-between gap-3 text-left"
               onClick={() => setOpenId(openId === r.id ? null : r.id)}
+              aria-expanded={openId === r.id}
             >
               <div>
                 <p className="font-medium text-slate-900">{r.poste}</p>
@@ -152,10 +178,22 @@ export default function ProgressionPage() {
                   </span>
                 )}
                 <ScoreBadge score={r.score_confiance} />
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className={`h-4 w-4 text-slate-400 transition-transform duration-200 ${openId === r.id ? "rotate-180" : ""}`}
+                  aria-hidden
+                >
+                  <polyline points="6 9 12 15 18 9" />
+                </svg>
               </div>
             </button>
             {openId === r.id && (
-              <div className="mt-4 border-t border-slate-100 pt-4">
+              <div className="mt-4 border-t border-slate-100 pt-4 animate-rise">
                 <Debrief data={r.debrief} />
                 <div className="mt-4">
                   <ShareScoreButton poste={r.poste} score={r.debrief.scoreConfiance} />

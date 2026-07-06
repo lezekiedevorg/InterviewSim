@@ -24,7 +24,7 @@ export default function ResetPage() {
 
   return (
     <main className="mx-auto max-w-md px-4 py-10">
-      <Card>
+      <Card className="animate-scale-in">
         <h1 className="mb-4 font-heading text-xl font-bold">Nouveau mot de passe</h1>
         <Field label="Nouveau mot de passe" type="password" value={password} onChange={setPassword} />
         {msg && <p className="mb-2 text-sm text-red-600">{msg}</p>}
