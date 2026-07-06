@@ -1,53 +1,59 @@
+// Onde vocale compacte du recruteur qui parle.
+function SpeakingBars() {
+  const heights = [14, 9, 15, 7, 12];
+  return (
+    <span className="flex h-4 items-center gap-[2.5px]" aria-hidden>
+      {heights.map((h, i) => (
+        <span
+          key={i}
+          className="w-[3px] origin-center animate-wave rounded-sm bg-amber-400"
+          style={{ height: h, animationDelay: `${i * 0.12}s` }}
+        />
+      ))}
+    </span>
+  );
+}
+
 export function RecruiterTile({
   speaking,
   name = "Recruteur",
   initials = "RH",
+  compact = false,
 }: {
   speaking: boolean;
   name?: string;
   initials?: string;
+  compact?: boolean;
 }) {
   return (
     <div
-      className={`relative flex aspect-video w-full items-center justify-center overflow-hidden rounded-2xl bg-gradient-to-br from-slate-800 via-slate-900 to-brand-900 text-white transition-shadow duration-300 ${
-        speaking ? "shadow-glow ring-2 ring-brand-400/60" : "shadow-soft"
-      }`}
+      className={`relative flex w-full flex-col items-center justify-center gap-3 overflow-hidden rounded-[22px] border bg-[linear-gradient(160deg,#142326,#0d181b)] transition-colors duration-300 ${
+        compact ? "min-h-[190px] p-4" : "aspect-video min-h-[280px]"
+      } ${speaking ? "border-amber-400/80" : "border-cream/15"}`}
     >
-      {/* halo décoratif dans la tuile */}
-      <span
-        className="pointer-events-none absolute -right-10 -top-10 h-40 w-40 rounded-full bg-brand-500/15 blur-2xl"
-        aria-hidden
-      />
-      <div className="flex flex-col items-center gap-3">
-        <span className="relative grid place-items-center">
-          {/* ondes concentriques quand la voix est active */}
-          {speaking && (
-            <>
-              <span className="absolute inset-0 animate-pulse-ring rounded-full bg-brand-400/40" aria-hidden />
-              <span
-                className="absolute inset-0 animate-pulse-ring rounded-full bg-accent-400/30 [animation-delay:.5s]"
-                aria-hidden
-              />
-            </>
-          )}
-          <span
-            className={`grid h-20 w-20 place-items-center rounded-full bg-gradient-to-br from-brand-500 to-brand-700 text-2xl font-bold transition-transform duration-300 ${
-              speaking ? "scale-110" : "scale-100"
-            }`}
-          >
-            {initials}
+      <span className={`relative grid place-items-center ${compact ? "h-16 w-16" : "h-24 w-24"}`}>
+        {speaking && (
+          <>
+            <span className="absolute inset-0 animate-ring rounded-full border-2 border-amber-400/55" aria-hidden />
+            <span className="absolute inset-0 animate-ring rounded-full border-2 border-amber-400/40 [animation-delay:.6s]" aria-hidden />
+          </>
+        )}
+        <span
+          className={`grid place-items-center rounded-full border-[1.5px] border-amber-400/55 bg-amber-400/15 font-heading font-extrabold text-amber-400 ${
+            compact ? "h-16 w-16 text-xl" : "h-24 w-24 text-3xl"
+          }`}
+        >
+          {initials}
+        </span>
+      </span>
+      <div className="flex flex-col items-center gap-2">
+        <span className={`font-semibold text-cream ${compact ? "text-sm" : "text-base"}`}>{name}</span>
+        {speaking && (
+          <span className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.08em] text-amber-400">
+            <SpeakingBars />
+            {!compact && "En train de parler…"}
           </span>
-        </span>
-        <span className="flex items-center gap-1.5 text-sm font-medium text-slate-200">
-          {name}
-          {speaking && (
-            <span className="flex items-end gap-0.5 text-brand-300" aria-label="parle">
-              <span className="h-2 w-0.5 animate-pulse rounded-full bg-current" />
-              <span className="h-3 w-0.5 animate-pulse rounded-full bg-current [animation-delay:.15s]" />
-              <span className="h-1.5 w-0.5 animate-pulse rounded-full bg-current [animation-delay:.3s]" />
-            </span>
-          )}
-        </span>
+        )}
       </div>
     </div>
   );

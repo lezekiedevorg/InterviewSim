@@ -1,6 +1,5 @@
 "use client";
 
-import { Button } from "@/app/components/ui/Button";
 import {
   VolumeIcon,
   VolumeOffIcon,
@@ -34,9 +33,9 @@ type Props = {
 };
 
 const pill =
-  "flex cursor-pointer items-center gap-1.5 rounded-full px-3 py-2 text-sm font-medium transition-all duration-200 hover:shadow-soft";
-const pillOn = "bg-brand-100 text-brand-800 ring-1 ring-brand-200";
-const pillOff = "bg-white/80 text-slate-600 ring-1 ring-slate-200 backdrop-blur hover:text-slate-900";
+  "flex min-h-[44px] cursor-pointer items-center gap-1.5 rounded-full border px-4 py-2 text-[13px] font-semibold transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-40";
+const pillOn = "border-amber-400 bg-amber-400 text-amber-ink";
+const pillOff = "border-cream/[0.18] bg-night-700 text-muted hover:border-amber-400/60 hover:text-cream";
 
 export function MeetingControls({
   muted,
@@ -72,7 +71,7 @@ export function MeetingControls({
           type="button"
           onClick={onToggleMute}
           disabled={!speechSupported}
-          className={`${pill} ${muted ? "bg-slate-200 text-slate-600" : pillOn} disabled:opacity-40`}
+          className={`${pill} ${muted ? "border-cream/[0.18] bg-night-700 text-danger-400" : pillOff}`}
         >
           {muted ? <VolumeOffIcon /> : <VolumeIcon />}
           {muted ? "Son coupé" : "Son"}
@@ -90,13 +89,12 @@ export function MeetingControls({
             type="button"
             onClick={onToggleMic}
             disabled={micDisabled}
-            className={`${pill} relative ${
-              listening ? "bg-red-100 text-red-700 ring-1 ring-red-200" : pillOff
-            } disabled:opacity-40`}
+            className={`flex min-h-[52px] cursor-pointer items-center gap-2 rounded-full px-6 py-3 font-heading text-[15px] font-extrabold transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-40 ${
+              listening
+                ? "bg-danger-600 text-white shadow-[0_6px_20px_rgba(199,62,51,0.4)]"
+                : "bg-amber-400 text-amber-ink shadow-cta hover:-translate-y-0.5 active:translate-y-0"
+            }`}
           >
-            {listening && (
-              <span className="absolute inset-0 animate-pulse-ring rounded-full bg-red-300/50" aria-hidden />
-            )}
             <MicIcon />
             {listening ? "J'écoute…" : "Parler"}
           </button>
@@ -108,38 +106,43 @@ export function MeetingControls({
             className={`${pill} ${handsFree ? pillOn : pillOff}`}
           >
             <RadioIcon />
-            {handsFree ? "Mains-libres activé" : "Mains-libres"}
+            Mains-libres
           </button>
         )}
         <button type="button" onClick={onToggleCamera} className={`${pill} ${cameraOn ? pillOn : pillOff}`}>
           <VideoIcon />
-          {cameraOn ? "Caméra active" : "Activer la caméra"}
+          Caméra
         </button>
         <button
           type="button"
           onClick={onFinish}
           disabled={streaming}
-          className={`${pill} bg-red-50 text-red-600 ring-1 ring-red-100 hover:bg-red-100 disabled:opacity-40`}
+          className={`${pill} border-danger-600 bg-danger-600 font-bold text-white hover:bg-danger-400 hover:border-danger-400`}
         >
           <PhoneOffIcon />
           Terminer
         </button>
       </div>
-      <div className="flex items-end gap-2">
+      <div className="flex items-end gap-2.5">
         <textarea
           aria-label="Ta réponse"
-          className="min-h-[48px] w-full resize-none rounded-xl border border-slate-200 bg-white/90 px-3.5 py-2.5 text-base sm:text-sm outline-none transition-all duration-200 backdrop-blur hover:border-slate-300 focus:border-brand-500 focus:ring-4 focus:ring-brand-100 disabled:bg-slate-50"
+          className="min-h-[50px] w-full resize-none rounded-3xl border border-cream/[0.18] bg-night-800 px-5 py-3.5 text-base sm:text-[15px] font-medium text-cream placeholder:text-faint outline-none transition-colors duration-200 hover:border-cream/30 focus:border-amber-400 disabled:opacity-50"
           value={currentAnswer}
           disabled={streaming}
           onChange={(e) => onAnswerChange(e.target.value)}
           onKeyDown={onKeyDown}
           rows={1}
-          placeholder="Ta réponse…  (Entrée pour envoyer)"
+          placeholder="Ou écris ta réponse ici…  (Entrée pour envoyer)"
         />
-        <Button onClick={onSend} disabled={streaming || currentAnswer.trim() === ""}>
-          <SendIcon />
-          Envoyer
-        </Button>
+        <button
+          type="button"
+          onClick={onSend}
+          disabled={streaming || currentAnswer.trim() === ""}
+          aria-label="Envoyer"
+          className="grid h-[50px] w-[50px] shrink-0 cursor-pointer place-items-center rounded-full border border-amber-400/45 bg-amber-400/10 text-amber-400 transition-colors duration-200 hover:bg-amber-400/20 disabled:cursor-not-allowed disabled:opacity-40"
+        >
+          <SendIcon className="h-[18px] w-[18px]" />
+        </button>
       </div>
     </div>
   );

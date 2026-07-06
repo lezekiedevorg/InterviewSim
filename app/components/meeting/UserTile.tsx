@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 
-export function UserTile({ cameraOn }: { cameraOn: boolean }) {
+export function UserTile({ cameraOn, inset = false }: { cameraOn: boolean; inset?: boolean }) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [error, setError] = useState(false);
 
@@ -35,15 +35,32 @@ export function UserTile({ cameraOn }: { cameraOn: boolean }) {
   }, [cameraOn]);
 
   return (
-    <div className="relative flex aspect-video w-full items-center justify-center overflow-hidden rounded-2xl border border-white/60 bg-slate-100/80 shadow-soft backdrop-blur">
+    <div
+      className={`relative flex items-center justify-center overflow-hidden border border-cream/20 bg-night-900 ${
+        inset ? "h-[72px] w-[110px] rounded-[14px]" : "aspect-video w-full rounded-[22px]"
+      }`}
+    >
       {cameraOn && !error ? (
         <video ref={videoRef} autoPlay muted playsInline className="h-full w-full object-cover" />
       ) : (
-        <div className="flex flex-col items-center gap-2">
-          <span className="grid h-14 w-14 place-items-center rounded-full bg-gradient-to-br from-slate-400 to-slate-500 text-lg font-bold text-white shadow-soft">
-            Toi
+        <div className="flex flex-col items-center gap-1.5 p-2 text-center">
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.8"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className={`text-faint ${inset ? "h-[18px] w-[18px]" : "h-7 w-7"}`}
+            aria-hidden
+          >
+            <path d="M16 8l6-3v14l-6-3" />
+            <rect x="2" y="6" width="14" height="12" rx="3" />
+            <line x1="3" y1="3" x2="21" y2="21" />
+          </svg>
+          <span className={`font-semibold text-faint ${inset ? "text-[11px]" : "text-sm"}`}>
+            {error ? "Caméra indisponible" : "Toi · caméra off"}
           </span>
-          {error && <span className="text-xs text-slate-500">Caméra indisponible</span>}
         </div>
       )}
     </div>

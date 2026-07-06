@@ -220,37 +220,41 @@ export function MeetingRoom({
     <div className="flex flex-col gap-4 animate-rise">
       {jury ? (
         <div className="flex flex-col gap-3">
-          <div className="grid grid-cols-3 gap-2">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
             {PERSONAS.map((p) => (
               <RecruiterTile
                 key={p.id}
                 name={p.name}
                 initials={p.initials}
+                compact
                 speaking={isSpeaking && currentSpeaker === p.id}
               />
             ))}
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-3">
-            <UserTile cameraOn={cameraOn} />
-          </div>
+          {cameraOn && (
+            <div className="grid grid-cols-2 sm:grid-cols-3">
+              <UserTile cameraOn={cameraOn} />
+            </div>
+          )}
         </div>
       ) : (
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-          <div className="sm:col-span-2">
-            <RecruiterTile speaking={isSpeaking} />
+        <div className="relative">
+          <RecruiterTile speaking={isSpeaking} />
+          {/* Médaillon « Toi » incrusté, comme dans un vrai appel vidéo */}
+          <div className={`absolute bottom-3 right-3 ${cameraOn ? "w-32 sm:w-40" : ""}`}>
+            <UserTile cameraOn={cameraOn} inset={!cameraOn} />
           </div>
-          <UserTile cameraOn={cameraOn} />
         </div>
       )}
 
       {!supported && (
-        <p className="rounded-lg bg-amber-50 px-3 py-2 text-sm text-amber-700">
+        <p className="rounded-xl border border-amber-400/45 bg-amber-400/10 px-3.5 py-2.5 text-sm text-amber-300">
           La synthèse vocale n&apos;est pas supportée sur ce navigateur. Ouvre la transcription
           pour lire l&apos;entretien.
         </p>
       )}
       {(errorMsg || rec.error) && (
-        <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600">{errorMsg || rec.error}</p>
+        <p className="rounded-xl border border-danger-400/40 bg-danger-400/10 px-3.5 py-2.5 text-sm text-danger-400">{errorMsg || rec.error}</p>
       )}
 
       {showTranscript && <TranscriptPanel history={history} />}
