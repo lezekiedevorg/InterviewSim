@@ -240,7 +240,9 @@ export default function Home() {
                   onChange={(v) => setContext({ ...context, offre: v })} />
               </div>
             </div>
-            {formErrors.length > 0 && (
+            {/* L'erreur n'apparaît que si l'utilisateur a tapé quelque chose d'invalide,
+                pas à l'arrivée sur la page (le bouton grisé suffit comme garde-fou). */}
+            {formErrors.length > 0 && context.poste !== "" && (
               <p className="mb-3 text-sm text-red-600">{formErrors.join(" ")}</p>
             )}
             <label className="mb-3 flex items-center gap-2 text-sm text-slate-700">
