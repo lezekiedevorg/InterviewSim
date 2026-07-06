@@ -113,8 +113,8 @@ export default function ProgressionPage() {
         <svg viewBox="0 0 300 60" className="h-16 w-full">
           <defs>
             <linearGradient id="spark" x1="0" y1="0" x2="1" y2="0">
-              <stop offset="0%" stopColor="#059669" />
-              <stop offset="100%" stopColor="#2dd4bf" />
+              <stop offset="0%" stopColor="#4f46e5" />
+              <stop offset="100%" stopColor="#ff6b5e" />
             </linearGradient>
           </defs>
           <polyline

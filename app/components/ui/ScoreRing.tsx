@@ -1,14 +1,15 @@
 import { scoreColor } from "@/lib/scoreColor";
 
+// vert = émeraude volontairement (sémantique universelle du « bon score »), même si la marque est indigo
 const strokeByColor: Record<string, string> = {
   rouge: "stroke-red-500",
   ambre: "stroke-amber-500",
-  vert: "stroke-brand-500",
+  vert: "stroke-emerald-500",
 };
 const textByColor: Record<string, string> = {
   rouge: "text-red-600",
   ambre: "text-amber-600",
-  vert: "text-brand-700",
+  vert: "text-emerald-600",
 };
 
 /** Jauge circulaire animée — le cercle se remplit jusqu'au score au chargement (CSS pur). */

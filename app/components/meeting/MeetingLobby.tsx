@@ -32,7 +32,7 @@ export function MeetingLobby({
     <div className="flex flex-col items-center gap-6 rounded-2xl border border-white/70 bg-white/80 p-10 text-center shadow-card ring-1 ring-brand-600/5 backdrop-blur-xl animate-scale-in">
       <span className="relative grid place-items-center">
         <span className="absolute inset-0 animate-pulse-ring rounded-full bg-brand-300/50" aria-hidden />
-        <span className="grid h-20 w-20 place-items-center rounded-full bg-gradient-to-br from-brand-600 to-accent-500 text-2xl font-bold text-white shadow-brand">
+        <span className="grid h-20 w-20 place-items-center rounded-full bg-gradient-to-br from-brand-500 to-brand-700 text-2xl font-bold text-white shadow-brand">
           RH
         </span>
       </span>

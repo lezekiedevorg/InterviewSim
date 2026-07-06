@@ -12,7 +12,7 @@ export function TranscriptPanel({ history }: { history: ChatMessage[] }) {
           className={`max-w-[85%] whitespace-pre-wrap rounded-xl px-3 py-2 text-sm animate-rise ${
             m.role === "recruiter"
               ? "self-start bg-slate-100 text-slate-800"
-              : "self-end bg-gradient-to-r from-brand-600 to-accent-500 text-white"
+              : "self-end bg-brand-600 text-white"
           }`}
         >
           <strong className="mb-0.5 block text-xs font-semibold uppercase tracking-wide opacity-70">

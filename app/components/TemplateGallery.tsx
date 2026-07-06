@@ -112,7 +112,7 @@ export function TemplateGallery({
             <span
               className={`grid h-9 w-9 place-items-center rounded-lg transition-colors duration-200 ${
                 selectedId === t.id
-                  ? "bg-gradient-to-br from-brand-600 to-accent-500 text-white"
+                  ? "bg-brand-600 text-white"
                   : "bg-brand-50 text-brand-700 group-hover:bg-brand-100"
               }`}
             >

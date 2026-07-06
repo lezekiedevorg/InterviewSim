@@ -6,8 +6,9 @@ type Props = ButtonHTMLAttributes<HTMLButtonElement> & {
 };
 
 const styles: Record<string, string> = {
+  // corail + texte indigo sombre : contraste AA garanti (blanc sur corail ne passe pas)
   primary:
-    "bg-gradient-to-r from-brand-600 to-accent-500 text-white shadow-brand hover:shadow-glow hover:brightness-105 hover:-translate-y-0.5 active:translate-y-0 disabled:from-slate-300 disabled:to-slate-300 disabled:text-slate-500 disabled:shadow-none disabled:translate-y-0",
+    "bg-gradient-to-r from-accent-500 to-accent-600 text-brand-950 shadow-cta hover:shadow-glow hover:brightness-105 hover:-translate-y-0.5 active:translate-y-0 disabled:from-slate-300 disabled:to-slate-300 disabled:text-slate-500 disabled:shadow-none disabled:translate-y-0",
   secondary:
     "bg-white/80 text-brand-700 border border-brand-600/50 backdrop-blur hover:bg-brand-50 hover:border-brand-600 disabled:opacity-50",
   ghost: "bg-transparent text-slate-600 hover:text-slate-900 hover:bg-slate-100",

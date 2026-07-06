@@ -29,7 +29,7 @@ export function Header() {
     <header className="sticky top-3 z-20 px-3">
       <div className="mx-auto flex max-w-3xl items-center justify-between rounded-2xl border border-white/70 bg-white/80 px-4 py-2.5 shadow-card ring-1 ring-brand-600/5 backdrop-blur-xl">
         <Link href="/" className="group flex items-center gap-2 font-heading text-lg font-bold text-slate-900">
-          <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-br from-brand-600 to-accent-500 text-sm text-white shadow-brand transition-transform duration-200 group-hover:scale-105 group-hover:rotate-3">
+          <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-br from-brand-600 to-brand-400 text-sm text-white shadow-brand transition-transform duration-200 group-hover:scale-105 group-hover:rotate-3">
             IS
           </span>
           Interview<span className="text-gradient">Sim</span>
@@ -54,7 +54,7 @@ export function Header() {
           ) : (
             <Link
               href="/login"
-              className="rounded-xl bg-gradient-to-r from-brand-600 to-accent-500 px-4 py-1.5 font-semibold text-white shadow-brand transition-all duration-200 hover:shadow-glow hover:brightness-105"
+              className="rounded-xl bg-gradient-to-r from-accent-500 to-accent-600 px-4 py-1.5 font-semibold text-brand-950 shadow-cta transition-all duration-200 hover:shadow-glow hover:brightness-105"
             >
               Se connecter
             </Link>

@@ -27,10 +27,11 @@ export function renderScoreCard(input: { poste: string; score: number }): Promis
   const ctx = canvas.getContext("2d");
   if (!ctx) return Promise.reject(new Error("canvas 2d indisponible"));
 
-  // Fond dégradé émeraude (charte brand).
+  // Fond dégradé indigo→corail (charte brand).
   const grad = ctx.createLinearGradient(0, 0, SIZE, SIZE);
-  grad.addColorStop(0, "#065f46"); // emerald-800
-  grad.addColorStop(1, "#059669"); // emerald-600
+  grad.addColorStop(0, "#312e81"); // indigo-900
+  grad.addColorStop(0.65, "#4f46e5"); // indigo-600
+  grad.addColorStop(1, "#ff6b5e"); // corail
   ctx.fillStyle = grad;
   ctx.fillRect(0, 0, SIZE, SIZE);
 

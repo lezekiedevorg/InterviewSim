@@ -159,7 +159,7 @@ export default function Home() {
             <span
               className={`flex items-center gap-2 rounded-full px-3 py-1.5 transition-all duration-300 ${
                 i === activeStep
-                  ? "bg-gradient-to-r from-brand-600 to-accent-500 text-white shadow-brand"
+                  ? "bg-brand-600 text-white shadow-brand"
                   : i < activeStep
                   ? "bg-brand-100 text-brand-700"
                   : "bg-white/70 text-slate-400 ring-1 ring-slate-200"
@@ -192,8 +192,8 @@ export default function Home() {
           <div className="mb-10 text-center">
             <p className="mb-4 inline-flex items-center gap-1.5 rounded-full border border-brand-200 bg-brand-50/80 px-3 py-1 text-xs font-semibold text-brand-700">
               <span className="relative flex h-2 w-2">
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-brand-400 opacity-75" />
-                <span className="relative inline-flex h-2 w-2 rounded-full bg-brand-500" />
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-accent-400 opacity-75" />
+                <span className="relative inline-flex h-2 w-2 rounded-full bg-accent-500" />
               </span>
               Gratuit · illimité · sans jugement
             </p>

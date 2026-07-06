@@ -19,8 +19,8 @@ export function Debrief({ data }: { data: DebriefType }) {
       </Card>
 
       <div className="grid gap-4 sm:grid-cols-2">
-        <Card className="border-l-4 border-l-brand-500">
-          <h3 className="mb-2 flex items-center gap-2 font-heading font-semibold text-brand-700">
+        <Card className="border-l-4 border-l-emerald-500">
+          <h3 className="mb-2 flex items-center gap-2 font-heading font-semibold text-emerald-700">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4" aria-hidden>
               <polyline points="20 6 9 17 4 12" />
             </svg>

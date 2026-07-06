@@ -49,7 +49,7 @@ export default function LoginPage() {
     <main className="mx-auto max-w-md px-4 py-10">
       <Card className="animate-scale-in">
         <div className="mb-5 text-center">
-          <span className="mx-auto mb-3 flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-brand-600 to-accent-500 font-heading text-sm font-bold text-white shadow-brand">
+          <span className="mx-auto mb-3 flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-brand-600 to-brand-400 font-heading text-sm font-bold text-white shadow-brand">
             IS
           </span>
           <h1 className="font-heading text-xl font-bold">

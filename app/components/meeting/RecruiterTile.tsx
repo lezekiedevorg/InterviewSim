@@ -31,7 +31,7 @@ export function RecruiterTile({
             </>
           )}
           <span
-            className={`grid h-20 w-20 place-items-center rounded-full bg-gradient-to-br from-brand-500 to-accent-500 text-2xl font-bold transition-transform duration-300 ${
+            className={`grid h-20 w-20 place-items-center rounded-full bg-gradient-to-br from-brand-500 to-brand-700 text-2xl font-bold transition-transform duration-300 ${
               speaking ? "scale-110" : "scale-100"
             }`}
           >
