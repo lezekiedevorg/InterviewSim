@@ -21,7 +21,12 @@ function toMessages(systemPrompt: string, history: ChatMessage[]) {
   ];
 }
 
-async function post(systemPrompt: string, history: ChatMessage[], stream: boolean) {
+async function post(
+  systemPrompt: string,
+  history: ChatMessage[],
+  stream: boolean,
+  temperature?: number
+) {
   const res = await fetch(ENDPOINT, {
     method: "POST",
     headers: {
@@ -32,6 +37,8 @@ async function post(systemPrompt: string, history: ChatMessage[], stream: boolea
       model: MODEL,
       messages: toMessages(systemPrompt, history),
       stream,
+      // Température imposée uniquement quand demandé (débrief : 0 → correcteur froid et régulier)
+      ...(temperature !== undefined && { temperature }),
     }),
   });
   if (!res.ok) {
@@ -67,9 +74,10 @@ export async function* askModelStream(
 
 export async function askModelText(
   systemPrompt: string,
-  history: ChatMessage[]
+  history: ChatMessage[],
+  opts?: { temperature?: number }
 ): Promise<string> {
-  const res = await post(systemPrompt, history, false);
+  const res = await post(systemPrompt, history, false, opts?.temperature);
   const json = await res.json();
   return json.choices?.[0]?.message?.content ?? "";
 }
