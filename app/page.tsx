@@ -34,6 +34,7 @@ export default function Home() {
   const [saveMsg, setSaveMsg] = useState<string | null>(null);
   const [templateId, setTemplateId] = useState<string | null>(null);
   const [jury, setJury] = useState(false);
+  const [tooShort, setTooShort] = useState(false);
 
   function pickTemplate(t: Template) {
     setContext({
@@ -105,6 +106,7 @@ export default function Home() {
     setDebrief(null);
     setDebriefRaw(null);
     setSaveMsg(null);
+    setTooShort(false);
     try {
       const res = await fetch("/api/debrief", {
         method: "POST",
@@ -114,6 +116,10 @@ export default function Home() {
       const data = await res.json();
       if (!res.ok) {
         setErrorMsg(data.error ?? "Erreur.");
+        return;
+      }
+      if (data.tooShort) {
+        setTooShort(true);
         return;
       }
       if (data.debrief) setDebrief(data.debrief);
@@ -331,7 +337,16 @@ export default function Home() {
               <Button onClick={finishInterview}>Réessayer</Button>
             </Card>
           )}
-          {!errorMsg && !debrief && !debriefRaw && (
+          {tooShort && (
+            <Card className="flex flex-col items-center gap-4 py-8 text-center">
+              <p className="max-w-sm text-sm leading-relaxed text-muted">
+                Entretien trop court pour être évalué sérieusement — réponds à au moins
+                3 questions, puis termine.
+              </p>
+              <Button onClick={() => window.location.reload()}>Nouvel entretien</Button>
+            </Card>
+          )}
+          {!errorMsg && !tooShort && !debrief && !debriefRaw && (
             <Card className="flex flex-col items-center gap-4 py-8 text-sm text-muted">
               <VoiceWave bars={14} height={32} />
               Analyse de ton entretien en cours…

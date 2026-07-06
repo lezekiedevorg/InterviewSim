@@ -1,7 +1,8 @@
 import type { Debrief as DebriefType } from "@/lib/types";
 import { Card } from "@/app/components/ui/Card";
 import { ScoreRing } from "@/app/components/ui/ScoreRing";
-import { verdict } from "@/lib/scoreColor";
+import { verdict, scoreColor, BAND_HEX } from "@/lib/scoreColor";
+import { CRITERES } from "@/lib/score";
 
 function CheckIcon() {
   return (
@@ -33,6 +34,44 @@ export function Debrief({ data }: { data: DebriefType }) {
           {data.syntheseGenerale}
         </p>
       </div>
+
+      {/* Détail de la note — présent uniquement sur les débriefs notés avec la grille */}
+      {data.criteres && data.criteres.length > 0 && (
+        <Card className="flex w-full flex-col gap-4">
+          <span className="text-[11px] font-bold uppercase tracking-[0.14em] text-faint">
+            Détail de la note
+          </span>
+          {data.criteres.map((c) => {
+            const label = CRITERES.find((x) => x.id === c.id)?.label ?? c.id;
+            const hex = BAND_HEX[scoreColor(c.note)];
+            return (
+              <div key={c.id} className="flex flex-col gap-1.5">
+                <div className="flex items-baseline justify-between gap-3">
+                  <span className="text-sm font-semibold text-cream">{label}</span>
+                  <span className="font-heading text-[15px] font-extrabold" style={{ color: hex }}>
+                    {c.note}
+                    <span className="ml-0.5 text-[10px] font-medium text-faint">/100</span>
+                  </span>
+                </div>
+                <div className="h-1.5 w-full overflow-hidden rounded-full bg-cream/10">
+                  <div
+                    className="h-full rounded-full transition-[width] duration-700"
+                    style={{ width: `${c.note}%`, background: hex }}
+                  />
+                </div>
+                {c.commentaire && (
+                  <p className="text-[13px] leading-snug text-muted">{c.commentaire}</p>
+                )}
+                {c.preuve && (
+                  <p className="border-l-2 border-cream/15 pl-2.5 text-xs italic leading-snug text-faint">
+                    «&nbsp;{c.preuve}&nbsp;»
+                  </p>
+                )}
+              </div>
+            );
+          })}
+        </Card>
+      )}
 
       <div className="grid w-full gap-3.5 sm:grid-cols-2">
         <Card className="flex flex-col gap-3">
