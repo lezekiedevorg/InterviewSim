@@ -5,6 +5,18 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createBrowserSupabase } from "@/lib/supabase/client";
 
+// Logo « Studio nuit » : micro sur pastille ambre.
+function Logo() {
+  return (
+    <svg width="30" height="30" viewBox="0 0 30 30" aria-hidden>
+      <rect width="30" height="30" rx="9" fill="#ffb224" />
+      <rect x="12" y="6" width="6" height="11" rx="3" fill="#14100a" />
+      <path d="M9 14a6 6 0 0 0 12 0" stroke="#14100a" strokeWidth="2" fill="none" />
+      <line x1="15" y1="20" x2="15" y2="24" stroke="#14100a" strokeWidth="2" />
+    </svg>
+  );
+}
+
 export function Header() {
   const [email, setEmail] = useState<string | null>(null);
   const router = useRouter();
@@ -26,27 +38,27 @@ export function Header() {
   }
 
   return (
-    <header className="sticky top-3 z-20 px-3">
-      <div className="mx-auto flex max-w-3xl items-center justify-between rounded-2xl border border-white/70 bg-white/80 px-4 py-2.5 shadow-card ring-1 ring-brand-600/5 backdrop-blur-xl">
-        <Link href="/" className="group flex items-center gap-2 font-heading text-lg font-bold text-slate-900">
-          <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-br from-brand-600 to-brand-400 text-sm text-white shadow-brand transition-transform duration-200 group-hover:scale-105 group-hover:rotate-3">
-            IS
+    <header className="sticky top-0 z-20 bg-night-900/85 backdrop-blur-md">
+      <div className="mx-auto flex max-w-5xl items-center justify-between px-5 py-4">
+        <Link href="/" className="group flex items-center gap-2.5 font-heading text-lg font-extrabold tracking-tight text-cream">
+          <span className="transition-transform duration-200 group-hover:scale-105 group-hover:rotate-3">
+            <Logo />
           </span>
-          Interview<span className="text-gradient">Sim</span>
+          Interview<span className="text-amber-400">Sim</span>
         </Link>
         <nav className="flex items-center gap-3 text-sm">
           {email ? (
             <>
               <Link
                 href="/progression"
-                className="rounded-lg px-2 py-1 text-slate-600 transition-colors duration-200 hover:bg-brand-50 hover:text-brand-700"
+                className="rounded-full px-3 py-1.5 font-semibold text-muted transition-colors duration-200 hover:bg-cream/10 hover:text-cream"
               >
                 Ma progression
               </Link>
-              <span className="hidden text-slate-400 sm:inline">{email}</span>
+              <span className="hidden text-faint sm:inline">{email}</span>
               <button
                 onClick={signOut}
-                className="cursor-pointer rounded-lg px-2 py-1 text-slate-600 transition-colors duration-200 hover:bg-slate-100 hover:text-slate-900"
+                className="cursor-pointer rounded-full px-3 py-1.5 font-semibold text-muted transition-colors duration-200 hover:bg-cream/10 hover:text-cream"
               >
                 Se déconnecter
               </button>
@@ -54,7 +66,7 @@ export function Header() {
           ) : (
             <Link
               href="/login"
-              className="rounded-xl bg-gradient-to-r from-accent-500 to-accent-600 px-4 py-1.5 font-semibold text-brand-950 shadow-cta transition-all duration-200 hover:shadow-glow hover:brightness-105"
+              className="rounded-full border border-cream/30 px-4 py-2 font-semibold text-cream transition-colors duration-200 hover:border-amber-400 hover:bg-amber-400/10"
             >
               Se connecter
             </Link>

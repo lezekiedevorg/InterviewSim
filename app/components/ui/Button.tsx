@@ -6,23 +6,25 @@ type Props = ButtonHTMLAttributes<HTMLButtonElement> & {
 };
 
 const styles: Record<string, string> = {
-  // corail + texte indigo sombre : contraste AA garanti (blanc sur corail ne passe pas)
+  // pilule ambre, texte sombre, typo display — le CTA « Studio nuit »
   primary:
-    "bg-gradient-to-r from-accent-500 to-accent-600 text-brand-950 shadow-cta hover:shadow-glow hover:brightness-105 hover:-translate-y-0.5 active:translate-y-0 disabled:from-slate-300 disabled:to-slate-300 disabled:text-slate-500 disabled:shadow-none disabled:translate-y-0",
+    "rounded-full bg-amber-400 font-heading font-extrabold text-amber-ink shadow-cta hover:shadow-cta-hover hover:-translate-y-0.5 active:translate-y-0 disabled:bg-night-700 disabled:text-faint disabled:shadow-none disabled:translate-y-0",
+  // ambre en creux : bordure + fond teinté
   secondary:
-    "bg-white/80 text-brand-700 border border-brand-600/50 backdrop-blur hover:bg-brand-50 hover:border-brand-600 disabled:opacity-50",
-  ghost: "bg-transparent text-slate-600 hover:text-slate-900 hover:bg-slate-100",
+    "rounded-full border border-amber-400/45 bg-amber-400/10 font-semibold text-amber-400 hover:bg-amber-400/20 disabled:opacity-50",
+  ghost:
+    "rounded-full bg-transparent font-semibold text-muted hover:text-cream hover:bg-cream/10",
 };
 
 const sizes: Record<string, string> = {
-  md: "px-4 py-2.5 text-sm",
-  lg: "px-6 py-3.5 text-base",
+  md: "px-5 py-2.5 text-sm",
+  lg: "px-6 py-3.5 text-base min-h-[54px]",
 };
 
 export function Button({ variant = "primary", size = "md", className = "", ...props }: Props) {
   return (
     <button
-      className={`inline-flex cursor-pointer items-center justify-center gap-2 rounded-xl font-semibold transition-all duration-200 outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed ${sizes[size]} ${styles[variant]} ${className}`}
+      className={`inline-flex cursor-pointer items-center justify-center gap-2 transition-all duration-200 outline-none focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2 focus-visible:ring-offset-night-900 disabled:cursor-not-allowed ${sizes[size]} ${styles[variant]} ${className}`}
       {...props}
     />
   );

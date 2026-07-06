@@ -105,25 +105,30 @@ export function TemplateGallery({
   }
 
   const arrow =
-    "grid h-8 w-8 shrink-0 cursor-pointer place-items-center rounded-full border border-slate-200 bg-white/80 text-slate-600 backdrop-blur transition-all duration-200 hover:border-brand-300 hover:text-brand-700 hover:shadow-soft";
+    "grid h-8 w-8 shrink-0 cursor-pointer place-items-center rounded-full border border-cream/20 bg-night-700 text-muted transition-all duration-200 hover:border-amber-400/60 hover:text-amber-400";
 
   return (
-    <section className="mb-6">
-      <div className="mb-3 flex items-center justify-between gap-3">
-        <h2 className="text-sm font-medium text-slate-500">
-          Pas d&apos;idée ? Pars d&apos;un scénario
+    <section className="mb-8">
+      <div className="mb-3.5 flex items-baseline justify-between gap-3">
+        <h2 className="font-heading text-lg font-bold tracking-tight text-cream sm:text-xl">
+          Choisis un scénario prêt
         </h2>
-        <div className="flex gap-2">
-          <button type="button" onClick={() => slide(-1)} aria-label="Scénarios précédents" className={arrow}>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4" aria-hidden>
-              <polyline points="15 18 9 12 15 6" />
-            </svg>
-          </button>
-          <button type="button" onClick={() => slide(1)} aria-label="Scénarios suivants" className={arrow}>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4" aria-hidden>
-              <polyline points="9 18 15 12 9 6" />
-            </svg>
-          </button>
+        <div className="flex items-center gap-3">
+          <span className="hidden text-[11px] font-semibold uppercase tracking-[0.14em] text-faint sm:inline">
+            {String(TEMPLATES.length).padStart(2, "0")} scénarios
+          </span>
+          <div className="flex gap-2">
+            <button type="button" onClick={() => slide(-1)} aria-label="Scénarios précédents" className={arrow}>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4" aria-hidden>
+                <polyline points="15 18 9 12 15 6" />
+              </svg>
+            </button>
+            <button type="button" onClick={() => slide(1)} aria-label="Scénarios suivants" className={arrow}>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4" aria-hidden>
+                <polyline points="9 18 15 12 9 6" />
+              </svg>
+            </button>
+          </div>
         </div>
       </div>
       <div
@@ -135,23 +140,17 @@ export function TemplateGallery({
             key={t.id}
             type="button"
             onClick={() => onPick(t)}
-            className={`group flex w-40 shrink-0 snap-start cursor-pointer flex-col items-start gap-2 rounded-xl border p-3 text-left transition-all duration-200 hover:-translate-y-0.5 hover:shadow-card ${
+            className={`flex w-44 shrink-0 snap-start cursor-pointer flex-col items-start gap-3 rounded-2xl border bg-night-700 p-4 text-left transition-all duration-200 hover:-translate-y-0.5 ${
               selectedId === t.id
-                ? "border-brand-500 bg-brand-50/90 shadow-card ring-2 ring-brand-200"
-                : "border-white/70 bg-white/80 backdrop-blur hover:border-brand-200"
+                ? "border-amber-400 bg-amber-400/10"
+                : "border-cream/15 hover:border-amber-400/70"
             }`}
           >
-            <span
-              className={`grid h-9 w-9 place-items-center rounded-lg transition-colors duration-200 ${
-                selectedId === t.id
-                  ? "bg-brand-600 text-white"
-                  : "bg-brand-50 text-brand-700 group-hover:bg-brand-100"
-              }`}
-            >
+            <span className="grid h-10 w-10 place-items-center rounded-xl bg-amber-400/10 text-amber-400">
               <TemplateIcon id={t.id} />
             </span>
-            <span className="text-sm font-semibold text-slate-900">{t.titre}</span>
-            <span className="text-xs text-slate-500">{t.sousTitre}</span>
+            <span className="text-[15px] font-semibold leading-tight text-cream">{t.titre}</span>
+            <span className="text-[11px] font-semibold uppercase tracking-[0.1em] text-faint">{t.sousTitre}</span>
           </button>
         ))}
       </div>

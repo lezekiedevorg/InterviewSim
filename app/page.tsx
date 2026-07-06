@@ -11,6 +11,7 @@ import { Debrief as DebriefComponent } from "@/app/components/Debrief";
 import { ShareScoreButton } from "@/app/components/ShareScoreButton";
 import { createBrowserSupabase } from "@/lib/supabase/client";
 import { TemplateGallery } from "@/app/components/TemplateGallery";
+import { VoiceWave } from "@/app/components/VoiceWave";
 import type { Template } from "@/lib/templates";
 
 type Phase = "form" | "chat" | "debrief";
@@ -153,19 +154,23 @@ export default function Home() {
   return (
     <main className="mx-auto max-w-3xl px-4 py-8 sm:py-12">
       {/* Stepper */}
-      <ol className="mb-8 flex items-center justify-center gap-2 text-xs font-medium sm:gap-3">
+      <ol className="mb-8 flex items-center justify-center gap-2 text-xs font-semibold sm:gap-3">
         {STEPS.map((s, i) => (
           <li key={s.key} className="flex items-center gap-2 sm:gap-3">
             <span
-              className={`flex items-center gap-2 rounded-full px-3 py-1.5 transition-all duration-300 ${
+              className={`flex items-center gap-2 rounded-full px-3 py-1.5 uppercase tracking-[0.08em] transition-all duration-300 ${
                 i === activeStep
-                  ? "bg-brand-600 text-white shadow-brand"
+                  ? "bg-amber-400 text-amber-ink shadow-cta"
                   : i < activeStep
-                  ? "bg-brand-100 text-brand-700"
-                  : "bg-white/70 text-slate-400 ring-1 ring-slate-200"
+                  ? "bg-amber-400/15 text-amber-400"
+                  : "bg-night-700 text-faint ring-1 ring-cream/15"
               }`}
             >
-              <span className="grid h-4 w-4 place-items-center rounded-full bg-white/25 text-[10px]">
+              <span
+                className={`grid h-4 w-4 place-items-center rounded-full text-[10px] ${
+                  i === activeStep ? "bg-amber-ink/15" : "bg-cream/10"
+                }`}
+              >
                 {i < activeStep ? (
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="h-2.5 w-2.5" aria-hidden>
                     <polyline points="20 6 9 17 4 12" />
@@ -179,7 +184,7 @@ export default function Home() {
             {i < STEPS.length - 1 && (
               <span
                 className={`h-0.5 w-4 rounded-full transition-colors duration-300 sm:w-8 ${
-                  i < activeStep ? "bg-brand-300" : "bg-slate-200"
+                  i < activeStep ? "bg-amber-400/50" : "bg-cream/15"
                 }`}
               />
             )}
@@ -190,37 +195,46 @@ export default function Home() {
       {phase === "form" && (
         <div className="stagger">
           <div className="mb-10 text-center">
-            <p className="mb-4 inline-flex items-center gap-1.5 rounded-full border border-brand-200 bg-brand-50/80 px-3 py-1 text-xs font-semibold text-brand-700">
-              <span className="relative flex h-2 w-2">
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-accent-400 opacity-75" />
-                <span className="relative inline-flex h-2 w-2 rounded-full bg-accent-500" />
-              </span>
-              Gratuit · illimité · sans jugement
+            <p className="mb-5 text-xs font-semibold uppercase tracking-[0.2em] text-amber-400">
+              Entretien vocal · Recruteur IA · En direct
             </p>
-            <h1 className="font-heading text-4xl font-bold tracking-tight text-slate-900 sm:text-5xl">
-              Passe l&apos;entretien{" "}
-              <span className="text-gradient">avant l&apos;entretien</span>.
+            <h1 className="mx-auto max-w-3xl font-heading text-[clamp(2.5rem,9vw,4.8rem)] font-extrabold leading-none tracking-[-0.03em] text-cream [text-wrap:balance]">
+              Rate tes entretiens ici.{" "}
+              <span className="text-amber-400">Réussis le vrai.</span>
             </h1>
-            <p className="mx-auto mt-4 max-w-xl text-base text-slate-600 sm:text-lg">
-              Un recruteur IA te fait passer une simulation sur mesure à partir de ton profil
-              (CV optionnel), puis te livre un débrief actionnable. Autant de fois que tu veux.
+            <div className="mt-7">
+              <VoiceWave />
+            </div>
+            <p className="mx-auto mt-6 max-w-xl text-base leading-relaxed text-muted sm:text-lg">
+              Un recruteur IA te pose de vraies questions, à voix haute, tour après tour.
+              À la fin&nbsp;: un débrief honnête et ton score de confiance sur&nbsp;100.
+            </p>
+            <p className="mt-7 inline-flex items-center gap-2.5 rounded-full border border-amber-400/45 bg-amber-400/10 px-4 py-2.5 text-[13px] font-semibold uppercase tracking-[0.08em] text-amber-300">
+              Gratuit
+              <span className="h-1 w-1 rounded-full bg-amber-400" aria-hidden />
+              Illimité
+              <span className="h-1 w-1 rounded-full bg-amber-400" aria-hidden />
+              Sans jugement
             </p>
           </div>
 
           <TemplateGallery onPick={pickTemplate} selectedId={templateId} />
 
-          <Card>
+          <Card className="mx-auto max-w-[600px] p-6 sm:p-7">
+            <h2 className="mb-4 font-heading text-xl font-bold tracking-tight text-cream">
+              …ou décris ton poste
+            </h2>
             <Field label="Poste visé *" value={context.poste}
-              placeholder="Ex : Développeur back-end, stagiaire marketing…"
+              placeholder="Ex. : Développeur junior dans une fintech"
               onChange={(v) => setContext({ ...context, poste: v })} />
 
             {/* Champs optionnels repliés : le formulaire visible tient en 4 lignes */}
-            <details className="group mb-4">
-              <summary className="flex cursor-pointer list-none items-center gap-1.5 text-sm font-medium text-brand-700 transition-colors hover:text-brand-800 [&::-webkit-details-marker]:hidden">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4 transition-transform duration-200 group-open:rotate-90" aria-hidden>
-                  <polyline points="9 18 15 12 9 6" />
+            <details className="group mb-4 rounded-xl border border-dashed border-cream/25 px-3.5 py-3">
+              <summary className="flex cursor-pointer list-none items-center gap-2 text-sm font-semibold text-amber-400 transition-colors hover:text-amber-300 [&::-webkit-details-marker]:hidden">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="h-3 w-3 shrink-0 transition-transform duration-200 group-open:rotate-90" aria-hidden>
+                  <polyline points="9 5 16 12 9 19" />
                 </svg>
-                Personnaliser mon entretien (CV, offre, niveau…) — recommandé
+                Personnaliser (CV, offre, niveau…) — recommandé
               </summary>
               <div className="mt-4 grid gap-x-4 sm:grid-cols-2">
                 <Field label="Entreprise / type" value={context.entreprise ?? ""}
@@ -251,20 +265,30 @@ export default function Home() {
             {/* L'erreur n'apparaît que si l'utilisateur a tapé quelque chose d'invalide,
                 pas à l'arrivée sur la page (le bouton grisé suffit comme garde-fou). */}
             {formErrors.length > 0 && context.poste !== "" && (
-              <p className="mb-3 text-sm text-red-600">{formErrors.join(" ")}</p>
+              <p className="mb-3 text-sm text-danger-400">{formErrors.join(" ")}</p>
             )}
-            <label className="mb-3 flex items-center gap-2 text-sm text-slate-700">
+            <label className="mb-4 flex items-start gap-2.5 text-sm leading-snug text-muted">
               <input
                 type="checkbox"
                 checked={jury}
                 onChange={(e) => setJury(e.target.checked)}
-                className="h-4 w-4 rounded border-slate-300 text-brand-600 focus:ring-brand-500"
+                className="mt-0.5 h-[18px] w-[18px] shrink-0 cursor-pointer accent-amber-400"
               />
-              Mode jury — 3 recruteurs (RH, Manager opérationnel, Expert métier)
+              <span>
+                <strong className="font-semibold text-cream">Mode jury</strong> — trois recruteurs,
+                questions croisées
+              </span>
             </label>
             <Button size="lg" className="w-full" disabled={formErrors.length > 0} onClick={startInterview}>
-              Démarrer l&apos;entretien →
+              Démarrer l&apos;entretien
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5" aria-hidden>
+                <line x1="4" y1="12" x2="20" y2="12" />
+                <polyline points="13 5 20 12 13 19" />
+              </svg>
             </Button>
+            <p className="mt-3 text-center text-[11px] font-semibold uppercase tracking-[0.1em] text-faint">
+              Sans inscription · Voix ou texte · Audio léger
+            </p>
           </Card>
         </div>
       )}
@@ -286,27 +310,23 @@ export default function Home() {
         <div className="flex flex-col gap-4 animate-rise">
           {errorMsg && (
             <Card>
-              <p className="mb-3 text-sm text-red-600">{errorMsg}</p>
+              <p className="mb-3 text-sm text-danger-400">{errorMsg}</p>
               <Button onClick={finishInterview}>Réessayer</Button>
             </Card>
           )}
           {!errorMsg && !debrief && !debriefRaw && (
-            <Card className="flex items-center gap-3 text-sm text-slate-600">
-              <span className="inline-flex gap-1">
-                <span className="h-2 w-2 animate-bounce rounded-full bg-brand-500 [animation-delay:-0.3s]" />
-                <span className="h-2 w-2 animate-bounce rounded-full bg-brand-500 [animation-delay:-0.15s]" />
-                <span className="h-2 w-2 animate-bounce rounded-full bg-brand-500" />
-              </span>
+            <Card className="flex flex-col items-center gap-4 py-8 text-sm text-muted">
+              <VoiceWave bars={14} height={32} />
               Analyse de ton entretien en cours…
             </Card>
           )}
           {debrief && <DebriefComponent data={debrief} />}
           {debrief && <ShareScoreButton poste={context.poste} score={debrief.scoreConfiance} />}
           {saveMsg && (
-            <p className="text-center text-sm text-slate-500">{saveMsg}</p>
+            <p className="text-center text-sm text-faint">{saveMsg}</p>
           )}
           {debriefRaw && (
-            <pre className="whitespace-pre-wrap rounded-lg bg-slate-50 p-3 text-sm">{debriefRaw}</pre>
+            <pre className="whitespace-pre-wrap rounded-xl border border-cream/15 bg-night-800 p-3 text-sm text-muted">{debriefRaw}</pre>
           )}
           {(debrief || debriefRaw) && (
             <Button variant="secondary" className="mx-auto" onClick={() => window.location.reload()}>

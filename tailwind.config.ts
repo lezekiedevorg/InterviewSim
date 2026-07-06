@@ -1,5 +1,6 @@
 import type { Config } from "tailwindcss";
 
+// Direction « Studio nuit » : fond bleu-nuit, crème, ambre chaud.
 const config: Config = {
   content: [
     "./app/**/*.{ts,tsx}",
@@ -8,34 +9,30 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        brand: {
-          // indigo — sérieux, confiance
-          50: "#eef2ff",
-          100: "#e0e7ff",
-          200: "#c7d2fe",
-          300: "#a5b4fc",
-          400: "#818cf8",
-          500: "#6366f1",
-          600: "#4f46e5",
-          700: "#4338ca",
-          800: "#3730a3",
-          900: "#312e81",
-          950: "#1e1b4b",
+        night: {
+          900: "#0c1517", // fond de page + inputs
+          800: "#101c1f", // cartes
+          700: "#132124", // tuiles, pilules
+          600: "#142326", // haut des dégradés de tuile
         },
-        accent: {
-          // corail vif — énergie, boutons d'action
-          300: "#ffb4ab",
-          400: "#ff8f83",
-          500: "#ff6b5e",
-          600: "#ef4f42",
+        cream: "#f2efe4", // texte principal
+        muted: "#aebcbb", // texte secondaire
+        faint: "#7d908f", // libellés, mentions
+        amber: {
+          300: "#ffcf6e",
+          400: "#ffb224", // accent principal
+          ink: "#14100a", // texte sur ambre
         },
+        danger: {
+          400: "#ff5a4e",
+          600: "#c73e33",
+        },
+        ok: "#34d27b", // succès / bon score
       },
       boxShadow: {
-        soft: "0 1px 2px rgba(16,24,40,.04), 0 8px 24px -12px rgba(49,46,129,.18)",
-        brand: "0 8px 20px -8px rgba(79,70,229,.50)",
-        cta: "0 8px 20px -8px rgba(255,107,94,.60)",
-        glow: "0 0 0 1px rgba(99,102,241,.12), 0 12px 40px -12px rgba(255,107,94,.40)",
-        card: "0 1px 2px rgba(15,23,42,.04), 0 16px 40px -20px rgba(67,56,202,.25)",
+        card: "0 20px 50px rgba(0,0,0,0.4)",
+        cta: "0 6px 24px rgba(255,178,36,0.3)",
+        "cta-hover": "0 10px 30px rgba(255,178,36,0.45)",
       },
       fontFamily: {
         heading: ["var(--font-heading)", "system-ui", "sans-serif"],
@@ -43,32 +40,27 @@ const config: Config = {
       },
       keyframes: {
         rise: {
-          from: { opacity: "0", transform: "translateY(10px)" },
+          from: { opacity: "0", transform: "translateY(16px)" },
           to: { opacity: "1", transform: "translateY(0)" },
         },
-        "scale-in": {
-          from: { opacity: "0", transform: "scale(.96)" },
-          to: { opacity: "1", transform: "scale(1)" },
+        wave: {
+          from: { transform: "scaleY(0.3)" },
+          to: { transform: "scaleY(1)" },
         },
-        drift: {
-          "0%, 100%": { transform: "translate(0, 0) scale(1)" },
-          "50%": { transform: "translate(4rem, -3rem) scale(1.15)" },
+        ring: {
+          from: { transform: "scale(1)", opacity: ".55" },
+          to: { transform: "scale(1.9)", opacity: "0" },
         },
-        "drift-2": {
-          "0%, 100%": { transform: "translate(0, 0) scale(1.1)" },
-          "50%": { transform: "translate(-3rem, 4rem) scale(1)" },
-        },
-        "pulse-ring": {
-          "0%": { transform: "scale(1)", opacity: ".45" },
-          "100%": { transform: "scale(1.6)", opacity: "0" },
+        blink: {
+          "0%, 100%": { opacity: "1" },
+          "50%": { opacity: ".25" },
         },
       },
       animation: {
-        rise: "rise .45s cubic-bezier(.16,1,.3,1) both",
-        "scale-in": "scale-in .35s cubic-bezier(.16,1,.3,1) both",
-        drift: "drift 16s ease-in-out infinite",
-        "drift-2": "drift-2 20s ease-in-out infinite",
-        "pulse-ring": "pulse-ring 1.6s cubic-bezier(0,0,.2,1) infinite",
+        rise: "rise .6s cubic-bezier(.2,.7,.3,1) both",
+        wave: "wave .7s ease-in-out infinite alternate",
+        ring: "ring 1.8s ease-out infinite",
+        blink: "blink 1.6s ease-in-out infinite",
       },
     },
   },

@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
-import { Sora, Plus_Jakarta_Sans } from "next/font/google";
+import { Bricolage_Grotesque, Instrument_Sans } from "next/font/google";
 import "./globals.css";
 import { Header } from "@/app/components/Header";
 
-const heading = Sora({ subsets: ["latin"], variable: "--font-heading" });
-const body = Plus_Jakarta_Sans({ subsets: ["latin"], variable: "--font-body" });
+const heading = Bricolage_Grotesque({ subsets: ["latin"], variable: "--font-heading" });
+const body = Instrument_Sans({ subsets: ["latin"], variable: "--font-body" });
 
 export const metadata: Metadata = {
   title: "InterviewSim",
@@ -19,7 +19,6 @@ export default function RootLayout({
   return (
     <html lang="fr" className={`${heading.variable} ${body.variable}`}>
       <body>
-        <div className="aurora" aria-hidden />
         <Header />
         {children}
       </body>
