@@ -27,43 +27,45 @@ export function renderScoreCard(input: { poste: string; score: number }): Promis
   const ctx = canvas.getContext("2d");
   if (!ctx) return Promise.reject(new Error("canvas 2d indisponible"));
 
-  // Fond dégradé indigo→corail (charte brand).
-  const grad = ctx.createLinearGradient(0, 0, SIZE, SIZE);
-  grad.addColorStop(0, "#312e81"); // indigo-900
-  grad.addColorStop(0.65, "#4f46e5"); // indigo-600
-  grad.addColorStop(1, "#ff6b5e"); // corail
-  ctx.fillStyle = grad;
+  // Fond « Studio nuit » : bleu-nuit + halo ambre en haut (charte brand).
+  ctx.fillStyle = "#0c1517";
+  ctx.fillRect(0, 0, SIZE, SIZE);
+  const glow = ctx.createRadialGradient(SIZE / 2, -SIZE * 0.15, 0, SIZE / 2, -SIZE * 0.15, SIZE * 0.9);
+  glow.addColorStop(0, "rgba(255,178,36,0.28)");
+  glow.addColorStop(1, "rgba(255,178,36,0)");
+  ctx.fillStyle = glow;
   ctx.fillRect(0, 0, SIZE, SIZE);
 
   ctx.textAlign = "center";
 
   // Label
-  ctx.fillStyle = "rgba(255,255,255,0.85)";
+  ctx.fillStyle = "#7d908f";
   ctx.font = "600 48px sans-serif";
-  ctx.fillText("Score de confiance", SIZE / 2, 360);
+  ctx.fillText("SCORE DE CONFIANCE", SIZE / 2, 360);
 
-  // Score géant
-  ctx.fillStyle = "#ffffff";
+  // Score géant en ambre
+  ctx.fillStyle = "#ffb224";
   ctx.font = "800 300px sans-serif";
   ctx.fillText(`${input.score}`, SIZE / 2, 620);
+  ctx.fillStyle = "#f2efe4";
   ctx.font = "700 72px sans-serif";
   ctx.fillText("/ 100", SIZE / 2, 700);
 
   // Poste (une ligne, tronqué)
-  ctx.fillStyle = "rgba(255,255,255,0.95)";
+  ctx.fillStyle = "#f2efe4";
   ctx.font = "600 52px sans-serif";
   ctx.fillText(fitOneLine(ctx, input.poste, SIZE - 160), SIZE / 2, 800);
 
   // Encouragement
-  ctx.fillStyle = "rgba(255,255,255,0.9)";
+  ctx.fillStyle = "#aebcbb";
   ctx.font = "500 44px sans-serif";
   ctx.fillText(encouragement(input.score), SIZE / 2, 880);
 
   // Wordmark + CTA
-  ctx.fillStyle = "#ffffff";
+  ctx.fillStyle = "#f2efe4";
   ctx.font = "800 56px sans-serif";
   ctx.fillText("InterviewSim", SIZE / 2, 980);
-  ctx.fillStyle = "rgba(255,255,255,0.8)";
+  ctx.fillStyle = "#ffb224";
   ctx.font = "500 36px sans-serif";
   ctx.fillText(`Entraîne-toi gratuitement · ${APP_URL}`, SIZE / 2, 1030);
 

@@ -1,41 +1,43 @@
 import { scoreColor } from "@/lib/scoreColor";
 
-// vert = émeraude volontairement (sémantique universelle du « bon score »), même si la marque est indigo
-const strokeByColor: Record<string, string> = {
-  rouge: "stroke-red-500",
-  ambre: "stroke-amber-500",
-  vert: "stroke-emerald-500",
-};
-const textByColor: Record<string, string> = {
-  rouge: "text-red-600",
-  ambre: "text-amber-600",
-  vert: "text-emerald-600",
+// Bandes de score « Studio nuit » : rouge < 40, ambre < 70, vert ≥ 70.
+export const BAND_HEX: Record<string, string> = {
+  rouge: "#ff5a4e",
+  ambre: "#ffb224",
+  vert: "#34d27b",
 };
 
-/** Jauge circulaire animée — le cercle se remplit jusqu'au score au chargement (CSS pur). */
+/** Grande jauge circulaire animée — le trait se remplit jusqu'au score au chargement (CSS pur). */
 export function ScoreRing({ score }: { score: number }) {
-  const color = scoreColor(score);
-  // viewBox 36x36, r choisi pour une circonférence de ~100 : dashoffset = 100 - score.
+  const hex = BAND_HEX[scoreColor(score)];
+  // r = 54 → circonférence ≈ 339.3 ; dashoffset = 339.3 × (1 - score/100).
   return (
-    <div className="relative grid h-24 w-24 place-items-center" role="img" aria-label={`Score de confiance : ${score} sur 100`}>
-      <svg viewBox="0 0 36 36" className="h-full w-full -rotate-90">
-        <circle cx="18" cy="18" r="15.9155" fill="none" strokeWidth="3.5" className="stroke-slate-200/70" />
+    <div
+      className="relative h-[180px] w-[180px]"
+      role="img"
+      aria-label={`Score de confiance : ${score} sur 100`}
+    >
+      <svg viewBox="0 0 120 120" className="h-full w-full -rotate-90">
+        <circle cx="60" cy="60" r="54" fill="none" strokeWidth="8" stroke="rgba(242,239,228,0.1)" />
         <circle
-          cx="18"
-          cy="18"
-          r="15.9155"
+          cx="60"
+          cy="60"
+          r="54"
           fill="none"
-          strokeWidth="3.5"
+          strokeWidth="8"
           strokeLinecap="round"
-          strokeDasharray="100"
-          strokeDashoffset={100 - score}
-          className={`${strokeByColor[color]} animate-score-fill`}
+          stroke={hex}
+          strokeDasharray="339.3"
+          strokeDashoffset={(339.3 * (1 - score / 100)).toFixed(1)}
+          className="animate-score-fill"
         />
       </svg>
-      <div className={`absolute inset-0 grid place-items-center ${textByColor[color]}`}>
-        <span className="animate-scale-in text-2xl font-bold [animation-delay:.5s]">
+      <div className="absolute inset-0 flex flex-col items-center justify-center">
+        <span className="font-heading text-[52px] font-extrabold leading-none" style={{ color: hex }}>
           {score}
-          <span className="text-xs font-medium opacity-60">/100</span>
+        </span>
+        <span className="mt-1 text-xs font-bold uppercase tracking-[0.14em] text-faint">
+          Score / 100
         </span>
       </div>
     </div>
