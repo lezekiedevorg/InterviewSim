@@ -19,6 +19,7 @@ export default function RootLayout({
   return (
     <html lang="fr" className={`${heading.variable} ${body.variable}`}>
       <body>
+        <div className="aurora" aria-hidden />
         <Header />
         {children}
       </body>
