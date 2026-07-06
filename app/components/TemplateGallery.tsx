@@ -114,10 +114,13 @@ export function TemplateGallery({
           Choisis un scénario prêt
         </h2>
         <div className="flex items-center gap-3">
+          <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-faint sm:hidden">
+            Glisse →
+          </span>
           <span className="hidden text-[11px] font-semibold uppercase tracking-[0.14em] text-faint sm:inline">
             {String(TEMPLATES.length).padStart(2, "0")} scénarios
           </span>
-          <div className="flex gap-2">
+          <div className="hidden gap-2 sm:flex">
             <button type="button" onClick={() => slide(-1)} aria-label="Scénarios précédents" className={arrow}>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4" aria-hidden>
                 <polyline points="15 18 9 12 15 6" />
@@ -140,7 +143,7 @@ export function TemplateGallery({
             key={t.id}
             type="button"
             onClick={() => onPick(t)}
-            className={`flex w-44 shrink-0 snap-start cursor-pointer flex-col items-start gap-3 rounded-2xl border bg-night-700 p-4 text-left transition-all duration-200 hover:-translate-y-0.5 ${
+            className={`flex w-[150px] shrink-0 snap-start cursor-pointer flex-col items-start gap-2.5 rounded-2xl border bg-night-700 p-3.5 text-left transition-all duration-200 hover:-translate-y-0.5 sm:w-44 sm:gap-3 sm:p-4 ${
               selectedId === t.id
                 ? "border-amber-400 bg-amber-400/10"
                 : "border-cream/15 hover:border-amber-400/70"

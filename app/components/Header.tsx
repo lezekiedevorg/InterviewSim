@@ -51,16 +51,23 @@ export function Header() {
             <>
               <Link
                 href="/progression"
-                className="rounded-full px-3 py-1.5 font-semibold text-muted transition-colors duration-200 hover:bg-cream/10 hover:text-cream"
+                className="whitespace-nowrap rounded-full px-2 py-1.5 text-[13px] font-semibold text-muted transition-colors duration-200 hover:bg-cream/10 hover:text-cream sm:px-3 sm:text-sm"
               >
                 Ma progression
               </Link>
-              <span className="hidden text-faint sm:inline">{email}</span>
+              <span className="hidden text-faint lg:inline">{email}</span>
               <button
                 onClick={signOut}
-                className="cursor-pointer rounded-full px-3 py-1.5 font-semibold text-muted transition-colors duration-200 hover:bg-cream/10 hover:text-cream"
+                aria-label="Se déconnecter"
+                className="cursor-pointer rounded-full px-2 py-1.5 font-semibold text-muted transition-colors duration-200 hover:bg-cream/10 hover:text-cream sm:px-3"
               >
-                Se déconnecter
+                {/* mobile : icône seule ; tablette+ : libellé */}
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-[18px] w-[18px] sm:hidden" aria-hidden>
+                  <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                  <polyline points="16 17 21 12 16 7" />
+                  <line x1="21" y1="12" x2="9" y2="12" />
+                </svg>
+                <span className="hidden sm:inline">Se déconnecter</span>
               </button>
             </>
           ) : (

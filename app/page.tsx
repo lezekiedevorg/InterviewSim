@@ -158,7 +158,7 @@ export default function Home() {
         {STEPS.map((s, i) => (
           <li key={s.key} className="flex items-center gap-2 sm:gap-3">
             <span
-              className={`flex items-center gap-2 rounded-full px-3 py-1.5 uppercase tracking-[0.08em] transition-all duration-300 ${
+              className={`flex items-center gap-1.5 whitespace-nowrap rounded-full px-2.5 py-1 text-[10px] uppercase tracking-[0.06em] transition-all duration-300 sm:gap-2 sm:px-3 sm:py-1.5 sm:text-xs sm:tracking-[0.08em] ${
                 i === activeStep
                   ? "bg-amber-400 text-amber-ink shadow-cta"
                   : i < activeStep
@@ -183,7 +183,7 @@ export default function Home() {
             </span>
             {i < STEPS.length - 1 && (
               <span
-                className={`h-0.5 w-4 rounded-full transition-colors duration-300 sm:w-8 ${
+                className={`h-0.5 w-2 rounded-full transition-colors duration-300 sm:w-8 ${
                   i < activeStep ? "bg-amber-400/50" : "bg-cream/15"
                 }`}
               />
@@ -195,14 +195,17 @@ export default function Home() {
       {phase === "form" && (
         <div className="stagger">
           <div className="mb-10 text-center">
-            <p className="mb-5 text-xs font-semibold uppercase tracking-[0.2em] text-amber-400">
-              Entretien vocal · Recruteur IA · En direct
+            <p className="mb-5 text-[10.5px] font-bold uppercase tracking-[0.18em] text-amber-400 sm:text-xs sm:tracking-[0.2em]">
+              Entretien vocal · Recruteur IA<span className="hidden sm:inline"> · En direct</span>
             </p>
             <h1 className="mx-auto max-w-3xl font-heading text-[clamp(2.5rem,9vw,4.8rem)] font-extrabold leading-none tracking-[-0.03em] text-cream [text-wrap:balance]">
               Rate tes entretiens ici.{" "}
               <span className="text-amber-400">Réussis le vrai.</span>
             </h1>
-            <div className="mt-7">
+            <div className="mt-5 sm:hidden">
+              <VoiceWave bars={18} height={40} />
+            </div>
+            <div className="mt-7 hidden sm:block">
               <VoiceWave />
             </div>
             <p className="mx-auto mt-6 max-w-xl text-base leading-relaxed text-muted sm:text-lg">
@@ -279,6 +282,23 @@ export default function Home() {
                 questions croisées
               </span>
             </label>
+            {/* Desktop : CTA dans la carte */}
+            <div className="hidden sm:block">
+              <Button size="lg" className="w-full" disabled={formErrors.length > 0} onClick={startInterview}>
+                Démarrer l&apos;entretien
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5" aria-hidden>
+                  <line x1="4" y1="12" x2="20" y2="12" />
+                  <polyline points="13 5 20 12 13 19" />
+                </svg>
+              </Button>
+              <p className="mt-3 text-center text-[11px] font-semibold uppercase tracking-[0.1em] text-faint">
+                Sans inscription · Voix ou texte · Audio léger
+              </p>
+            </div>
+          </Card>
+
+          {/* Mobile : CTA collé en bas de l'écran, avec fondu vers le contenu */}
+          <div className="sticky bottom-0 z-10 -mx-4 bg-gradient-to-t from-night-900 from-55% to-transparent px-4 pb-6 pt-4 sm:hidden">
             <Button size="lg" className="w-full" disabled={formErrors.length > 0} onClick={startInterview}>
               Démarrer l&apos;entretien
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5" aria-hidden>
@@ -286,10 +306,7 @@ export default function Home() {
                 <polyline points="13 5 20 12 13 19" />
               </svg>
             </Button>
-            <p className="mt-3 text-center text-[11px] font-semibold uppercase tracking-[0.1em] text-faint">
-              Sans inscription · Voix ou texte · Audio léger
-            </p>
-          </Card>
+          </div>
         </div>
       )}
 

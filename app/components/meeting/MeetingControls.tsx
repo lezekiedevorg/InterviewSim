@@ -32,10 +32,12 @@ type Props = {
   onToggleHandsFree: () => void;
 };
 
+// Mobile : rond icône-seule (48px). Tablette et plus : pilule avec libellé.
 const pill =
-  "flex min-h-[44px] cursor-pointer items-center gap-1.5 rounded-full border px-4 py-2 text-[13px] font-semibold transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-40";
+  "flex h-12 w-12 cursor-pointer items-center justify-center gap-1.5 rounded-full border text-[13px] font-semibold transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-40 sm:h-auto sm:w-auto sm:min-h-[44px] sm:px-4 sm:py-2";
 const pillOn = "border-amber-400 bg-amber-400 text-amber-ink";
 const pillOff = "border-cream/[0.18] bg-night-700 text-muted hover:border-amber-400/60 hover:text-cream";
+const pillLabel = "hidden sm:inline";
 
 export function MeetingControls({
   muted,
@@ -71,18 +73,20 @@ export function MeetingControls({
           type="button"
           onClick={onToggleMute}
           disabled={!speechSupported}
+          aria-label={muted ? "Réactiver le son" : "Couper le son"}
           className={`${pill} ${muted ? "border-cream/[0.18] bg-night-700 text-danger-400" : pillOff}`}
         >
           {muted ? <VolumeOffIcon /> : <VolumeIcon />}
-          {muted ? "Son coupé" : "Son"}
+          <span className={pillLabel}>{muted ? "Son coupé" : "Son"}</span>
         </button>
         <button
           type="button"
           onClick={onToggleTranscript}
+          aria-label="Transcription"
           className={`${pill} ${showTranscript ? pillOn : pillOff}`}
         >
           <MessageIcon />
-          Transcription
+          <span className={pillLabel}>Transcription</span>
         </button>
         {recognitionSupported && (
           <button
@@ -103,24 +107,31 @@ export function MeetingControls({
           <button
             type="button"
             onClick={onToggleHandsFree}
+            aria-label="Mains-libres"
             className={`${pill} ${handsFree ? pillOn : pillOff}`}
           >
             <RadioIcon />
-            Mains-libres
+            <span className={pillLabel}>Mains-libres</span>
           </button>
         )}
-        <button type="button" onClick={onToggleCamera} className={`${pill} ${cameraOn ? pillOn : pillOff}`}>
+        <button
+          type="button"
+          onClick={onToggleCamera}
+          aria-label="Caméra"
+          className={`${pill} ${cameraOn ? pillOn : pillOff}`}
+        >
           <VideoIcon />
-          Caméra
+          <span className={pillLabel}>Caméra</span>
         </button>
         <button
           type="button"
           onClick={onFinish}
           disabled={streaming}
+          aria-label="Terminer l'entretien"
           className={`${pill} border-danger-600 bg-danger-600 font-bold text-white hover:bg-danger-400 hover:border-danger-400`}
         >
           <PhoneOffIcon />
-          Terminer
+          <span className={pillLabel}>Terminer</span>
         </button>
       </div>
       <div className="flex items-end gap-2.5">
@@ -132,7 +143,7 @@ export function MeetingControls({
           onChange={(e) => onAnswerChange(e.target.value)}
           onKeyDown={onKeyDown}
           rows={1}
-          placeholder="Ou écris ta réponse ici…  (Entrée pour envoyer)"
+          placeholder="Ou écris ta réponse ici…"
         />
         <button
           type="button"

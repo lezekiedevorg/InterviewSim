@@ -13,7 +13,7 @@ export function ScoreRing({ score }: { score: number }) {
   // r = 54 → circonférence ≈ 339.3 ; dashoffset = 339.3 × (1 - score/100).
   return (
     <div
-      className="relative h-[180px] w-[180px]"
+      className="relative h-[150px] w-[150px] sm:h-[180px] sm:w-[180px]"
       role="img"
       aria-label={`Score de confiance : ${score} sur 100`}
     >
@@ -33,7 +33,7 @@ export function ScoreRing({ score }: { score: number }) {
         />
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center">
-        <span className="font-heading text-[52px] font-extrabold leading-none" style={{ color: hex }}>
+        <span className="font-heading text-[42px] font-extrabold leading-none sm:text-[52px]" style={{ color: hex }}>
           {score}
         </span>
         <span className="mt-1 text-xs font-bold uppercase tracking-[0.14em] text-faint">
