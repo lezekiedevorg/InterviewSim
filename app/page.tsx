@@ -210,36 +210,44 @@ export default function Home() {
           <TemplateGallery onPick={pickTemplate} selectedId={templateId} />
 
           <Card>
-            <div className="grid gap-x-4 sm:grid-cols-2">
-              <div className="sm:col-span-2">
-                <Field label="Poste visé *" value={context.poste}
-                  placeholder="Ex : Développeur back-end"
-                  onChange={(v) => setContext({ ...context, poste: v })} />
+            <Field label="Poste visé *" value={context.poste}
+              placeholder="Ex : Développeur back-end, stagiaire marketing…"
+              onChange={(v) => setContext({ ...context, poste: v })} />
+
+            {/* Champs optionnels repliés : le formulaire visible tient en 4 lignes */}
+            <details className="group mb-4">
+              <summary className="flex cursor-pointer list-none items-center gap-1.5 text-sm font-medium text-brand-700 transition-colors hover:text-brand-800 [&::-webkit-details-marker]:hidden">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4 transition-transform duration-200 group-open:rotate-90" aria-hidden>
+                  <polyline points="9 18 15 12 9 6" />
+                </svg>
+                Personnaliser mon entretien (CV, offre, niveau…) — recommandé
+              </summary>
+              <div className="mt-4 grid gap-x-4 sm:grid-cols-2">
+                <Field label="Entreprise / type" value={context.entreprise ?? ""}
+                  placeholder="Ex : Startup fintech"
+                  onChange={(v) => setContext({ ...context, entreprise: v })} />
+                <Field label="Domaine" value={context.domaine ?? ""}
+                  placeholder="Ex : Paiement en ligne"
+                  onChange={(v) => setContext({ ...context, domaine: v })} />
+                <Field label="Niveau" value={context.niveau ?? ""}
+                  placeholder="Junior, confirmé, senior…"
+                  onChange={(v) => setContext({ ...context, niveau: v })} />
+                <Field label="Langue" value={context.langue ?? ""}
+                  placeholder="Français"
+                  onChange={(v) => setContext({ ...context, langue: v })} />
+                <div className="sm:col-span-2">
+                  <Field label="CV (collé)" value={context.cv} textarea rows={4}
+                    placeholder="Colle ici le texte de ton CV…"
+                    hint="Copié-collé brut, la mise en forme n'a pas d'importance."
+                    onChange={(v) => setContext({ ...context, cv: v })} />
+                </div>
+                <div className="sm:col-span-2">
+                  <Field label="Offre d'emploi (collée)" value={context.offre ?? ""} textarea rows={4}
+                    placeholder="Optionnel — colle l'offre pour un entretien plus ciblé."
+                    onChange={(v) => setContext({ ...context, offre: v })} />
+                </div>
               </div>
-              <Field label="Entreprise / type" value={context.entreprise ?? ""}
-                placeholder="Ex : Startup fintech"
-                onChange={(v) => setContext({ ...context, entreprise: v })} />
-              <Field label="Domaine" value={context.domaine ?? ""}
-                placeholder="Ex : Paiement en ligne"
-                onChange={(v) => setContext({ ...context, domaine: v })} />
-              <Field label="Niveau" value={context.niveau ?? ""}
-                placeholder="Junior, confirmé, senior…"
-                onChange={(v) => setContext({ ...context, niveau: v })} />
-              <Field label="Langue" value={context.langue ?? ""}
-                placeholder="Français"
-                onChange={(v) => setContext({ ...context, langue: v })} />
-              <div className="sm:col-span-2">
-                <Field label="CV (collé)" value={context.cv} textarea rows={5}
-                  placeholder="Colle ici le texte de ton CV…"
-                  hint="Copié-collé brut, la mise en forme n'a pas d'importance."
-                  onChange={(v) => setContext({ ...context, cv: v })} />
-              </div>
-              <div className="sm:col-span-2">
-                <Field label="Offre d'emploi (collée)" value={context.offre ?? ""} textarea rows={5}
-                  placeholder="Optionnel — colle l'offre pour un entretien plus ciblé."
-                  onChange={(v) => setContext({ ...context, offre: v })} />
-              </div>
-            </div>
+            </details>
             {/* L'erreur n'apparaît que si l'utilisateur a tapé quelque chose d'invalide,
                 pas à l'arrivée sur la page (le bouton grisé suffit comme garde-fou). */}
             {formErrors.length > 0 && context.poste !== "" && (
