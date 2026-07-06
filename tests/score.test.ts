@@ -32,6 +32,10 @@ describe("capNote", () => {
     expect(capNote(90, "   ")).toBe(PLAFOND_SANS_PREUVE);
     expect(capNote(30, "")).toBe(30); // sous le plafond : inchangé
   });
+  it("bornes exactes du plafond : 40 sans preuve reste 40, 0 négatif sans preuve reste 0", () => {
+    expect(capNote(40, "")).toBe(40);
+    expect(capNote(-5, "")).toBe(0);
+  });
 });
 
 describe("computeScore", () => {
@@ -55,6 +59,23 @@ describe("computeScore", () => {
     // 100 partout sauf concret (poids 25) à 0 → 75
     expect(computeScore(sansConcret)).toBe(75);
   });
+  it("en cas d'ID dupliqué, la première occurrence gagne", () => {
+    const doublon: CritereNote[] = [
+      ...criteresAvecNote(60),
+      { id: "concret", note: 100, preuve: "p", commentaire: "" },
+    ];
+    expect(computeScore(doublon)).toBe(60);
+  });
+  it("re-borne une note hors limites passée sans capNote", () => {
+    const triche = criteresAvecNote(60).map((c) =>
+      c.id === "concret" ? { ...c, note: 999 } : c
+    );
+    // concret compté 100 au lieu de 999 : 60*75/100 + 100*25/100 = 70
+    expect(computeScore(triche)).toBe(70);
+  });
+  it("liste vide → 0", () => {
+    expect(computeScore([])).toBe(0);
+  });
 });
 
 describe("estTropCourt", () => {
@@ -72,5 +93,8 @@ describe("estTropCourt", () => {
   });
   it("ignore les réponses candidat vides ou blanches", () => {
     expect(estTropCourt([c("r1"), c("   "), c("r2"), c("")])).toBe(true);
+  });
+  it("transcript vide → trop court", () => {
+    expect(estTropCourt([])).toBe(true);
   });
 });

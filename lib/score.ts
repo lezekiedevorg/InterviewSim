@@ -23,11 +23,14 @@ export function capNote(note: number, preuve: string): number {
 
 // Score global = moyenne pondérée des 5 critères. C'est NOTRE code qui calcule,
 // jamais le modèle (il ne peut plus « offrir » un global incohérent avec son détail).
+// Défenses : en cas d'IDs dupliqués la PREMIÈRE occurrence gagne ; chaque note est
+// re-bornée dans [0, 100] même si l'appelant a oublié capNote.
 export function computeScore(criteres: CritereNote[]): number {
   let total = 0;
   for (const c of CRITERES) {
     const trouve = criteres.find((x) => x.id === c.id);
-    total += (trouve ? trouve.note : 0) * c.poids;
+    const note = trouve ? Math.max(0, Math.min(100, trouve.note)) : 0;
+    total += note * c.poids;
   }
   return Math.round(total / 100);
 }
