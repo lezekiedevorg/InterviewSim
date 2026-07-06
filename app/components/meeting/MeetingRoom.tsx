@@ -99,11 +99,17 @@ export function MeetingRoom({
   }
 
   // Mains-libres : chaque mot reconnu réarme le minuteur de silence ; à échéance -> envoi auto (via detector).
+  // On bump `rec.transcript` (texte reconnu brut) : la garde non-vide porte donc sur la parole, pas sur le champ.
+  // Volontaire — pas d'envoi auto sur pur silence même si du texte a été tapé (l'envoi utilise bien currentAnswer via sendAnswer).
   useEffect(() => {
     const d = detectorRef.current!;
     if (handsFree && rec.listening) d.bump(rec.transcript);
     else d.cancel();
   }, [handsFree, rec.listening, rec.transcript]);
+
+  // Annule tout minuteur de silence en cours au démontage (ex. clic « Terminer » pendant l'écoute) :
+  // sinon le tir différé déclencherait un envoi fantôme sur l'écran de débrief.
+  useEffect(() => () => detectorRef.current?.cancel(), []);
 
   // Mains-libres : rouvrir le micro tout seul quand le recruteur a fini (anti-rebond contre les micro-coupures d'isSpeaking).
   // Deps = uniquement des primitives + rec.start (stable, useCallback[]) — surtout PAS `rec` ni `currentAnswer`,
