@@ -26,27 +26,36 @@ export function Header() {
   }
 
   return (
-    <header className="sticky top-0 z-20 border-b border-slate-200/70 bg-white/80 backdrop-blur-md">
-      <div className="mx-auto flex max-w-3xl items-center justify-between px-4 py-3">
+    <header className="sticky top-3 z-20 px-3">
+      <div className="mx-auto flex max-w-3xl items-center justify-between rounded-2xl border border-white/70 bg-white/80 px-4 py-2.5 shadow-card ring-1 ring-brand-600/5 backdrop-blur-xl">
         <Link href="/" className="group flex items-center gap-2 font-heading text-lg font-bold text-slate-900">
-          <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-brand-600 text-sm text-white shadow-brand transition-transform group-hover:scale-105">
+          <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-br from-brand-600 to-accent-500 text-sm text-white shadow-brand transition-transform duration-200 group-hover:scale-105 group-hover:rotate-3">
             IS
           </span>
-          Interview<span className="text-brand-600">Sim</span>
+          Interview<span className="text-gradient">Sim</span>
         </Link>
         <nav className="flex items-center gap-3 text-sm">
           {email ? (
             <>
-              <Link href="/progression" className="text-slate-600 hover:text-slate-900">
+              <Link
+                href="/progression"
+                className="rounded-lg px-2 py-1 text-slate-600 transition-colors duration-200 hover:bg-brand-50 hover:text-brand-700"
+              >
                 Ma progression
               </Link>
               <span className="hidden text-slate-400 sm:inline">{email}</span>
-              <button onClick={signOut} className="text-slate-600 hover:text-slate-900">
+              <button
+                onClick={signOut}
+                className="cursor-pointer rounded-lg px-2 py-1 text-slate-600 transition-colors duration-200 hover:bg-slate-100 hover:text-slate-900"
+              >
                 Se déconnecter
               </button>
             </>
           ) : (
-            <Link href="/login" className="font-medium text-brand-700 hover:text-brand-800">
+            <Link
+              href="/login"
+              className="rounded-xl bg-gradient-to-r from-brand-600 to-accent-500 px-4 py-1.5 font-semibold text-white shadow-brand transition-all duration-200 hover:shadow-glow hover:brightness-105"
+            >
               Se connecter
             </Link>
           )}

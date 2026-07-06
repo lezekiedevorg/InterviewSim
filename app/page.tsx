@@ -157,34 +157,53 @@ export default function Home() {
         {STEPS.map((s, i) => (
           <li key={s.key} className="flex items-center gap-2 sm:gap-3">
             <span
-              className={`flex items-center gap-2 rounded-full px-3 py-1 transition-colors ${
+              className={`flex items-center gap-2 rounded-full px-3 py-1.5 transition-all duration-300 ${
                 i === activeStep
-                  ? "bg-brand-600 text-white shadow-brand"
+                  ? "bg-gradient-to-r from-brand-600 to-accent-500 text-white shadow-brand"
                   : i < activeStep
                   ? "bg-brand-100 text-brand-700"
-                  : "bg-slate-100 text-slate-400"
+                  : "bg-white/70 text-slate-400 ring-1 ring-slate-200"
               }`}
             >
               <span className="grid h-4 w-4 place-items-center rounded-full bg-white/25 text-[10px]">
-                {i < activeStep ? "✓" : i + 1}
+                {i < activeStep ? (
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="h-2.5 w-2.5" aria-hidden>
+                    <polyline points="20 6 9 17 4 12" />
+                  </svg>
+                ) : (
+                  i + 1
+                )}
               </span>
               {s.label}
             </span>
-            {i < STEPS.length - 1 && <span className="h-px w-4 bg-slate-200 sm:w-8" />}
+            {i < STEPS.length - 1 && (
+              <span
+                className={`h-0.5 w-4 rounded-full transition-colors duration-300 sm:w-8 ${
+                  i < activeStep ? "bg-brand-300" : "bg-slate-200"
+                }`}
+              />
+            )}
           </li>
         ))}
       </ol>
 
       {phase === "form" && (
-        <div className="animate-rise">
-          <div className="mb-8 text-center">
-            <h1 className="font-heading text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
-              Passe l&apos;entretien <span className="text-brand-600">avant</span>{" "}l&apos;entretien.
+        <div className="stagger">
+          <div className="mb-10 text-center">
+            <p className="mb-4 inline-flex items-center gap-1.5 rounded-full border border-brand-200 bg-brand-50/80 px-3 py-1 text-xs font-semibold text-brand-700">
+              <span className="relative flex h-2 w-2">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-brand-400 opacity-75" />
+                <span className="relative inline-flex h-2 w-2 rounded-full bg-brand-500" />
+              </span>
+              Gratuit · illimité · sans jugement
+            </p>
+            <h1 className="font-heading text-4xl font-bold tracking-tight text-slate-900 sm:text-5xl">
+              Passe l&apos;entretien{" "}
+              <span className="text-gradient">avant l&apos;entretien</span>.
             </h1>
-            <p className="mx-auto mt-3 max-w-xl text-slate-600">
+            <p className="mx-auto mt-4 max-w-xl text-base text-slate-600 sm:text-lg">
               Un recruteur IA te fait passer une simulation sur mesure à partir de ton profil
-              (CV optionnel), puis te livre un débrief actionnable. Sans jugement, autant de fois
-              que tu veux.
+              (CV optionnel), puis te livre un débrief actionnable. Autant de fois que tu veux.
             </p>
           </div>
 
