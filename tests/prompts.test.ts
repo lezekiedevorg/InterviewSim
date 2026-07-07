@@ -152,9 +152,9 @@ describe("difficulté injectée dans les prompts", () => {
 
   it("non-régression : sans difficulté ou en réaliste, les prompts sont inchangés", () => {
     expect(buildRecruiterPrompt(ctx)).toBe(buildRecruiterPrompt({ ...ctx, difficulte: "realiste" }));
-    expect(buildRecruiterPrompt(ctx)).not.toContain("Attitude imposée pour cet entretien");
+    expect(buildRecruiterPrompt(ctx)).not.toContain("Attitude imposée");
     expect(buildJuryPrompt(ctx)).toBe(buildJuryPrompt({ ...ctx, difficulte: "realiste" }));
-    expect(buildJuryPrompt(ctx)).not.toContain("Attitude imposée pour cet entretien");
+    expect(buildJuryPrompt(ctx)).not.toContain("Attitude imposée");
   });
 
   it("le prompt débrief ignore totalement la difficulté", () => {
