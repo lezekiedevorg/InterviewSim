@@ -1,9 +1,5 @@
-import {
-  EDGE_SOLO_VOICES,
-  EDGE_JURY_PACKS,
-  DEFAULT_SOLO_VOICE_ID,
-  DEFAULT_JURY_PACK_ID,
-} from "./edgeVoices";
+import { EDGE_JURY_PACKS, DEFAULT_SOLO_VOICE_ID, DEFAULT_JURY_PACK_ID } from "./edgeVoices";
+import { SOLO_VOICES } from "./pocketVoices";
 
 export type VoicePref = { soloId: string; packId: string };
 
@@ -12,7 +8,7 @@ const PACK_KEY = "interviewsim.voice.juryPack";
 
 // Valide des valeurs brutes (localStorage) contre les catalogues connus ; inconnu → défaut.
 export function resolveVoicePref(rawSolo: string | null, rawPack: string | null): VoicePref {
-  const soloId = EDGE_SOLO_VOICES.some((v) => v.id === rawSolo) ? rawSolo! : DEFAULT_SOLO_VOICE_ID;
+  const soloId = SOLO_VOICES.some((v) => v.id === rawSolo) ? rawSolo! : DEFAULT_SOLO_VOICE_ID;
   const packId = EDGE_JURY_PACKS.some((p) => p.id === rawPack) ? rawPack! : DEFAULT_JURY_PACK_ID;
   return { soloId, packId };
 }
