@@ -6,12 +6,15 @@ export type InterviewContext = {
   langue?: string;
   cv: string;
   offre?: string;
+  difficulte?: DifficulteId;
 };
 
 export type ChatMessage = {
   role: "recruiter" | "candidate";
   text: string;
 };
+
+export type DifficulteId = "detendu" | "realiste" | "sans-pitie";
 
 export type CritereId = "structure" | "concret" | "adequation" | "communication" | "pression";
 
