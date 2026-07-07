@@ -45,7 +45,8 @@ describe("askModel — modèle et effort de réflexion", () => {
   });
 
   it("askModelStream envoie reasoning_effort low et stream true", async () => {
-    const fn = stubFetch({ body: sseBody() });
+    // Cast : TS distingue Uint8Array<ArrayBuffer> (Response.body) de celui de TextEncoder.
+    const fn = stubFetch({ body: sseBody() as NonNullable<Response["body"]> });
     const out: string[] = [];
     for await (const t of askModelStream("sys", [])) out.push(t);
     expect(out.join("")).toBe("ok");
