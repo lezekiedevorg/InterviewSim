@@ -195,13 +195,13 @@ ${contextLines(ctx)}
 Insérer ENTRE la ligne IMPORTANT et `${contextLines(ctx)}` (avec une ligne vide de chaque côté) :
 
 ```
-RÈGLE D'OR (elle domine TOUT le reste, y compris l'« Attitude imposée » s'il y en a une) : chaque réplique fait 2 à 4 phrases orales MAXIMUM et pose UNE SEULE question — un seul point d'interrogation. Si plusieurs points méritent d'être creusés, choisis le plus important ; les autres attendront les prochains tours.
+RÈGLE D'OR (elle domine TOUT le reste, y compris les consignes de difficulté s'il y en a) : chaque réplique fait 2 à 4 phrases orales MAXIMUM et pose UNE SEULE question — un seul point d'interrogation. Si plusieurs points méritent d'être creusés, choisis le plus important ; les autres attendront les prochains tours.
 ```
 
 Faire EXACTEMENT la même insertion dans `buildJuryPrompt` (même position : entre sa ligne IMPORTANT et son `${contextLines(ctx)}`), avec la variante jury :
 
 ```
-RÈGLE D'OR (elle domine TOUT le reste, y compris l'« Attitude imposée » s'il y en a une) : la réplique du persona qui parle fait 2 à 4 phrases orales MAXIMUM et pose UNE SEULE question — un seul point d'interrogation. Si plusieurs points méritent d'être creusés, choisis le plus important ; les autres attendront les prochains tours.
+RÈGLE D'OR (elle domine TOUT le reste, y compris les consignes de difficulté s'il y en a) : la réplique du persona qui parle fait 2 à 4 phrases orales MAXIMUM et pose UNE SEULE question — un seul point d'interrogation. Si plusieurs points méritent d'être creusés, choisis le plus important ; les autres attendront les prochains tours.
 ```
 
 Ne toucher à RIEN d'autre : ni au bloc `${attitude}`, ni aux listes « Règles : », ni à `buildDebriefPrompt`.
