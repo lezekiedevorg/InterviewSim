@@ -3,7 +3,7 @@ import type { ChatMessage } from "./types";
 // Groq : tier gratuit à quota PAR CLÉ (pas un pool partagé comme OpenRouter :free),
 // donc pas de 429 dès qu'un autre utilisateur sature. OpenAI-compatible.
 const ENDPOINT = "https://api.groq.com/openai/v1/chat/completions";
-const MODEL = "llama-3.3-70b-versatile";
+const MODEL = "openai/gpt-oss-120b";
 
 function apiKey(): string {
   const key = process.env.GROQ_API_KEY;
@@ -37,6 +37,11 @@ async function post(
       model: MODEL,
       messages: toMessages(systemPrompt, history),
       stream,
+      // gpt-oss : réfléchit peu quand il parle en direct (latence voix), davantage quand il corrige.
+      // Envoyé seulement pour gpt-oss : un repli vers llama rejetterait ce paramètre.
+      ...(MODEL.startsWith("openai/gpt-oss") && {
+        reasoning_effort: stream ? "low" : "medium",
+      }),
       // Température imposée uniquement quand demandé (débrief : 0 → correcteur froid et régulier)
       ...(temperature !== undefined && { temperature }),
     }),
