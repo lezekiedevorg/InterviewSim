@@ -36,6 +36,8 @@ def ffmpeg_exe() -> str:
 @app.on_event("startup")
 def load() -> None:
     global MODEL
+    # Mesuré sur HF Spaces cpu-basic (2026-07-07) : RTF ~1.75 sans quantize, ~2.5 AVEC
+    # (pas de kernels int8 rapides sur ce CPU) — donc pas de quantize. GO attendu sur VPS.
     MODEL = TTSModel.load_model(language="french_24l")
     for vid, src in VOICE_SOURCES.items():
         if isinstance(src, Path) and not src.exists():
