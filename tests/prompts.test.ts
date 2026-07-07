@@ -152,14 +152,43 @@ describe("difficulté injectée dans les prompts", () => {
 
   it("non-régression : sans difficulté ou en réaliste, les prompts sont inchangés", () => {
     expect(buildRecruiterPrompt(ctx)).toBe(buildRecruiterPrompt({ ...ctx, difficulte: "realiste" }));
-    expect(buildRecruiterPrompt(ctx)).not.toContain("Attitude imposée");
+    expect(buildRecruiterPrompt(ctx)).not.toContain("Attitude imposée pour cet entretien");
     expect(buildJuryPrompt(ctx)).toBe(buildJuryPrompt({ ...ctx, difficulte: "realiste" }));
-    expect(buildJuryPrompt(ctx)).not.toContain("Attitude imposée");
+    expect(buildJuryPrompt(ctx)).not.toContain("Attitude imposée pour cet entretien");
   });
 
   it("le prompt débrief ignore totalement la difficulté", () => {
     const p = buildDebriefPrompt({ ...ctx, difficulte: "sans-pitie" }, transcript);
     expect(p).not.toContain("Venons-en au fait");
     expect(p).not.toContain("Attitude imposée");
+  });
+});
+
+describe("règle d'or — une seule question par réplique", () => {
+  const transcript: ChatMessage[] = [
+    { role: "recruiter", text: "Parlez-moi de vous." },
+    { role: "candidate", text: "Je suis développeur." },
+  ];
+
+  it("recruteur : la règle d'or est présente, AVANT le contexte", () => {
+    const p = buildRecruiterPrompt(ctx);
+    expect(p).toContain("RÈGLE D'OR");
+    expect(p).toContain("UNE SEULE question");
+    expect(p.indexOf("RÈGLE D'OR")).toBeLessThan(p.indexOf("Poste visé"));
+  });
+
+  it("jury : la règle d'or est présente aussi", () => {
+    const p = buildJuryPrompt(ctx);
+    expect(p).toContain("RÈGLE D'OR");
+    expect(p).toContain("UNE SEULE question");
+  });
+
+  it("la règle d'or précède le bloc d'attitude de la difficulté (elle le domine)", () => {
+    const p = buildRecruiterPrompt({ ...ctx, difficulte: "sans-pitie" });
+    expect(p.indexOf("RÈGLE D'OR")).toBeLessThan(p.indexOf("Attitude imposée"));
+  });
+
+  it("le prompt débrief ne contient PAS la règle d'or", () => {
+    expect(buildDebriefPrompt(ctx, transcript)).not.toContain("RÈGLE D'OR");
   });
 });

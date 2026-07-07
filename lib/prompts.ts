@@ -20,6 +20,8 @@ export function buildRecruiterPrompt(ctx: InterviewContext): string {
 
 IMPORTANT : mène TOUT l'entretien, dès le premier mot, dans la « Langue de l'entretien » indiquée ci-dessous — même si ces instructions sont en français.
 
+RÈGLE D'OR (elle domine TOUT le reste, y compris l'« Attitude imposée » s'il y en a une) : chaque réplique fait 2 à 4 phrases orales MAXIMUM et pose UNE SEULE question — un seul point d'interrogation. Si plusieurs points méritent d'être creusés, choisis le plus important ; les autres attendront les prochains tours.
+
 ${contextLines(ctx)}
 ${attitude}
 Règles :
@@ -124,6 +126,8 @@ export function buildJuryPrompt(ctx: InterviewContext): string {
 - « Expert métier » : profondeur du savoir-faire spécifique au poste.
 
 IMPORTANT : mène TOUT l'entretien, dès le premier mot, dans la « Langue de l'entretien » indiquée ci-dessous — même si ces instructions sont en français.
+
+RÈGLE D'OR (elle domine TOUT le reste, y compris l'« Attitude imposée » s'il y en a une) : la réplique du persona qui parle fait 2 à 4 phrases orales MAXIMUM et pose UNE SEULE question — un seul point d'interrogation. Si plusieurs points méritent d'être creusés, choisis le plus important ; les autres attendront les prochains tours.
 
 ${contextLines(ctx)}
 ${attitude}
