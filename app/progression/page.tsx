@@ -17,6 +17,7 @@ import { Debrief } from "@/app/components/Debrief";
 import { ShareScoreButton } from "@/app/components/ShareScoreButton";
 import { CrossAnalysis } from "@/app/components/CrossAnalysis";
 import type { CrossAnalysis as CrossAnalysisType } from "@/lib/types";
+import { difficulteLabel } from "@/lib/difficulte";
 
 export default function ProgressionPage() {
   const [sessions, setSessions] = useState<SavedSession[] | null>(null);
@@ -186,7 +187,9 @@ export default function ProgressionPage() {
               <div className="min-w-0">
                 <p className="truncate font-semibold text-cream">{r.poste}</p>
                 <p className="text-xs text-faint">
-                  {new Date(r.created_at).toLocaleDateString("fr-FR")}
+                  {[new Date(r.created_at).toLocaleDateString("fr-FR"), difficulteLabel(r.context?.difficulte)]
+                    .filter(Boolean)
+                    .join(" · ")}
                 </p>
               </div>
               <div className="flex shrink-0 items-center gap-2.5">

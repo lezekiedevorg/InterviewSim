@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import { MeetingRoom } from "@/app/components/meeting/MeetingRoom";
-import type { InterviewContext, ChatMessage, Debrief } from "@/lib/types";
+import type { InterviewContext, ChatMessage, Debrief, DifficulteId } from "@/lib/types";
+import { DIFFICULTES } from "@/lib/difficulte";
 import { validateContext } from "@/lib/validate";
 import { Button } from "@/app/components/ui/Button";
 import { Card } from "@/app/components/ui/Card";
@@ -34,6 +35,7 @@ export default function Home() {
   const [saveMsg, setSaveMsg] = useState<string | null>(null);
   const [templateId, setTemplateId] = useState<string | null>(null);
   const [jury, setJury] = useState(false);
+  const [difficulte, setDifficulte] = useState<DifficulteId>("realiste");
   const [tooShort, setTooShort] = useState(false);
 
   function pickTemplate(t: Template) {
@@ -58,7 +60,7 @@ export default function Home() {
       const res = await fetch("/api/interview", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ context, history: nextHistory, jury }),
+        body: JSON.stringify({ context: { ...context, difficulte }, history: nextHistory, jury }),
       });
       if (!res.ok) {
         const txt = await res.text();
@@ -139,6 +141,7 @@ export default function Home() {
                 domaine: context.domaine,
                 niveau: context.niveau,
                 langue: context.langue,
+                difficulte,
               },
               debrief: data.debrief,
               score_confiance: data.debrief.scoreConfiance,
@@ -276,6 +279,31 @@ export default function Home() {
             {formErrors.length > 0 && context.poste !== "" && (
               <p className="mb-3 text-sm text-danger-400">{formErrors.join(" ")}</p>
             )}
+            <div className="mb-4">
+              <span className="mb-1.5 block text-[11px] font-bold uppercase tracking-[0.14em] text-faint">
+                Difficulté
+              </span>
+              <div className="flex flex-wrap gap-2">
+                {DIFFICULTES.map((d) => (
+                  <button
+                    key={d.id}
+                    type="button"
+                    onClick={() => setDifficulte(d.id)}
+                    aria-pressed={difficulte === d.id}
+                    className={`min-h-[44px] cursor-pointer rounded-full px-4 py-2 text-[13px] font-semibold transition-all duration-200 ${
+                      difficulte === d.id
+                        ? "bg-amber-400 text-amber-ink"
+                        : "bg-night-700 text-muted ring-1 ring-cream/15 hover:text-cream"
+                    }`}
+                  >
+                    {d.label}
+                  </button>
+                ))}
+              </div>
+              <p className="mt-1.5 text-[13px] leading-snug text-muted">
+                {DIFFICULTES.find((d) => d.id === difficulte)?.description}
+              </p>
+            </div>
             <label className="mb-4 flex items-start gap-2.5 text-sm leading-snug text-muted">
               <input
                 type="checkbox"
