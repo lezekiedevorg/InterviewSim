@@ -1,5 +1,6 @@
 import type { InterviewContext, ChatMessage, SessionSummary, CritereId } from "./types";
 import { CRITERES } from "./score";
+import { difficulteBloc } from "./difficulte";
 
 function contextLines(ctx: InterviewContext): string {
   const parts = [`Poste visé : ${ctx.poste}`];
@@ -13,12 +14,14 @@ function contextLines(ctx: InterviewContext): string {
 }
 
 export function buildRecruiterPrompt(ctx: InterviewContext): string {
+  const bloc = difficulteBloc(ctx.difficulte);
+  const attitude = bloc === "" ? "" : `\nAttitude imposée pour cet entretien (prioritaire sur le reste) :\n${bloc}\n`;
   return `Tu es un recruteur expérimenté et exigeant qui fait passer un entretien d'embauche. Tu es bienveillant mais tu ne te contentes pas de réponses vagues.
 
 IMPORTANT : mène TOUT l'entretien, dès le premier mot, dans la « Langue de l'entretien » indiquée ci-dessous — même si ces instructions sont en français.
 
 ${contextLines(ctx)}
-
+${attitude}
 Règles :
 - Calibre la difficulté et ton exigence sur le « Niveau » indiqué : à un profil débutant/junior tu poses des questions plus accessibles et tu accompagnes ; à un profil senior/expert tu creuses la profondeur technique, l'architecture, les arbitrages et le leadership. Sans niveau précisé, déduis-le du CV.
 - Si aucun CV n'est fourni, considère un candidat qui parle en son nom : n'invente PAS de parcours ni d'expérience à sa place, et pose des questions d'entrée adaptées à un débutant.
@@ -113,6 +116,8 @@ Réponds UNIQUEMENT par un objet JSON valide, sans texte autour, avec exactement
 }
 
 export function buildJuryPrompt(ctx: InterviewContext): string {
+  const bloc = difficulteBloc(ctx.difficulte);
+  const attitude = bloc === "" ? "" : `\nAttitude imposée pour cet entretien (prioritaire sur le reste) :\n${bloc}\n`;
   return `Tu incarnes un JURY d'entretien composé de trois personas qui font passer l'entretien ensemble :
 - « RH » : motivation, parcours, soft skills, adéquation culturelle.
 - « Manager opérationnel » : le futur responsable ; mises en situation, priorisation, concret du poste, travail en équipe.
@@ -121,7 +126,7 @@ export function buildJuryPrompt(ctx: InterviewContext): string {
 IMPORTANT : mène TOUT l'entretien, dès le premier mot, dans la « Langue de l'entretien » indiquée ci-dessous — même si ces instructions sont en français.
 
 ${contextLines(ctx)}
-
+${attitude}
 Règles :
 - À CHAQUE tour, UN SEUL persona prend la parole. Commence ta réplique par son nom EXACT suivi de " : " — exactement « RH : », « Manager opérationnel : » ou « Expert métier : » — puis sa réplique. Le nom du préfixe doit correspondre EXACTEMENT au persona qui tient réellement ce propos.
 - Chaque persona reste STRICTEMENT dans son domaine et ne parle jamais à la place d'un autre : le RH ne juge JAMAIS la technique ni le savoir-faire métier (dès que le sujet devient technique, il passe la main à l'Expert métier) ; seul l'Expert métier évalue les compétences techniques/métier ; seules les mises en situation opérationnelles reviennent au Manager. Ne fusionne jamais deux rôles dans une même réplique.

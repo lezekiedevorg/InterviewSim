@@ -132,3 +132,34 @@ describe("buildJuryPrompt", () => {
     expect(p.toLowerCase()).toContain("passe la main");
   });
 });
+
+describe("difficulté injectée dans les prompts", () => {
+  const transcript: ChatMessage[] = [
+    { role: "recruiter", text: "Parlez-moi de vous." },
+    { role: "candidate", text: "Je suis développeur." },
+  ];
+
+  it("sans-pitie : le prompt recruteur contient le bloc", () => {
+    const p = buildRecruiterPrompt({ ...ctx, difficulte: "sans-pitie" });
+    expect(p).toContain("Venons-en au fait");
+    expect(p).toContain("Attitude imposée");
+  });
+
+  it("detendu : le prompt jury contient le bloc", () => {
+    const p = buildJuryPrompt({ ...ctx, difficulte: "detendu" });
+    expect(p).toContain("prenez votre temps");
+  });
+
+  it("non-régression : sans difficulté ou en réaliste, les prompts sont inchangés", () => {
+    expect(buildRecruiterPrompt(ctx)).toBe(buildRecruiterPrompt({ ...ctx, difficulte: "realiste" }));
+    expect(buildRecruiterPrompt(ctx)).not.toContain("Attitude imposée");
+    expect(buildJuryPrompt(ctx)).toBe(buildJuryPrompt({ ...ctx, difficulte: "realiste" }));
+    expect(buildJuryPrompt(ctx)).not.toContain("Attitude imposée");
+  });
+
+  it("le prompt débrief ignore totalement la difficulté", () => {
+    const p = buildDebriefPrompt({ ...ctx, difficulte: "sans-pitie" }, transcript);
+    expect(p).not.toContain("Venons-en au fait");
+    expect(p).not.toContain("Attitude imposée");
+  });
+});
