@@ -1,18 +1,18 @@
 import { scoreColor } from "@/lib/scoreColor";
 
+// Pilule pleine à la couleur de la bande, texte nuit — comme la maquette « Studio nuit ».
 const classes: Record<string, string> = {
-  rouge: "bg-red-50 text-red-700 ring-red-600/20",
-  ambre: "bg-amber-50 text-amber-700 ring-amber-600/20",
-  vert: "bg-emerald-50 text-emerald-700 ring-emerald-600/20",
+  rouge: "bg-danger-400",
+  ambre: "bg-amber-400",
+  vert: "bg-ok",
 };
 
 export function ScoreBadge({ score }: { score: number }) {
   return (
     <span
-      className={`inline-flex items-baseline gap-0.5 rounded-full px-3 py-1 text-sm font-bold ring-1 ring-inset ${classes[scoreColor(score)]}`}
+      className={`inline-flex min-w-[44px] items-center justify-center rounded-full px-2.5 py-1 font-heading text-[15px] font-extrabold text-night-900 ${classes[scoreColor(score)]}`}
     >
       {score}
-      <span className="text-xs font-medium opacity-70">/100</span>
     </span>
   );
 }

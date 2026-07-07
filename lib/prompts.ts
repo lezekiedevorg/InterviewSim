@@ -1,4 +1,6 @@
-import type { InterviewContext, ChatMessage, SessionSummary } from "./types";
+import type { InterviewContext, ChatMessage, SessionSummary, CritereId } from "./types";
+import { CRITERES } from "./score";
+import { difficulteBloc } from "./difficulte";
 
 function contextLines(ctx: InterviewContext): string {
   const parts = [`Poste visé : ${ctx.poste}`];
@@ -12,12 +14,14 @@ function contextLines(ctx: InterviewContext): string {
 }
 
 export function buildRecruiterPrompt(ctx: InterviewContext): string {
+  const bloc = difficulteBloc(ctx.difficulte);
+  const attitude = bloc === "" ? "" : `\nAttitude imposée pour cet entretien (prioritaire sur le reste) :\n${bloc}\n`;
   return `Tu es un recruteur expérimenté et exigeant qui fait passer un entretien d'embauche. Tu es bienveillant mais tu ne te contentes pas de réponses vagues.
 
 IMPORTANT : mène TOUT l'entretien, dès le premier mot, dans la « Langue de l'entretien » indiquée ci-dessous — même si ces instructions sont en français.
 
 ${contextLines(ctx)}
-
+${attitude}
 Règles :
 - Calibre la difficulté et ton exigence sur le « Niveau » indiqué : à un profil débutant/junior tu poses des questions plus accessibles et tu accompagnes ; à un profil senior/expert tu creuses la profondeur technique, l'architecture, les arbitrages et le leadership. Sans niveau précisé, déduis-le du CV.
 - Si aucun CV n'est fourni, considère un candidat qui parle en son nom : n'invente PAS de parcours ni d'expérience à sa place, et pose des questions d'entrée adaptées à un débutant.
@@ -39,18 +43,56 @@ export function buildDebriefPrompt(
     .map((m) => `${m.role === "recruiter" ? "Recruteur" : "Candidat"}: ${m.text}`)
     .join("\n");
 
-  return `Tu es un coach en recrutement. Analyse l'entretien ci-dessous (pour le poste de ${ctx.poste}) et produis un débrief exploitable pour le candidat.
+  // Barème par tranche pour chaque critère de la grille (ids alignés sur lib/score.ts).
+  const baremes: Record<CritereId, string> = {
+    structure:
+      "80+ = réponses organisées (situation → action → résultat) ; 50 = organisation partielle, des digressions ; 20 = décousu, coq-à-l'âne.",
+    concret:
+      "80+ = exemples réels précis avec chiffres ou résultats mesurables ; 50 = exemples vagues sans mesure ; 20 = généralités, aucune expérience citée.",
+    adequation:
+      "80+ = réponses collées au poste et à l'offre, vocabulaire du métier juste ; 50 = lien partiel avec le poste ; 20 = hors sujet, réponses passe-partout.",
+    communication:
+      "80+ = clair, concis, adapté à l'oral ; 50 = compréhensible mais confus ou trop long ; 20 = laconique, incompréhensible ou tunnel interminable.",
+    pression:
+      "80+ = garde son calme, répond avec précision aux relances et questions pièges ; 50 = se défend mais s'embrouille ; 20 = élude, se contredit ou s'effondre.",
+  };
+  const grille = CRITERES.map(
+    (c) => `- "${c.id}" (${c.label}) : ${baremes[c.id]}`
+  ).join("\n");
+
+  return `Tu es un évaluateur de recrutement froid, factuel et exigeant. Tu notes l'entretien ci-dessous (poste : ${ctx.poste}) comme un VRAI processus de recrutement compétitif, pas comme un professeur bienveillant. La complaisance rend l'évaluation inutile pour le candidat.
+
+ANCRAGE DU BARÈME (à respecter strictement) :
+- 50 = candidat moyen qui ne serait PAS retenu.
+- 70+ = candidat convaincant, embauche probable — exige des preuves solides.
+- 85+ = exceptionnel, quasi jamais atteint en entraînement.
+- Une réponse vague, générique ou sans exemple se note SOUS 50.
+
+CRITÈRES — note chacun de 0 à 100 :
+${grille}
+
+RÈGLES DE PREUVE :
+- Pour CHAQUE critère, cite dans "preuve" une phrase EXACTE du candidat (la plus représentative de ta note). Ne cite JAMAIS le recruteur.
+- Aucune citation pertinente → mets "preuve": "" (la note sera plafonnée).
+- N'attribue JAMAIS plus de 55 à un critère sans citation précise qui le justifie.
+- Ne calcule AUCUN score global : il est calculé ailleurs à partir de tes 5 notes.
 
 Entretien :
 ${conversation}
 
 Réponds UNIQUEMENT par un objet JSON valide, sans texte autour, avec exactement ces champs :
 {
+  "criteres": [
+    { "id": "structure", "note": entier 0-100, "preuve": "citation exacte du candidat", "commentaire": "1 phrase de justification" },
+    { "id": "concret", "note": …, "preuve": …, "commentaire": … },
+    { "id": "adequation", "note": …, "preuve": …, "commentaire": … },
+    { "id": "communication", "note": …, "preuve": …, "commentaire": … },
+    { "id": "pression", "note": …, "preuve": …, "commentaire": … }
+  ],
   "pointsForts": [liste de chaînes],
   "pointsATravailler": [liste de chaînes],
   "reformulations": [liste de chaînes : des réponses du candidat reformulées en mieux],
-  "scoreConfiance": un entier de 0 à 100,
-  "syntheseGenerale": une chaîne (2-3 phrases)
+  "syntheseGenerale": une chaîne (2-3 phrases, ton direct et honnête)
 }`;
 }
 
@@ -74,6 +116,8 @@ Réponds UNIQUEMENT par un objet JSON valide, sans texte autour, avec exactement
 }
 
 export function buildJuryPrompt(ctx: InterviewContext): string {
+  const bloc = difficulteBloc(ctx.difficulte);
+  const attitude = bloc === "" ? "" : `\nAttitude imposée pour cet entretien (prioritaire sur le reste) :\n${bloc}\n`;
   return `Tu incarnes un JURY d'entretien composé de trois personas qui font passer l'entretien ensemble :
 - « RH » : motivation, parcours, soft skills, adéquation culturelle.
 - « Manager opérationnel » : le futur responsable ; mises en situation, priorisation, concret du poste, travail en équipe.
@@ -82,7 +126,7 @@ export function buildJuryPrompt(ctx: InterviewContext): string {
 IMPORTANT : mène TOUT l'entretien, dès le premier mot, dans la « Langue de l'entretien » indiquée ci-dessous — même si ces instructions sont en français.
 
 ${contextLines(ctx)}
-
+${attitude}
 Règles :
 - À CHAQUE tour, UN SEUL persona prend la parole. Commence ta réplique par son nom EXACT suivi de " : " — exactement « RH : », « Manager opérationnel : » ou « Expert métier : » — puis sa réplique. Le nom du préfixe doit correspondre EXACTEMENT au persona qui tient réellement ce propos.
 - Chaque persona reste STRICTEMENT dans son domaine et ne parle jamais à la place d'un autre : le RH ne juge JAMAIS la technique ni le savoir-faire métier (dès que le sujet devient technique, il passe la main à l'Expert métier) ; seul l'Expert métier évalue les compétences techniques/métier ; seules les mises en situation opérationnelles reviennent au Manager. Ne fusionne jamais deux rôles dans une même réplique.
