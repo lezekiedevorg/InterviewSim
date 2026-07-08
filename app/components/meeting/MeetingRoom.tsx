@@ -17,8 +17,10 @@ import { MeetingLobby } from "./MeetingLobby";
 import { TranscriptPanel } from "./TranscriptPanel";
 
 // ponytail: seuils de conversation mains-libres — calibration (débit de parole / pauses réelles).
-// 1200 ms : coupe les blancs sans hacher la parole. À régler si ça envoie trop tôt.
-const SILENCE_MS = 1200; // silence sans nouveaux mots avant l'envoi automatique
+// 2000 ms : laisse le temps d'une pause de réflexion sans couper. 1200 coupait trop tôt.
+// Vrai correctif à terme : endpointing basé sur l'énergie micro (réutiliser useMicEnergy)
+// pour ne déclencher que sur un vrai silence acoustique, pas une simple pause de mots.
+const SILENCE_MS = 2000; // silence sans nouveaux mots avant l'envoi automatique
 const MIC_REOPEN_MS = 400; // anti-rebond avant réouverture auto du micro (absorbe les micro-coupures d'isSpeaking entre phrases)
 
 type Props = {
