@@ -3,6 +3,7 @@ import { buildDebriefPrompt } from "@/lib/prompts";
 import { askModelText } from "@/lib/askModel";
 import { parseDebrief } from "@/lib/parseDebrief";
 import { isRateLimitError } from "@/lib/mapModelError";
+import { estTropCourt } from "@/lib/score";
 import type { InterviewContext, ChatMessage } from "@/lib/types";
 
 export async function POST(req: Request): Promise<Response> {
@@ -18,19 +19,28 @@ export async function POST(req: Request): Promise<Response> {
     return Response.json({ error: errors.join(" ") }, { status: 400 });
   }
 
-  const prompt = buildDebriefPrompt(body.context, body.transcript ?? []);
+  const transcript = body.transcript ?? [];
+
+  // Entretien trop court pour être noté sérieusement : on ne consomme pas le modèle.
+  if (estTropCourt(transcript)) {
+    return Response.json({ tooShort: true });
+  }
+
+  const prompt = buildDebriefPrompt(body.context, transcript);
 
   // ponytail: Gemini rejects contents:[]; seed provides required user content; server-only, not shown to UI
   const seed = [{ role: "candidate" as const, text: "Génère le débrief de cet entretien." }];
 
   try {
     // Premier essai
-    let raw = await askModelText(prompt, seed);
+    let raw = await askModelText(prompt, seed, { temperature: 0 });
     let debrief = parseDebrief(raw);
 
     // Un seul re-essai si le JSON est malformé
     if (!debrief) {
-      raw = await askModelText(prompt, seed);
+      // Re-essai à température légèrement relevée : à 0 le modèle est déterministe,
+      // il reproduirait le même JSON cassé.
+      raw = await askModelText(prompt, seed, { temperature: 0.2 });
       debrief = parseDebrief(raw);
     }
 

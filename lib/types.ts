@@ -6,11 +6,23 @@ export type InterviewContext = {
   langue?: string;
   cv: string;
   offre?: string;
+  difficulte?: DifficulteId;
 };
 
 export type ChatMessage = {
   role: "recruiter" | "candidate";
   text: string;
+};
+
+export type DifficulteId = "detendu" | "realiste" | "sans-pitie";
+
+export type CritereId = "structure" | "concret" | "adequation" | "communication" | "pression";
+
+export type CritereNote = {
+  id: CritereId;
+  note: number; // 0-100, déjà bornée et plafonnée par lib/score.ts
+  preuve: string; // citation exacte du candidat ("" si aucune)
+  commentaire: string; // 1 phrase de justification
 };
 
 export type Debrief = {
@@ -19,6 +31,7 @@ export type Debrief = {
   reformulations: string[];
   scoreConfiance: number;
   syntheseGenerale: string;
+  criteres?: CritereNote[]; // absent sur les débriefs enregistrés avant la grille
 };
 
 export type CrossAnalysis = {

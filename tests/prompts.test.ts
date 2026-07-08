@@ -60,11 +60,21 @@ describe("buildDebriefPrompt", () => {
     expect(p).toContain("Je suis développeur.");
   });
 
-  it("demande un JSON avec les champs attendus", () => {
+  it("demande le JSON v2 avec critères et preuves, sans score global", () => {
     const p = buildDebriefPrompt(ctx, transcript);
+    expect(p).toContain('"criteres"');
+    expect(p).toContain('"preuve"');
     expect(p).toContain("pointsForts");
-    expect(p).toContain("scoreConfiance");
     expect(p).toContain("syntheseGenerale");
+    expect(p).not.toContain("scoreConfiance");
+  });
+
+  it("contient l'ancrage marché réel et les 5 critères de la grille", () => {
+    const p = buildDebriefPrompt(ctx, transcript);
+    expect(p).toContain("ne serait PAS retenu");
+    for (const id of ["structure", "concret", "adequation", "communication", "pression"]) {
+      expect(p).toContain(`"${id}"`);
+    }
   });
 });
 
@@ -120,5 +130,65 @@ describe("buildJuryPrompt", () => {
     const p = buildJuryPrompt(ctx);
     expect(p).toContain("STRICTEMENT");
     expect(p.toLowerCase()).toContain("passe la main");
+  });
+});
+
+describe("difficulté injectée dans les prompts", () => {
+  const transcript: ChatMessage[] = [
+    { role: "recruiter", text: "Parlez-moi de vous." },
+    { role: "candidate", text: "Je suis développeur." },
+  ];
+
+  it("sans-pitie : le prompt recruteur contient le bloc", () => {
+    const p = buildRecruiterPrompt({ ...ctx, difficulte: "sans-pitie" });
+    expect(p).toContain("Venons-en au fait");
+    expect(p).toContain("Attitude imposée");
+  });
+
+  it("detendu : le prompt jury contient le bloc", () => {
+    const p = buildJuryPrompt({ ...ctx, difficulte: "detendu" });
+    expect(p).toContain("prenez votre temps");
+  });
+
+  it("non-régression : sans difficulté ou en réaliste, les prompts sont inchangés", () => {
+    expect(buildRecruiterPrompt(ctx)).toBe(buildRecruiterPrompt({ ...ctx, difficulte: "realiste" }));
+    expect(buildRecruiterPrompt(ctx)).not.toContain("Attitude imposée");
+    expect(buildJuryPrompt(ctx)).toBe(buildJuryPrompt({ ...ctx, difficulte: "realiste" }));
+    expect(buildJuryPrompt(ctx)).not.toContain("Attitude imposée");
+  });
+
+  it("le prompt débrief ignore totalement la difficulté", () => {
+    const p = buildDebriefPrompt({ ...ctx, difficulte: "sans-pitie" }, transcript);
+    expect(p).not.toContain("Venons-en au fait");
+    expect(p).not.toContain("Attitude imposée");
+  });
+});
+
+describe("règle d'or — une seule question par réplique", () => {
+  const transcript: ChatMessage[] = [
+    { role: "recruiter", text: "Parlez-moi de vous." },
+    { role: "candidate", text: "Je suis développeur." },
+  ];
+
+  it("recruteur : la règle d'or est présente, AVANT le contexte", () => {
+    const p = buildRecruiterPrompt(ctx);
+    expect(p).toContain("RÈGLE D'OR");
+    expect(p).toContain("UNE SEULE question");
+    expect(p.indexOf("RÈGLE D'OR")).toBeLessThan(p.indexOf("Poste visé"));
+  });
+
+  it("jury : la règle d'or est présente aussi", () => {
+    const p = buildJuryPrompt(ctx);
+    expect(p).toContain("RÈGLE D'OR");
+    expect(p).toContain("UNE SEULE question");
+  });
+
+  it("la règle d'or précède le bloc d'attitude de la difficulté (elle le domine)", () => {
+    const p = buildRecruiterPrompt({ ...ctx, difficulte: "sans-pitie" });
+    expect(p.indexOf("RÈGLE D'OR")).toBeLessThan(p.indexOf("Attitude imposée"));
+  });
+
+  it("le prompt débrief ne contient PAS la règle d'or", () => {
+    expect(buildDebriefPrompt(ctx, transcript)).not.toContain("RÈGLE D'OR");
   });
 });
