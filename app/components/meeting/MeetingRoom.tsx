@@ -9,14 +9,16 @@ import { nextSpeakableChunk, mergeTranscript } from "@/lib/speech";
 import { PERSONAS, parseSpeaker, type PersonaId } from "@/lib/jury";
 import { useSpeechRecognition } from "@/lib/useSpeechRecognition";
 import { createSilenceDetector } from "@/lib/silenceDetector";
+import { useMicEnergy } from "@/lib/useMicEnergy";
 import { RecruiterTile } from "./RecruiterTile";
 import { UserTile } from "./UserTile";
-import { MeetingControls } from "./MeetingControls";
+import { MeetingControls, type LiveState } from "./MeetingControls";
 import { MeetingLobby } from "./MeetingLobby";
 import { TranscriptPanel } from "./TranscriptPanel";
 
-// ponytail: seuils de conversation mains-libres — boutons de calibration (débit de parole / pauses réelles à régler).
-const SILENCE_MS = 2500; // silence sans nouveaux mots avant l'envoi automatique
+// ponytail: seuils de conversation mains-libres — calibration (débit de parole / pauses réelles).
+// 1200 ms : coupe les blancs sans hacher la parole. À régler si ça envoie trop tôt.
+const SILENCE_MS = 1200; // silence sans nouveaux mots avant l'envoi automatique
 const MIC_REOPEN_MS = 400; // anti-rebond avant réouverture auto du micro (absorbe les micro-coupures d'isSpeaking entre phrases)
 
 type Props = {
@@ -96,6 +98,38 @@ export function MeetingRoom({
       recStopRef.current();
       sendRef.current();
     });
+  }
+
+  const [bargeIn, setBargeIn] = useState(false);
+
+  // Interruption : coupe le TTS immédiatement puis ouvre le micro.
+  // cancel() bascule isSpeaking à false dans le même rendu que rec.start(),
+  // donc l'effet de coupure forcée (plus bas) laisse le micro ouvert.
+  function handleBargeIn() {
+    cancel();
+    baseTextRef.current = currentAnswerRef.current;
+    rec.start();
+  }
+
+  // Capteur de volume : actif seulement quand le barge-in est armé et non muet ;
+  // ne nourrit la porte de parole que pendant que l'IA parle (isSpeaking).
+  const micEnergy = useMicEnergy({
+    enabled: bargeIn && joined && !muted && rec.supported,
+    listening: isSpeaking,
+    onSpeech: handleBargeIn,
+  });
+
+  // État conversationnel affiché en direct (dérivé, pas de source nouvelle).
+  const liveState: LiveState = isSpeaking
+    ? "speaking"
+    : streaming
+    ? "thinking"
+    : rec.listening
+    ? "listening"
+    : "idle";
+
+  function toggleBargeIn() {
+    setBargeIn((b) => !b);
   }
 
   // Mains-libres : chaque mot reconnu réarme le minuteur de silence ; à échéance -> envoi auto (via detector).
@@ -253,8 +287,8 @@ export function MeetingRoom({
           pour lire l&apos;entretien.
         </p>
       )}
-      {(errorMsg || rec.error) && (
-        <p className="rounded-xl border border-danger-400/40 bg-danger-400/10 px-3.5 py-2.5 text-sm text-danger-400">{errorMsg || rec.error}</p>
+      {(errorMsg || rec.error || micEnergy.error) && (
+        <p className="rounded-xl border border-danger-400/40 bg-danger-400/10 px-3.5 py-2.5 text-sm text-danger-400">{errorMsg || rec.error || micEnergy.error}</p>
       )}
 
       {showTranscript && <TranscriptPanel history={history} />}
@@ -278,6 +312,10 @@ export function MeetingRoom({
         micDisabled={streaming || isSpeaking}
         handsFree={handsFree}
         onToggleHandsFree={toggleHandsFree}
+        liveState={liveState}
+        bargeIn={bargeIn}
+        onToggleBargeIn={toggleBargeIn}
+        bargeInSupported={rec.supported && micEnergy.supported}
       />
     </div>
   );
