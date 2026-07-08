@@ -83,7 +83,10 @@ export function MeetingRoom({
   const spokenRef = useRef<{ index: number; len: number }>({ index: -1, len: 0 });
   const rec = useSpeechRecognition();
   const baseTextRef = useRef("");
-  const [handsFree, setHandsFree] = useState(false);
+  // Mode fluide par défaut : on rejoint, l'IA accueille, le micro se rouvre seul, l'envoi
+  // part au silence — zéro clic. Le bouton « Parler » reste un filet de secours (manuel /
+  // navigateurs sans Web Speech). Barge-in reste OFF (écho sans casque).
+  const [handsFree, setHandsFree] = useState(true);
 
   // Refs vers les dernières valeurs/fonctions, pour que le détecteur (créé une fois) et l'effet
   // d'ouverture utilisent toujours la version courante SANS les mettre dans les tableaux de deps
