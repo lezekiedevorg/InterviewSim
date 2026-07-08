@@ -138,3 +138,22 @@ parole ».
 - Silero VAD WASM (upgrade de la porte d'énergie) — seulement si l'écho gêne trop.
 - Endpointing adaptatif, réglages d'utilisateur pour les seuils.
 - Vraie API realtime bidirectionnelle (coût + data).
+
+## Chemin d'upgrade v2 — LiveKit (à la reprise VPS)
+
+Le vrai temps réel « ChatGPT Voice » = **LiveKit Agents + WebRTC** (standard industrie) :
+audio bidirectionnel instantané, VAD serveur, interruption fiable **même sans casque**,
+STT streaming (Whisper via Groq / Deepgram) → LLM → TTS streaming (Kokoro local /
+ElevenLabs). Meilleur ressenti possible.
+
+**Pourquoi différé, pas maintenant :** chaque brique réintroduit le coût qu'on fuit —
+LiveKit Agents tourne sur un **serveur** + serveur média WebRTC (Cloud = quota serré,
+self-host = **VPS 24/7**) ; WebRTC = **audio continu = lourd en data mobile** (l'inverse
+de notre contrainte) ; Deepgram/ElevenLabs payants ; Kokoro « local » = on héberge
+l'inférence (GPU/CPU = VPS). C'est le **même mur NO-GO CPU gratuit → reprise au VPS** que
+le clonage de voix.
+
+**Déclencheur :** à activer en même temps que la reprise VPS / la monétisation (freemium).
+Le plan gratuit actuel livre déjà 3 des 4 besoins (pastille live, blancs réduits, barge-in)
+à 0 € et sans data ; LiveKit n'apporte de net que le barge-in fiable sans casque + la
+robustesse hors Chrome, au prix d'un VPS + data.
