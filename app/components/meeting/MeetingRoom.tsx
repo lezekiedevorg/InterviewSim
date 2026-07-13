@@ -10,6 +10,7 @@ import { PERSONAS, parseSpeaker, type PersonaId } from "@/lib/jury";
 import { useSpeechRecognition } from "@/lib/useSpeechRecognition";
 import { createSilenceDetector } from "@/lib/silenceDetector";
 import { useMicEnergy } from "@/lib/useMicEnergy";
+import { pickFiller, shouldFill } from "@/lib/filler";
 import { RecruiterTile } from "./RecruiterTile";
 import { UserTile } from "./UserTile";
 import { MeetingControls, type LiveState } from "./MeetingControls";
@@ -187,6 +188,22 @@ export function MeetingRoom({
     if (handsFree && rec.listening) rec.stop(); // couper le micro si on désactive en plein tour
     setHandsFree((h) => !h);
   }
+
+  // Masque le blanc : dès que le recruteur commence à « réfléchir » (front montant de
+  // streaming, en réponse à une réponse du candidat), on glisse une micro-réaction ("Mmh.")
+  // dans la file TTS. Elle joue en premier (~400 ms, pool chaud) ; la vraie réponse s'enchaîne
+  // derrière. historyRef : lu sans mettre `history` en deps (changerait à chaque token).
+  const historyRef = useRef(history);
+  historyRef.current = history;
+  const prevStreamingRef = useRef(false);
+  useEffect(() => {
+    const prevStreaming = prevStreamingRef.current;
+    prevStreamingRef.current = streaming;
+    const hasCandidateTurn = historyRef.current.some((m) => m.role === "candidate");
+    if (shouldFill({ streaming, prevStreaming, jury, muted, ready, hasCandidateTurn })) {
+      speak(pickFiller(), { edgeVoice: soloVoiceById(pref.soloId) });
+    }
+  }, [streaming, jury, muted, ready, speak, pref]);
 
   // Fait parler le recruteur phrase par phrase, au fil du flux.
   useEffect(() => {

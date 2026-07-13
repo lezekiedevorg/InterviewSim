@@ -141,7 +141,7 @@ describe("difficulté injectée dans les prompts", () => {
 
   it("sans-pitie : le prompt recruteur contient le bloc", () => {
     const p = buildRecruiterPrompt({ ...ctx, difficulte: "sans-pitie" });
-    expect(p).toContain("Venons-en au fait");
+    expect(p).toContain("ramener le candidat à l'essentiel");
     expect(p).toContain("Attitude imposée");
   });
 
@@ -159,7 +159,7 @@ describe("difficulté injectée dans les prompts", () => {
 
   it("le prompt débrief ignore totalement la difficulté", () => {
     const p = buildDebriefPrompt({ ...ctx, difficulte: "sans-pitie" }, transcript);
-    expect(p).not.toContain("Venons-en au fait");
+    expect(p).not.toContain("ramener le candidat à l'essentiel");
     expect(p).not.toContain("Attitude imposée");
   });
 });

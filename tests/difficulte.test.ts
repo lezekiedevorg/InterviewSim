@@ -25,7 +25,7 @@ describe("difficulteBloc", () => {
     expect(difficulteBloc("realiste")).toBe("");
   });
   it("sans-pitie contient la consigne de coupure", () => {
-    expect(difficulteBloc("sans-pitie")).toContain("Venons-en au fait");
+    expect(difficulteBloc("sans-pitie")).toContain("ramener le candidat à l'essentiel");
   });
   it("detendu contient l'encouragement", () => {
     expect(difficulteBloc("detendu")).toContain("prenez votre temps");
