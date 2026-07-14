@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { buildRecruiterPrompt, buildDebriefPrompt, buildCrossAnalysisPrompt, buildJuryPrompt, buildDrillPrompt } from "../lib/prompts";
+import { buildRecruiterPrompt, buildDebriefPrompt, buildCrossAnalysisPrompt, buildJuryPrompt, buildDrillPrompt, buildDrillReportPrompt } from "../lib/prompts";
 import type { InterviewContext, ChatMessage, SessionSummary } from "../lib/types";
 
 const ctx: InterviewContext = {
@@ -211,5 +211,17 @@ describe("buildDrillPrompt", () => {
   it("thème inconnu → pas de crash, prompt générique sûr", () => {
     const p = buildDrillPrompt(ctx, "xxx", 4);
     expect(p).toContain("Développeur back-end");
+  });
+});
+
+describe("buildDrillReportPrompt", () => {
+  it("demande le JSON attendu et cible le thème", () => {
+    const p = buildDrillReportPrompt("pieges", [
+      { role: "recruiter", text: "Votre plus gros défaut ?" },
+      { role: "candidate", text: "Je suis perfectionniste." },
+    ]);
+    expect(p).toContain("score");
+    expect(p).toContain("meilleureReponse");
+    expect(p).toContain("Je suis perfectionniste.");
   });
 });

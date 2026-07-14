@@ -1,7 +1,7 @@
 import type { InterviewContext, ChatMessage, SessionSummary, CritereId } from "./types";
 import { CRITERES } from "./score";
 import { difficulteBloc } from "./difficulte";
-import { drillThemeBloc } from "./drillThemes";
+import { drillTheme, drillThemeBloc } from "./drillThemes";
 
 // Injecté dans les prompts recruteur ET jury : ce qui fait qu'une réplique orale
 // sonne humaine plutôt que « IA ». Aucune formule verbatim imposée (sinon elle devient
@@ -132,6 +132,32 @@ Réponds UNIQUEMENT par un objet JSON valide, sans texte autour, avec exactement
   "reformulations": [liste de chaînes : des réponses du candidat reformulées en mieux],
   "syntheseGenerale": une chaîne (2-3 phrases, ton direct et honnête)
 }`;
+}
+
+export function buildDrillReportPrompt(themeId: string, transcript: ChatMessage[]): string {
+  const theme = drillTheme(themeId);
+  const label = theme?.label ?? "ce thème";
+  const conversation = transcript
+    .map((m) => `${m.role === "recruiter" ? "Recruteur" : "Candidat"}: ${m.text}`)
+    .join("\n");
+
+  return `Tu es un coach en recrutement. Évalue UNIQUEMENT la performance du candidat sur le thème « ${label} » dans cette courte session d'entraînement. Sois honnête et exigeant : la complaisance ne l'aide pas.
+
+Session :
+${conversation}
+
+Réponds UNIQUEMENT par un objet JSON valide, sans texte autour, avec exactement ces champs :
+{
+  "score": un entier de 0 à 100 (maîtrise du thème : 50 = moyen non retenu, 70+ = convaincant, 85+ = rare),
+  "pointsForts": [2 chaînes courtes],
+  "aTravailler": [2 chaînes courtes et actionnables],
+  "meilleureReponse": {
+    "question": "la question concernée",
+    "avant": "une citation EXACTE d'une réponse faible du candidat",
+    "apres": "cette réponse réécrite en mieux (2-3 phrases orales)"
+  }
+}
+Si aucune réponse du candidat n'est exploitable, mets "meilleureReponse": null. Ne cite JAMAIS le recruteur dans "avant".`;
 }
 
 export function buildCrossAnalysisPrompt(sessions: SessionSummary[]): string {
