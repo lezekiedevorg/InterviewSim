@@ -27,9 +27,9 @@ export default function Entrainement() {
   const [loadingReport, setLoadingReport] = useState(false);
 
   const theme = selectedTheme ? drillTheme(selectedTheme) : undefined;
-  const context: InterviewContext = { poste: theme?.label ?? "", cv: "" };
 
-  async function streamDrill(nextHistory: ChatMessage[]) {
+  async function streamDrill(nextHistory: ChatMessage[], themeId: DrillThemeId) {
+    const context: InterviewContext = { poste: drillTheme(themeId)?.label ?? "", cv: "" };
     setStreaming(true);
     setErrorMsg(null);
     setHistory([...nextHistory, { role: "recruiter", text: "" }]);
@@ -37,7 +37,7 @@ export default function Entrainement() {
       const res = await fetch("/api/interview", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ context, history: nextHistory, theme: selectedTheme }),
+        body: JSON.stringify({ context, history: nextHistory, theme: themeId }),
       });
       if (!res.ok) {
         const txt = await res.text();
@@ -68,7 +68,7 @@ export default function Entrainement() {
     setReport(null);
     setReportError(null);
     setPhase("chat");
-    streamDrill([]);
+    streamDrill([], id);
   }
 
   async function generateReport(transcript: ChatMessage[]) {
@@ -89,7 +89,7 @@ export default function Entrainement() {
         return;
       }
       setReport(data.report);
-      void saveDrill(selectedTheme as string, data.report);
+      if (selectedTheme) void saveDrill(selectedTheme, data.report);
     } catch {
       setReportError("Connexion interrompue. Réessaie.");
     } finally {
@@ -98,7 +98,7 @@ export default function Entrainement() {
   }
 
   function sendAnswer() {
-    if (currentAnswer.trim() === "" || streaming) return;
+    if (currentAnswer.trim() === "" || streaming || !selectedTheme) return;
     const next: ChatMessage[] = [...history, { role: "candidate", text: currentAnswer.trim() }];
     setCurrentAnswer("");
     const recruiterTurns = next.filter((m) => m.role === "recruiter").length;
@@ -107,7 +107,7 @@ export default function Entrainement() {
       generateReport(next);
       return;
     }
-    streamDrill(next);
+    streamDrill(next, selectedTheme);
   }
 
   function finishInterview() {
