@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { buildRecruiterPrompt, buildDebriefPrompt, buildCrossAnalysisPrompt, buildJuryPrompt } from "../lib/prompts";
+import { buildRecruiterPrompt, buildDebriefPrompt, buildCrossAnalysisPrompt, buildJuryPrompt, buildDrillPrompt } from "../lib/prompts";
 import type { InterviewContext, ChatMessage, SessionSummary } from "../lib/types";
 
 const ctx: InterviewContext = {
@@ -190,5 +190,26 @@ describe("règle d'or — une seule question par réplique", () => {
 
   it("le prompt débrief ne contient PAS la règle d'or", () => {
     expect(buildDebriefPrompt(ctx, transcript)).not.toContain("RÈGLE D'OR");
+  });
+});
+
+describe("buildDrillPrompt", () => {
+  const ctx = { poste: "Développeur back-end", cv: "5 ans Node.js" };
+  it("injecte le bloc du thème et le poste", () => {
+    const p = buildDrillPrompt(ctx, "pieges", 4);
+    expect(p).toContain("questions pièges");
+    expect(p).toContain("Développeur back-end");
+  });
+  it("cadre le nombre de questions et le rôle d'entraînement", () => {
+    const p = buildDrillPrompt(ctx, "pitch", 4);
+    expect(p).toContain("4 questions");
+    expect(p.toLowerCase()).toContain("entraînement");
+  });
+  it("garde le naturel oral (réagir avant de questionner)", () => {
+    expect(buildDrillPrompt(ctx, "pitch", 4)).toContain("Naturel à l'oral");
+  });
+  it("thème inconnu → pas de crash, prompt générique sûr", () => {
+    const p = buildDrillPrompt(ctx, "xxx", 4);
+    expect(p).toContain("Développeur back-end");
   });
 });

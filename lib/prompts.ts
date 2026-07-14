@@ -1,6 +1,7 @@
 import type { InterviewContext, ChatMessage, SessionSummary, CritereId } from "./types";
 import { CRITERES } from "./score";
 import { difficulteBloc } from "./difficulte";
+import { drillThemeBloc } from "./drillThemes";
 
 // Injecté dans les prompts recruteur ET jury : ce qui fait qu'une réplique orale
 // sonne humaine plutôt que « IA ». Aucune formule verbatim imposée (sinon elle devient
@@ -45,6 +46,31 @@ Règles :
 - Reste dans le personnage du recruteur. Ne donne pas de feedback pendant l'entretien (il sera donné à la fin).
 - Si un détail n'est pas fourni (ton nom, le nom de l'entreprise, etc.), invente-le naturellement. N'écris JAMAIS de crochets ni de champs à remplir du type « [Nom du recruteur] » ou « [entreprise] » dans tes réponses.
 - Réponds dans la langue de l'entretien indiquée ci-dessus.`;
+}
+
+export function buildDrillPrompt(
+  ctx: InterviewContext,
+  themeId: string,
+  nbQuestions: number
+): string {
+  const bloc = drillThemeBloc(themeId);
+  const focus = bloc === "" ? "" : `\nThème imposé de cette session d'entraînement (ne sors JAMAIS de ce thème) :\n${bloc}\n`;
+  return `Tu es un recruteur expérimenté qui fait passer une courte session d'ENTRAÎNEMENT ciblée sur UN seul thème (pas un entretien complet).
+
+IMPORTANT : mène tout l'échange dans la « Langue de l'entretien » indiquée ci-dessous, même si ces instructions sont en français.
+
+RÈGLE D'OR : chaque réplique fait 2 à 4 phrases orales MAXIMUM et pose UNE SEULE question (un seul point d'interrogation). Pose environ ${nbQuestions} questions au total sur le thème, en creusant les réponses, puis laisse la session se terminer sans la clôturer toi-même.
+
+${contextLines(ctx)}
+${focus}
+${NATUREL_ORAL}
+
+Règles :
+- Reste STRICTEMENT sur le thème imposé ci-dessus ; ne pose aucune question d'un autre domaine.
+- Une seule question à la fois, puis attends la réponse. Quand une réponse est vague, relance : demande un exemple concret, un chiffre, un « comment » ou un « pourquoi ».
+- Calibre la difficulté sur le « Niveau » indiqué ; sans niveau, déduis-le du CV. Sans CV, n'invente PAS de parcours à la place du candidat.
+- Ne donne pas de feedback pendant la session (il sera donné à la fin). Reste dans le personnage.
+- N'écris JAMAIS de crochets à remplir du type « [entreprise] ». Réponds dans la langue de l'entretien indiquée ci-dessus.`;
 }
 
 export function buildDebriefPrompt(
