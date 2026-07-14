@@ -18,9 +18,12 @@ import { ShareScoreButton } from "@/app/components/ShareScoreButton";
 import { CrossAnalysis } from "@/app/components/CrossAnalysis";
 import type { CrossAnalysis as CrossAnalysisType } from "@/lib/types";
 import { difficulteLabel } from "@/lib/difficulte";
+import { loadDrillRows } from "@/lib/drills";
+import { masteryByTheme, type DrillRow } from "@/lib/drillMastery";
 
 export default function ProgressionPage() {
   const [sessions, setSessions] = useState<SavedSession[] | null>(null);
+  const [drillRows, setDrillRows] = useState<DrillRow[]>([]);
   const [openId, setOpenId] = useState<string | null>(null);
   const [analysis, setAnalysis] = useState<CrossAnalysisType | null>(null);
   const [analyzing, setAnalyzing] = useState(false);
@@ -40,6 +43,8 @@ export default function ProgressionPage() {
         .select("id, created_at, poste, context, debrief, score_confiance")
         .order("created_at", { ascending: false });
       setSessions((data as SavedSession[]) ?? []);
+      const rows = await loadDrillRows();
+      setDrillRows(rows);
     })();
   }, [router]);
 
@@ -175,6 +180,23 @@ export default function ProgressionPage() {
           </>
         )}
       </Card>
+
+      {masteryByTheme(drillRows).length > 0 && (
+        <Card className="mb-6">
+          <h2 className="mb-3 font-heading font-bold text-cream">Maîtrise par thème</h2>
+          <div className="flex flex-col gap-2.5">
+            {masteryByTheme(drillRows).map((m) => (
+              <div key={m.theme} className="flex items-center gap-3">
+                <span className="w-40 shrink-0 truncate text-sm text-muted">{m.label}</span>
+                <div className="h-2 flex-1 overflow-hidden rounded-full bg-cream/10">
+                  <div className="h-full rounded-full" style={{ width: `${m.mastery}%`, background: BAND_HEX[scoreColor(m.mastery)] }} />
+                </div>
+                <span className="w-14 shrink-0 text-right text-xs font-semibold text-cream">{m.mastery}%</span>
+              </div>
+            ))}
+          </div>
+        </Card>
+      )}
 
       <div className="flex flex-col gap-3">
         {rows.map((r) => (
