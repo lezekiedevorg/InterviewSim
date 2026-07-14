@@ -9,7 +9,17 @@ import {
   VideoIcon,
   PhoneOffIcon,
   SendIcon,
+  HandIcon,
 } from "@/app/components/ui/icons";
+
+export type LiveState = "idle" | "thinking" | "speaking" | "listening";
+
+const LIVE_LABEL: Record<LiveState, string> = {
+  idle: "En pause",
+  thinking: "L'IA réfléchit…",
+  speaking: "Au tour de l'IA",
+  listening: "Je t'écoute",
+};
 
 type Props = {
   muted: boolean;
@@ -30,6 +40,10 @@ type Props = {
   micDisabled: boolean;
   handsFree: boolean;
   onToggleHandsFree: () => void;
+  liveState?: LiveState;
+  bargeIn?: boolean;
+  onToggleBargeIn?: () => void;
+  bargeInSupported?: boolean;
 };
 
 // Mobile : rond icône-seule (48px). Tablette et plus : pilule avec libellé.
@@ -58,6 +72,10 @@ export function MeetingControls({
   micDisabled,
   handsFree,
   onToggleHandsFree,
+  liveState = "idle",
+  bargeIn = false,
+  onToggleBargeIn,
+  bargeInSupported = false,
 }: Props) {
   function onKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
     if (e.key === "Enter" && !e.shiftKey) {
@@ -68,6 +86,34 @@ export function MeetingControls({
 
   return (
     <div className="flex flex-col gap-3">
+      <div className="flex items-center justify-center">
+        <span
+          className={`inline-flex items-center gap-2 rounded-full px-3.5 py-1.5 text-[12px] font-semibold uppercase tracking-[0.08em] transition-colors duration-200 ${
+            liveState === "listening"
+              ? "bg-danger-600/15 text-danger-400"
+              : liveState === "speaking"
+              ? "bg-amber-400/15 text-amber-300"
+              : liveState === "thinking"
+              ? "bg-amber-400/10 text-amber-400"
+              : "bg-night-700 text-faint ring-1 ring-cream/15"
+          }`}
+          aria-live="polite"
+        >
+          <span
+            className={`h-2 w-2 rounded-full ${
+              liveState === "listening"
+                ? "animate-pulse bg-danger-400"
+                : liveState === "speaking"
+                ? "bg-amber-400"
+                : liveState === "thinking"
+                ? "animate-pulse bg-amber-400"
+                : "bg-cream/30"
+            }`}
+            aria-hidden
+          />
+          {LIVE_LABEL[liveState]}
+        </span>
+      </div>
       <div className="flex flex-wrap items-center justify-center gap-2">
         <button
           type="button"
@@ -114,6 +160,18 @@ export function MeetingControls({
             <span className={pillLabel}>Mains-libres</span>
           </button>
         )}
+        {bargeInSupported && (
+          <button
+            type="button"
+            onClick={onToggleBargeIn}
+            aria-pressed={bargeIn}
+            aria-label="Couper la parole de l'IA"
+            className={`${pill} ${bargeIn ? pillOn : pillOff}`}
+          >
+            <HandIcon />
+            <span className={pillLabel}>Couper la parole</span>
+          </button>
+        )}
         <button
           type="button"
           onClick={onToggleCamera}
@@ -134,6 +192,11 @@ export function MeetingControls({
           <span className={pillLabel}>Terminer</span>
         </button>
       </div>
+      {bargeIn && (
+        <p className="text-center text-[12px] text-faint">
+          🎧 Mets un casque pour bien couper la parole (sans casque, l&apos;écho gêne).
+        </p>
+      )}
       <div className="flex items-end gap-2.5">
         <textarea
           aria-label="Ta réponse"

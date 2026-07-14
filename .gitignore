@@ -45,3 +45,6 @@ next-env.d.ts
 .superpowers/
 .claude/
 .vscode/
+
+# TTS local / voix clonée pocket-tts (chapitre CUDA/VPS) — serveur + empreintes hors repo
+hf-space/

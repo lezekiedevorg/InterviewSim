@@ -9,14 +9,19 @@ import { nextSpeakableChunk, mergeTranscript } from "@/lib/speech";
 import { PERSONAS, parseSpeaker, type PersonaId } from "@/lib/jury";
 import { useSpeechRecognition } from "@/lib/useSpeechRecognition";
 import { createSilenceDetector } from "@/lib/silenceDetector";
+import { useMicEnergy } from "@/lib/useMicEnergy";
+import { pickFiller, shouldFill } from "@/lib/filler";
 import { RecruiterTile } from "./RecruiterTile";
 import { UserTile } from "./UserTile";
-import { MeetingControls } from "./MeetingControls";
+import { MeetingControls, type LiveState } from "./MeetingControls";
 import { MeetingLobby } from "./MeetingLobby";
 import { TranscriptPanel } from "./TranscriptPanel";
 
-// ponytail: seuils de conversation mains-libres — boutons de calibration (débit de parole / pauses réelles à régler).
-const SILENCE_MS = 2500; // silence sans nouveaux mots avant l'envoi automatique
+// ponytail: seuils de conversation mains-libres — calibration (débit de parole / pauses réelles).
+// 2000 ms : laisse le temps d'une pause de réflexion sans couper. 1200 coupait trop tôt.
+// Vrai correctif à terme : endpointing basé sur l'énergie micro (réutiliser useMicEnergy)
+// pour ne déclencher que sur un vrai silence acoustique, pas une simple pause de mots.
+const SILENCE_MS = 2000; // silence sans nouveaux mots avant l'envoi automatique
 const MIC_REOPEN_MS = 400; // anti-rebond avant réouverture auto du micro (absorbe les micro-coupures d'isSpeaking entre phrases)
 
 type Props = {
@@ -79,7 +84,10 @@ export function MeetingRoom({
   const spokenRef = useRef<{ index: number; len: number }>({ index: -1, len: 0 });
   const rec = useSpeechRecognition();
   const baseTextRef = useRef("");
-  const [handsFree, setHandsFree] = useState(false);
+  // Mode fluide par défaut : on rejoint, l'IA accueille, le micro se rouvre seul, l'envoi
+  // part au silence — zéro clic. Le bouton « Parler » reste un filet de secours (manuel /
+  // navigateurs sans Web Speech). Barge-in reste OFF (écho sans casque).
+  const [handsFree, setHandsFree] = useState(true);
 
   // Refs vers les dernières valeurs/fonctions, pour que le détecteur (créé une fois) et l'effet
   // d'ouverture utilisent toujours la version courante SANS les mettre dans les tableaux de deps
@@ -96,6 +104,38 @@ export function MeetingRoom({
       recStopRef.current();
       sendRef.current();
     });
+  }
+
+  const [bargeIn, setBargeIn] = useState(false);
+
+  // Interruption : coupe le TTS immédiatement puis ouvre le micro.
+  // cancel() bascule isSpeaking à false dans le même rendu que rec.start(),
+  // donc l'effet de coupure forcée (plus bas) laisse le micro ouvert.
+  function handleBargeIn() {
+    cancel();
+    baseTextRef.current = currentAnswerRef.current;
+    rec.start();
+  }
+
+  // Capteur de volume : actif seulement quand le barge-in est armé et non muet ;
+  // ne nourrit la porte de parole que pendant que l'IA parle (isSpeaking).
+  const micEnergy = useMicEnergy({
+    enabled: bargeIn && joined && !muted && rec.supported,
+    listening: isSpeaking,
+    onSpeech: handleBargeIn,
+  });
+
+  // État conversationnel affiché en direct (dérivé, pas de source nouvelle).
+  const liveState: LiveState = isSpeaking
+    ? "speaking"
+    : streaming
+    ? "thinking"
+    : rec.listening
+    ? "listening"
+    : "idle";
+
+  function toggleBargeIn() {
+    setBargeIn((b) => !b);
   }
 
   // Mains-libres : chaque mot reconnu réarme le minuteur de silence ; à échéance -> envoi auto (via detector).
@@ -148,6 +188,22 @@ export function MeetingRoom({
     if (handsFree && rec.listening) rec.stop(); // couper le micro si on désactive en plein tour
     setHandsFree((h) => !h);
   }
+
+  // Masque le blanc : dès que le recruteur commence à « réfléchir » (front montant de
+  // streaming, en réponse à une réponse du candidat), on glisse une micro-réaction ("Mmh.")
+  // dans la file TTS. Elle joue en premier (~400 ms, pool chaud) ; la vraie réponse s'enchaîne
+  // derrière. historyRef : lu sans mettre `history` en deps (changerait à chaque token).
+  const historyRef = useRef(history);
+  historyRef.current = history;
+  const prevStreamingRef = useRef(false);
+  useEffect(() => {
+    const prevStreaming = prevStreamingRef.current;
+    prevStreamingRef.current = streaming;
+    const hasCandidateTurn = historyRef.current.some((m) => m.role === "candidate");
+    if (shouldFill({ streaming, prevStreaming, jury, muted, ready, hasCandidateTurn })) {
+      speak(pickFiller(), { edgeVoice: soloVoiceById(pref.soloId) });
+    }
+  }, [streaming, jury, muted, ready, speak, pref]);
 
   // Fait parler le recruteur phrase par phrase, au fil du flux.
   useEffect(() => {
@@ -253,8 +309,8 @@ export function MeetingRoom({
           pour lire l&apos;entretien.
         </p>
       )}
-      {(errorMsg || rec.error) && (
-        <p className="rounded-xl border border-danger-400/40 bg-danger-400/10 px-3.5 py-2.5 text-sm text-danger-400">{errorMsg || rec.error}</p>
+      {(errorMsg || rec.error || micEnergy.error) && (
+        <p className="rounded-xl border border-danger-400/40 bg-danger-400/10 px-3.5 py-2.5 text-sm text-danger-400">{errorMsg || rec.error || micEnergy.error}</p>
       )}
 
       {showTranscript && <TranscriptPanel history={history} />}
@@ -278,6 +334,10 @@ export function MeetingRoom({
         micDisabled={streaming || isSpeaking}
         handsFree={handsFree}
         onToggleHandsFree={toggleHandsFree}
+        liveState={liveState}
+        bargeIn={bargeIn}
+        onToggleBargeIn={toggleBargeIn}
+        bargeInSupported={rec.supported && micEnergy.supported}
       />
     </div>
   );

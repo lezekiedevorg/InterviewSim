@@ -2,6 +2,14 @@ import type { InterviewContext, ChatMessage, SessionSummary, CritereId } from ".
 import { CRITERES } from "./score";
 import { difficulteBloc } from "./difficulte";
 
+// Injecté dans les prompts recruteur ET jury : ce qui fait qu'une réplique orale
+// sonne humaine plutôt que « IA ». Aucune formule verbatim imposée (sinon elle devient
+// un tic répété, cf. l'ancien « Venons-en au fait »).
+const NATUREL_ORAL = `Naturel à l'oral (pour ne pas sonner comme une IA) :
+- Avant de poser ta question, réagis d'abord brièvement à ce que le candidat vient de dire (un mot ou deux du genre « Ok. », « D'accord. », « Je vois. », « Hmm. ») — VARIE ces réactions, ne réutilise jamais deux fois de suite la même.
+- Parle comme un vrai recruteur qui improvise à l'oral : phrases simples, registre parlé, une petite hésitation ou un « du coup »/« donc » de temps en temps. Pas de tournures écrites léchées, pas de politesses de robot.
+- Tu n'as pas à être parfaitement structuré ni exhaustif : sois direct, parfois un peu sec, enchaîne vite. Une vraie personne n'aligne pas des réponses lisses et calibrées.`;
+
 function contextLines(ctx: InterviewContext): string {
   const parts = [`Poste visé : ${ctx.poste}`];
   if (ctx.entreprise) parts.push(`Entreprise / type : ${ctx.entreprise}`);
@@ -24,6 +32,8 @@ RÈGLE D'OR (elle domine TOUT le reste, y compris les consignes de difficulté s
 
 ${contextLines(ctx)}
 ${attitude}
+${NATUREL_ORAL}
+
 Règles :
 - Calibre la difficulté et ton exigence sur le « Niveau » indiqué : à un profil débutant/junior tu poses des questions plus accessibles et tu accompagnes ; à un profil senior/expert tu creuses la profondeur technique, l'architecture, les arbitrages et le leadership. Sans niveau précisé, déduis-le du CV.
 - Si aucun CV n'est fourni, considère un candidat qui parle en son nom : n'invente PAS de parcours ni d'expérience à sa place, et pose des questions d'entrée adaptées à un débutant.
@@ -131,6 +141,8 @@ RÈGLE D'OR (elle domine TOUT le reste, y compris les consignes de difficulté s
 
 ${contextLines(ctx)}
 ${attitude}
+${NATUREL_ORAL}
+
 Règles :
 - À CHAQUE tour, UN SEUL persona prend la parole. Commence ta réplique par son nom EXACT suivi de " : " — exactement « RH : », « Manager opérationnel : » ou « Expert métier : » — puis sa réplique. Le nom du préfixe doit correspondre EXACTEMENT au persona qui tient réellement ce propos.
 - Chaque persona reste STRICTEMENT dans son domaine et ne parle jamais à la place d'un autre : le RH ne juge JAMAIS la technique ni le savoir-faire métier (dès que le sujet devient technique, il passe la main à l'Expert métier) ; seul l'Expert métier évalue les compétences techniques/métier ; seules les mises en situation opérationnelles reviennent au Manager. Ne fusionne jamais deux rôles dans une même réplique.
