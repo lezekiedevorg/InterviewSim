@@ -47,6 +47,12 @@ export function Header() {
           Interview<span className="text-amber-400">Sim</span>
         </Link>
         <nav className="flex items-center gap-3 text-sm">
+          <Link
+            href="/entrainement"
+            className="whitespace-nowrap rounded-full px-2 py-1.5 text-[13px] font-semibold text-muted transition-colors duration-200 hover:bg-cream/10 hover:text-cream sm:px-3 sm:text-sm"
+          >
+            Entraînement
+          </Link>
           {email ? (
             <>
               <Link
