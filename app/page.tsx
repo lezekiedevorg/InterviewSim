@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { MeetingRoom } from "@/app/components/meeting/MeetingRoom";
 import type { InterviewContext, ChatMessage, Debrief, DifficulteId } from "@/lib/types";
 import { DIFFICULTES } from "@/lib/difficulte";
@@ -330,6 +331,12 @@ export default function Home() {
               </p>
             </div>
           </Card>
+
+          <p className="mt-4 text-center text-sm text-faint">
+            <Link href="/entrainement" className="underline decoration-dotted underline-offset-4 hover:text-cream">
+              ou entraîne-toi sur un thème →
+            </Link>
+          </p>
 
           {/* Mobile : CTA collé en bas de l'écran, avec fondu vers le contenu */}
           <div className="sticky bottom-0 z-10 -mx-4 bg-gradient-to-t from-night-900 from-55% to-transparent px-4 pb-6 pt-4 sm:hidden">
