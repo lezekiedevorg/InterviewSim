@@ -1,11 +1,11 @@
 import { validateContext } from "@/lib/validate";
-import { buildRecruiterPrompt, buildJuryPrompt } from "@/lib/prompts";
+import { buildRecruiterPrompt, buildJuryPrompt, buildDrillPrompt } from "@/lib/prompts";
 import { askModelStream } from "@/lib/askModel";
 import { isRateLimitError } from "@/lib/mapModelError";
 import type { InterviewContext, ChatMessage } from "@/lib/types";
 
 export async function POST(req: Request): Promise<Response> {
-  let body: { context: InterviewContext; history: ChatMessage[]; jury?: boolean };
+  let body: { context: InterviewContext; history: ChatMessage[]; jury?: boolean; theme?: string };
   try {
     body = await req.json();
   } catch {
@@ -17,7 +17,10 @@ export async function POST(req: Request): Promise<Response> {
     return new Response(errors.join(" "), { status: 400 });
   }
 
-  const systemPrompt = body.jury
+  const DRILL_QUESTIONS = 4; // ponytail: cap fixe ; passer en param si on veut 3-5 variable
+  const systemPrompt = body.theme
+    ? buildDrillPrompt(body.context, body.theme, DRILL_QUESTIONS)
+    : body.jury
     ? buildJuryPrompt(body.context)
     : buildRecruiterPrompt(body.context);
   const history = body.history ?? [];
