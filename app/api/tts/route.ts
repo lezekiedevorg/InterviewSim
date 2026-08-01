@@ -1,9 +1,28 @@
 import { MsEdgeTTS, OUTPUT_FORMAT } from "msedge-tts";
 import { EDGE_VOICE_ALLOWLIST } from "@/lib/edgeVoices";
+import { isTtsSocketNoise } from "@/lib/ttsNoise";
 
 export const runtime = "nodejs";
 
 const FORMAT = OUTPUT_FORMAT.AUDIO_24KHZ_48KBITRATE_MONO_MP3;
+
+// ponytail: garde-fou process, posé une seule fois. Les erreurs de socket d'Edge TTS
+// surviennent hors requête → sans ça Node tue l'instance (et les requêtes en vol avec).
+// On avale UNIQUEMENT ce bruit-là ; toute autre erreur repart et fait tomber le process
+// comme avant. À supprimer si msedge-tts finit par gérer ses propres sockets.
+const g = globalThis as typeof globalThis & { __ttsGuard?: boolean };
+if (!g.__ttsGuard) {
+  g.__ttsGuard = true;
+  const swallow = (err: unknown) => {
+    if (isTtsSocketNoise(err)) {
+      console.warn("[tts] erreur de socket ignorée :", err instanceof Error ? err.message : err);
+      return;
+    }
+    throw err;
+  };
+  process.on("uncaughtException", swallow);
+  process.on("unhandledRejection", swallow);
+}
 
 // ponytail: cache d'instances Edge TTS par voix — évite de rouvrir la websocket vers
 // Microsoft (~644 ms mesurés) à chaque phrase. Concurrence OK : msedge multiplexe par
@@ -20,6 +39,11 @@ function getTts(voice: string): Promise<MsEdgeTTS> {
       return tts;
     })();
     pool.set(voice, p); // posé synchroniquement → pas de double création en concurrence
+    // échec d'ouverture : retirer du cache (sinon la voix reste morte) ET marquer la
+    // promesse comme gérée, sinon Node la voit comme rejection non traitée.
+    p.catch(() => {
+      if (pool.get(voice) === p) pool.delete(voice);
+    });
   }
   return p;
 }
@@ -40,6 +64,7 @@ async function synthesizeOnce(voice: string, text: string): Promise<Buffer> {
     audioStream.on("end", () => resolve());
     audioStream.on("error", reject);
   });
+  collect.catch(() => {}); // si le timeout gagne la course, l'échec tardif reste géré
   const timeout = new Promise<never>((_, reject) =>
     setTimeout(() => reject(new Error("timeout")), 8000)
   );
