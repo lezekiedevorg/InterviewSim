@@ -2,15 +2,19 @@
  * ─────────────────────────────────────────────────────────────────────────────
  *  INTERRUPTEUR DE LANCEMENT
  * ─────────────────────────────────────────────────────────────────────────────
- *  Tant que l'outil n'est pas ouvert au public, la page de présentation ne doit
- *  mener nulle part : ni connexion, ni entraînement, et l'appel à l'action
- *  principal reste visible mais inerte.
+ *  Il sépare deux usages du même site :
  *
- *  Le but est qu'un visiteur venu d'un partage puisse comprendre le projet sans
- *  atterrir dans une application qu'on ne veut pas encore assumer.
+ *  - OUVERT (true) : l'outil est accessible. C'est le cas de la branche `main`,
+ *    déployée sur l'environnement de staging — on y teste toutes les
+ *    fonctionnalités pour de vrai.
  *
- *  POUR OUVRIR : passer cette valeur à `true`, puis redéployer. Rien d'autre à
- *  toucher — chaque point d'entrée lit cette constante. Laisser la valeur à
- *  `false` ici et l'oublier serait la seule façon de se tromper.
+ *  - FERMÉ (false) : la page présente le projet sans mener nulle part : pas de
+ *    connexion, pas d'entraînement, et l'appel à l'action principal reste
+ *    visible mais inerte. C'est le cas de la branche `production`, déployée sur
+ *    l'environnement public, celui qu'on partage.
+ *
+ *  Cette valeur est donc la SEULE différence entre `main` et `production`.
+ *  Pour publier une nouveauté : la mettre à `false` sur `production`, et à
+ *  `true` sur `main`.
  */
-export const OUTIL_OUVERT = false;
+export const OUTIL_OUVERT = true;
