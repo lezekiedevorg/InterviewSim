@@ -8,7 +8,7 @@ type Props = ButtonHTMLAttributes<HTMLButtonElement> & {
 const styles: Record<string, string> = {
   // pilule ambre, texte sombre, typo display — le CTA « Studio nuit »
   primary:
-    "rounded-full bg-amber-400 font-heading font-extrabold text-amber-ink shadow-cta hover:shadow-cta-hover hover:-translate-y-0.5 active:translate-y-0 disabled:bg-night-700 disabled:text-faint disabled:shadow-none disabled:translate-y-0",
+    "rounded-full bg-amber-400 font-heading font-semibold text-amber-ink shadow-cta hover:shadow-cta-hover hover:-translate-y-0.5 active:translate-y-0 disabled:bg-night-700 disabled:text-faint disabled:shadow-none disabled:translate-y-0",
   // ambre en creux : bordure + fond teinté
   secondary:
     "rounded-full border border-amber-400/45 bg-amber-400/10 font-semibold text-amber-400 hover:bg-amber-400/20 disabled:opacity-50",

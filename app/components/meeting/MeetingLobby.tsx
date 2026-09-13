@@ -45,7 +45,7 @@ export function MeetingLobby({
       </p>
 
       <div>
-        <h2 className="font-heading text-3xl font-extrabold tracking-tight text-cream sm:text-4xl">
+        <h2 className="font-heading text-3xl font-semibold tracking-tight text-cream sm:text-4xl">
           Prêt pour ton entretien&nbsp;?
         </h2>
         <p className="mt-3 text-[15px] text-muted">

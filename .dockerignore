@@ -1,0 +1,30 @@
+# Contexte de build : on n'envoie au démon Docker que ce qui sert à compiler.
+
+node_modules
+.next
+.git
+.gitignore
+
+# Secrets : jamais dans l'image. Les variables passent par l'environnement
+# du conteneur (Coolify), pas par un fichier copié au build.
+.env
+.env.*
+!.env.local.example
+
+# Tests et outillage — inutiles au build de production
+tests
+playwright-report
+test-results
+*.tsbuildinfo
+vitest.config.ts
+
+# Documentation et artefacts d'agents
+.hermes
+docs
+*.md
+!README.md
+
+# Divers
+.DS_Store
+npm-debug.log*
+coverage

@@ -134,7 +134,7 @@ export default function Entrainement() {
             <p className="mb-5 text-[10.5px] font-bold uppercase tracking-[0.18em] text-amber-400 sm:text-xs sm:tracking-[0.2em]">
               Entraînement quotidien · {DRILL_QUESTIONS} questions
             </p>
-            <h1 className="mx-auto max-w-3xl font-heading text-[clamp(2.2rem,8vw,3.8rem)] font-extrabold leading-none tracking-[-0.03em] text-cream [text-wrap:balance]">
+            <h1 className="mx-auto max-w-3xl font-heading text-[clamp(2.2rem,7vw,3.6rem)] font-semibold leading-[1.05] tracking-[-0.025em] text-cream [text-wrap:balance]">
               Choisis ton <span className="text-amber-400">thème du jour</span>.
             </h1>
             <p className="mx-auto mt-6 max-w-xl text-base leading-relaxed text-muted sm:text-lg">

@@ -57,7 +57,7 @@ export default function LoginPage() {
               <line x1="15" y1="20" x2="15" y2="24" stroke="#14100a" strokeWidth="2" />
             </svg>
           </span>
-          <h1 className="font-heading text-2xl font-extrabold tracking-tight text-cream">
+          <h1 className="font-heading text-2xl font-semibold tracking-tight text-cream">
             {mode === "login" ? "Content de te revoir" : "Crée ton compte"}
           </h1>
           <p className="mt-1.5 text-sm text-muted">

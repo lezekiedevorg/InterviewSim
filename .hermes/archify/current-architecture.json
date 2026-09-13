@@ -1,0 +1,60 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "InterviewSim — architecture actuelle",
+    "subtitle": "État après déploiement Coolify (1 container Next.js + Supabase self-hosted + APIs externes)",
+    "output": "interviewsim-current.html",
+    "quality_profile": "showcase",
+    "viewBox": [1380, 720],
+    "views": [
+      { "id": "main", "label": "Trafic principal", "focus": ["user", "browser", "edge", "app", "apis", "tts", "groq", "ms"] },
+      { "id": "data", "label": "Auth & données Supabase", "focus": ["mw", "browser", "kong", "gotrue", "rest", "pg", "app"] }
+    ]
+  },
+  "components": [
+    { "id": "user", "type": "external", "label": "Utilisateur", "sublabel": "Navigateur · Web Speech", "pos": [60, 360], "size": [140, 60] },
+    { "id": "browser", "type": "frontend", "label": "Next.js Client", "sublabel": "React 19 + Tailwind", "pos": [260, 360], "size": [150, 60], "tag": "Edge runtime" },
+
+    { "id": "edge", "type": "cloud", "label": "Traefik (Coolify)", "sublabel": "Reverse-proxy + TLS", "pos": [470, 360], "size": [150, 60], "tag": "Let's Encrypt" },
+    { "id": "app", "type": "backend", "label": "Next.js Server", "sublabel": "Standalone + Node 20", "pos": [680, 360], "size": [150, 60], "tag": "1 instance" },
+
+    { "id": "mw", "type": "security", "label": "Middleware", "sublabel": "Cookies Supabase SSR", "pos": [680, 200], "size": [150, 60] },
+    { "id": "apis", "type": "backend", "label": "Routes /api/*", "sublabel": "Node runtime", "pos": [890, 360], "size": [150, 60], "tag": "Streaming SSE" },
+    { "id": "tts", "type": "backend", "label": "/api/tts", "sublabel": "msedge-tts (WS pool)", "pos": [890, 200], "size": [150, 60] },
+
+    { "id": "kong", "type": "cloud", "label": "Supabase Kong", "sublabel": "API gateway", "pos": [470, 580], "size": [150, 60], "tag": "Coolify service" },
+    { "id": "gotrue", "type": "security", "label": "GoTrue", "sublabel": "Auth (email/pwd)", "pos": [260, 580], "size": [150, 60] },
+    { "id": "rest", "type": "backend", "label": "PostgREST", "sublabel": "REST auto", "pos": [680, 580], "size": [150, 60] },
+    { "id": "pg", "type": "database", "label": "PostgreSQL 15", "sublabel": "RLS + tables", "pos": [890, 580], "size": [150, 60], "tag": "sessions, drills" },
+
+    { "id": "groq", "type": "external", "label": "Groq API", "sublabel": "openai/gpt-oss-120b", "pos": [1100, 360], "size": [160, 60], "tag": "Streaming SSE" },
+    { "id": "ms", "type": "external", "label": "Microsoft Edge TTS", "sublabel": "wss (gratuit)", "pos": [1100, 200], "size": [160, 60] }
+  ],
+  "boundaries": [
+    { "kind": "region", "label": "VPS Contabo (Ubuntu 24.04) — Coolify 4.3.10", "wraps": ["user", "browser", "edge", "app", "mw", "apis", "tts", "kong", "gotrue", "rest", "pg"] },
+    { "kind": "security-group", "label": "Container app (Next.js)", "wraps": ["app", "mw", "apis", "tts"] },
+    { "kind": "security-group", "label": "Stack Supabase self-hosted", "wraps": ["kong", "gotrue", "rest", "pg"] }
+  ],
+  "connections": [
+    { "id": "u-to-browser", "from": "user", "to": "browser", "label": "HTTPS :443", "variant": "emphasis" },
+    { "id": "browser-to-edge", "from": "browser", "to": "edge", "label": "fetch /api/*", "labelDy": -22 },
+    { "id": "edge-to-app", "from": "edge", "to": "app", "label": "proxy" },
+    { "id": "app-to-mw", "from": "app", "to": "mw", "fromSide": "top", "toSide": "bottom", "label": "cookies" },
+    { "id": "app-to-apis", "from": "app", "to": "apis" },
+    { "id": "apis-to-tts", "from": "apis", "to": "tts", "fromSide": "top", "toSide": "bottom" },
+    { "id": "apis-to-groq", "from": "apis", "to": "groq", "label": "HTTPS stream", "labelDy": -22 },
+    { "id": "tts-to-ms", "from": "tts", "to": "ms", "label": "WSS", "variant": "security" },
+
+    { "id": "browser-to-kong", "from": "browser", "to": "kong", "label": "REST / Auth", "labelDy": 28 },
+    { "id": "kong-to-gotrue", "from": "kong", "to": "gotrue" },
+    { "id": "kong-to-rest", "from": "kong", "to": "rest" },
+    { "id": "rest-to-pg", "from": "rest", "to": "pg", "label": "SQL + RLS" }
+  ],
+  "cards": [
+    { "dot": "cyan", "title": "Edge & TLS", "items": ["Traefik Coolify gère HTTPS + Let's Encrypt", "Zéro cert à gérer côté app"] },
+    { "dot": "emerald", "title": "Application", "items": ["Next.js 16 standalone, Node 20, ~150 Mo image", "1 instance (pas de scale horizontal)", "Pool WebSocket Edge TTS en mémoire"] },
+    { "dot": "amber", "title": "Données & Auth", "items": ["Supabase self-hosted: 11 services (Postgres, GoTrue, PostgREST, Kong, Studio…)", "RLS strictes (auth.uid() = user_id)", "Pas de SMTP → confirmation email désactivée"] },
+    { "dot": "rose", "title": "Dette identifiée", "items": ["Secrets Groq/Supabase en clair dans UI Coolify", "Pas de rate-limit applicatif", "Pas d'observabilité (logs/metrics)", "Pas de queue pour les appels LLM longs"] }
+  ]
+}

@@ -27,7 +27,7 @@ export function Debrief({ data }: { data: DebriefType }) {
       {/* La jauge : le moment récompense */}
       <div className="flex flex-col items-center pt-2 text-center">
         <ScoreRing score={data.scoreConfiance} />
-        <h2 className="mt-5 font-heading text-3xl font-extrabold tracking-tight text-cream sm:text-4xl">
+        <h2 className="mt-5 font-heading text-3xl font-semibold tracking-tight text-cream sm:text-4xl">
           {verdict(data.scoreConfiance)}
         </h2>
         <p className="mx-auto mt-3 max-w-md text-[15px] leading-relaxed text-muted [text-wrap:pretty]">
