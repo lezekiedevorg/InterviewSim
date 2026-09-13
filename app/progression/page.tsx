@@ -68,7 +68,7 @@ export default function ProgressionPage() {
           <p className="text-muted">
             Aucun entretien enregistré pour l&apos;instant. Fais un entretien, puis reviens ici !
           </p>
-          <Button className="mt-4" onClick={() => router.push("/")}>
+          <Button className="mt-4" onClick={() => router.push("/entretien")}>
             Démarrer un entretien →
           </Button>
         </Card>

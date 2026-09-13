@@ -2,24 +2,118 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ═══════════════════════════════════════════════════════════════════════════
+   SYSTÈME DE COULEURS — deux thèmes, tous deux de premier rang.
+
+   Le CLAIR est le défaut. InterviewSim est un produit grand public : on
+   l'ouvre la veille d'un entretien, souvent inquiet. Un dashboard sombre
+   n'est pas le bon registre.
+
+   Le sombre est CHAUD (brun), jamais bleu-nuit : c'est le même studio,
+   la lumière éteinte.
+
+   Chaque couleur existe en deux formes :
+   - `--x`      : la valeur utilisable en CSS direct ;
+   - `--x-rgb`  : le triplet de canaux, pour que Tailwind puisse appliquer
+                  une opacité (`bg-night-900/85`). Sans les triplets, la
+                  syntaxe `/<alpha>` de Tailwind 3 ne fonctionne pas.
+   ═══════════════════════════════════════════════════════════════════════════ */
+:root {
+  --bg:            #FBF7F0;   --bg-rgb:            251 247 240;
+  --bg-alt:        #F4EBD9;   --bg-alt-rgb:        244 235 217;
+  --surface:       #FFFFFF;   --surface-rgb:       255 255 255;
+  --surface-2:     #FDFAF5;   --surface-2-rgb:     253 250 245;
+
+  --ink:           #2A1810;   --ink-rgb:           42 24 16;
+  --ink-muted:     #6B5B4E;   --ink-muted-rgb:     107 91 78;
+  --ink-faint:     #9C8B7C;   --ink-faint-rgb:     156 139 124;
+
+  --border:        #E8DCC4;   --border-rgb:        232 220 196;
+  --border-strong: #D9C9A8;   --border-strong-rgb: 217 201 168;
+
+  --accent:        #C2410C;   --accent-rgb:        194 65 12;
+  --accent-ink:    #FFFFFF;   --accent-ink-rgb:    255 255 255;
+  --accent-soft:   rgba(194, 65, 12, 0.07);
+
+  --ok:            #0F766E;   --ok-rgb:            15 118 110;
+  --ok-soft:       rgba(15, 118, 110, 0.09);
+  --danger:        #B91C1C;   --danger-rgb:        185 28 28;
+  --warn:          #B45309;   --warn-rgb:          180 83 9;
+
+  --shadow-sm: 0 1px 2px rgba(42,24,16,.04), 0 1px 3px rgba(42,24,16,.06);
+  --shadow-md: 0 4px 12px rgba(42,24,16,.06);
+  --shadow-lg: 0 24px 48px -16px rgba(42,24,16,.16), 0 4px 12px rgba(42,24,16,.05);
+  --grain: .035;
+}
+
+.dark {
+  --bg:            #1A1210;   --bg-rgb:            26 18 16;
+  --bg-alt:        #211714;   --bg-alt-rgb:        33 23 20;
+  --surface:       #261B18;   --surface-rgb:       38 27 24;
+  --surface-2:     #2C201C;   --surface-2-rgb:     44 32 28;
+
+  --ink:           #F7F1E8;   --ink-rgb:           247 241 232;
+  --ink-muted:     #C4B3A4;   --ink-muted-rgb:     196 179 164;
+  --ink-faint:     #8B7A6C;   --ink-faint-rgb:     139 122 108;
+
+  --border:        #3A2B26;   --border-rgb:        58 43 38;
+  --border-strong: #4A3831;   --border-strong-rgb: 74 56 49;
+
+  --accent:        #FB923C;   --accent-rgb:        251 146 60;
+  --accent-ink:    #26140A;   --accent-ink-rgb:    38 20 10;
+  --accent-soft:   rgba(251, 146, 60, 0.11);
+
+  --ok:            #34D399;   --ok-rgb:            52 211 153;
+  --ok-soft:       rgba(52, 211, 153, 0.12);
+  --danger:        #F87171;   --danger-rgb:        248 113 113;
+  --warn:          #FBBF24;   --warn-rgb:          251 191 36;
+
+  --shadow-sm: 0 1px 2px rgba(0,0,0,.3);
+  --shadow-md: 0 4px 14px rgba(0,0,0,.34);
+  --shadow-lg: 0 24px 48px -16px rgba(0,0,0,.55), 0 4px 12px rgba(0,0,0,.3);
+  --grain: .05;
+}
+
+/* Note sur le défilement : Next 16 n'écrase plus `scroll-behavior` pendant les
+   navigations (changement de comportement depuis la v15). L'attribut
+   `data-scroll-behavior="smooth"` posé sur <html> dans layout.tsx rétablit
+   l'ancien comportement : instantané au changement de page, fluide dans la page. */
 html {
   scroll-behavior: smooth;
 }
 
-/* Studio nuit : fond bleu-nuit + halo ambre qui tombe du haut, comme un projecteur. */
+/* Deux nappes radiales chaudes : jamais d'aplat mort, la profondeur sert l'accent. */
 body {
-  background-color: #0c1517;
-  background-image: radial-gradient(ellipse 90% 55% at 50% -12%, rgba(255, 178, 36, 0.1), transparent 65%);
-  color: #f2efe4;
+  background-color: var(--bg);
+  background-image:
+    radial-gradient(ellipse 80% 50% at 15% -8%, var(--accent-soft), transparent 60%),
+    radial-gradient(ellipse 60% 40% at 92% 6%,  var(--ok-soft),     transparent 62%);
+  background-attachment: fixed;
+  color: var(--ink);
   font-family: var(--font-body), system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
+  transition: background-color 400ms cubic-bezier(.4,0,.2,1), color 400ms cubic-bezier(.4,0,.2,1);
 }
 
 ::selection {
-  background: rgba(255, 178, 36, 0.35);
-  color: #f2efe4;
+  background: rgb(var(--accent-rgb) / 0.28);
+  color: var(--ink);
 }
+
+/* ─── Titres ──────────────────────────────────────────────────────────────
+   Biface : serif pour les titres, sans pour le texte, monospace uniquement
+   pour les chiffres — jamais pour des libellés. */
+h1, h2, h3, h4 {
+  font-family: var(--font-heading), Georgia, serif;
+  font-weight: 600;
+  letter-spacing: -0.022em;
+  line-height: 1.14;
+  text-wrap: balance;
+}
+p { text-wrap: pretty; }
+
+/* ─── Animations héritées (conservées : des écrans s'y appuient) ─────────── */
 
 /* Curseur de frappe du recruteur pendant le streaming */
 @keyframes blink-caret {
@@ -29,7 +123,7 @@ body {
 .caret::after {
   content: "▍";
   margin-left: 1px;
-  color: #ffb224;
+  color: var(--accent);
   animation: blink-caret 1s step-end infinite;
 }
 
@@ -60,6 +154,21 @@ body {
   animation: score-fill 1.2s cubic-bezier(0.2, 0.7, 0.3, 1) both;
 }
 
+/* ─── Révélation au défilement (landing) ──────────────────────────────────── */
+.rv {
+  opacity: 0;
+  transform: translateY(22px);
+  transition: opacity 620ms cubic-bezier(.4,0,.2,1), transform 620ms cubic-bezier(.4,0,.2,1);
+}
+.rv.seen { opacity: 1; transform: none; }
+
+/* Grain : texture, pas décor. */
+.grain::after {
+  content: "";
+  position: fixed; inset: 0; pointer-events: none; z-index: 0; opacity: var(--grain);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
 /* Accessibilité : on coupe tout mouvement si l'utilisateur le demande */
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
@@ -67,4 +176,5 @@ body {
     animation: none !important;
     transition: none !important;
   }
+  .rv { opacity: 1; transform: none; }
 }
