@@ -2,6 +2,18 @@ import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
 export async function middleware(request: NextRequest) {
+  /* Authentification non configurée : on laisse passer.
+     Sans cette garde, createServerClient lève à CHAQUE requête et tout le
+     site répond 500 — y compris les pages publiques qui n'ont aucun besoin
+     d'authentification, comme la landing. Une page de présentation ne doit
+     pas dépendre d'une configuration d'auth pour s'afficher. */
+  if (
+    !process.env.NEXT_PUBLIC_SUPABASE_URL ||
+    !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+  ) {
+    return NextResponse.next({ request });
+  }
+
   let response = NextResponse.next({ request });
 
   const supabase = createServerClient(
