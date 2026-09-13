@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createBrowserSupabase } from "@/lib/supabase/client";
 import { ThemeToggle } from "@/app/components/ThemeToggle";
+import { OUTIL_OUVERT } from "@/lib/lancement";
 
 // Logo « Studio nuit » : micro sur pastille ambre.
 function Logo() {
@@ -23,6 +24,10 @@ export function Header() {
   const router = useRouter();
 
   useEffect(() => {
+    // Inutile d'instancier Supabase tant qu'il n'y a pas de connexion à
+    // proposer : on éviterait un client inerte et une requête réseau perdue.
+    if (!OUTIL_OUVERT) return;
+
     // ponytail: supabase instantiated here so it never runs during server prerender
     const supabase = createBrowserSupabase();
     supabase.auth.getUser().then(({ data }) => setEmail(data.user?.email ?? null));
@@ -48,13 +53,18 @@ export function Header() {
           Interview<span className="text-amber-400">Sim</span>
         </Link>
         <nav className="flex items-center gap-2 text-sm sm:gap-3">
-          <Link
-            href="/entrainement"
-            className="whitespace-nowrap rounded-full px-2 py-1.5 text-[13px] font-semibold text-muted transition-colors duration-200 hover:bg-cream/10 hover:text-cream sm:px-3 sm:text-sm"
-          >
-            Entraînement
-          </Link>
-          {email ? (
+          {/* Tant que l'outil n'est pas ouvert, aucune entrée ne doit y mener :
+              un visiteur venu d'un partage n'a rien à faire dans l'application.
+              La bascule de thème, elle, reste : c'est un confort de lecture. */}
+          {OUTIL_OUVERT && (
+            <Link
+              href="/entrainement"
+              className="whitespace-nowrap rounded-full px-2 py-1.5 text-[13px] font-semibold text-muted transition-colors duration-200 hover:bg-cream/10 hover:text-cream sm:px-3 sm:text-sm"
+            >
+              Entraînement
+            </Link>
+          )}
+          {!OUTIL_OUVERT ? null : email ? (
             <>
               <Link
                 href="/progression"

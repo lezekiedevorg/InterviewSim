@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { InterviewDemo } from "@/app/components/landing/InterviewDemo";
 import { Reveal } from "@/app/components/landing/Reveal";
+import { OUTIL_OUVERT } from "@/lib/lancement";
 
 export const metadata: Metadata = {
   title: "InterviewSim — Le jour J, vous l'aurez déjà répété",
@@ -134,6 +135,46 @@ const faq = [
   },
 ];
 
+/**
+ * Appel à l'action principal, en deux états.
+ *
+ * Tant que l'outil n'est pas ouvert, le bouton reste VISIBLE mais inerte : le
+ * visiteur comprend que le produit existe et que l'accès viendra. Le supprimer
+ * aurait laissé une page sans point d'arrivée ; le laisser actif aurait envoyé
+ * les gens dans une application qu'on ne veut pas encore assumer.
+ */
+function CtaPrincipal() {
+  const base =
+    "inline-flex min-h-[44px] items-center justify-center gap-2.5 rounded-pill px-6 py-[11px] text-[15px] font-semibold";
+
+  if (OUTIL_OUVERT) {
+    return (
+      <Link
+        href="/entretien"
+        className={`${base} bg-accent text-accent-ink shadow-soft transition-all duration-studio ease-studio hover:-translate-y-px hover:shadow-card focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-accent/20`}
+      >
+        Commencer un entretien
+        <Arrow />
+      </Link>
+    );
+  }
+
+  return (
+    <button
+      type="button"
+      disabled
+      aria-disabled="true"
+      title="L'outil n'est pas encore ouvert au public"
+      className={`${base} cursor-not-allowed border-[1.5px] border-dashed border-border-strong bg-bg-alt text-ink-faint`}
+    >
+      Commencer un entretien
+      <span className="rounded-pill border border-border bg-surface px-2 py-0.5 text-[10.5px] font-semibold uppercase tracking-[.08em] text-ink-muted">
+        bientôt
+      </span>
+    </button>
+  );
+}
+
 export default function LandingPage() {
   return (
     <main className="relative z-10">
@@ -161,13 +202,7 @@ export default function LandingPage() {
             </p>
 
             <div className="flex flex-wrap items-center gap-3">
-              <Link
-                href="/entretien"
-                className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-pill bg-accent px-6 py-[11px] text-[15px] font-semibold text-accent-ink shadow-soft transition-all duration-studio ease-studio hover:-translate-y-px hover:shadow-card focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-accent/20"
-              >
-                Commencer un entretien
-                <Arrow />
-              </Link>
+              <CtaPrincipal />
               <a
                 href="#how"
                 className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-pill border-[1.5px] border-border-strong bg-surface px-6 py-[11px] text-[15px] font-semibold text-ink transition-all duration-studio ease-studio hover:-translate-y-px hover:shadow-soft focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-accent/20"
@@ -178,7 +213,9 @@ export default function LandingPage() {
 
             <p className="mt-5 flex items-center gap-2 text-sm text-ink-faint">
               <Check />
-              Aucune carte bancaire. Vous choisissez le poste, le niveau et la langue.
+              {OUTIL_OUVERT
+                ? "Aucune carte bancaire. Vous choisissez le poste, le niveau et la langue."
+                : "L'outil n'est pas encore ouvert — cette page en présente le principe."}
             </p>
           </div>
 
@@ -426,13 +463,7 @@ export default function LandingPage() {
               minutes.
             </p>
             <div className="flex flex-wrap justify-center gap-3">
-              <Link
-                href="/entretien"
-                className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-pill bg-accent px-6 py-[11px] text-[15px] font-semibold text-accent-ink shadow-soft transition-all duration-studio ease-studio hover:-translate-y-px hover:shadow-card focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-accent/20"
-              >
-                Commencer un entretien
-                <Arrow />
-              </Link>
+              <CtaPrincipal />
               <a
                 href="#faq"
                 className="inline-flex min-h-[44px] items-center justify-center rounded-pill border-[1.5px] border-border-strong bg-surface px-6 py-[11px] text-[15px] font-semibold text-ink transition-all duration-studio ease-studio hover:-translate-y-px hover:shadow-soft"
