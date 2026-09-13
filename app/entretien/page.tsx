@@ -208,7 +208,7 @@ export default function Home() {
             <p className="mb-5 text-[10.5px] font-bold uppercase tracking-[0.18em] text-amber-400 sm:text-xs sm:tracking-[0.2em]">
               Entretien vocal · Recruteur IA<span className="hidden sm:inline"> · En direct</span>
             </p>
-            <h1 className="mx-auto max-w-3xl font-heading text-[clamp(2.5rem,9vw,4.8rem)] font-extrabold leading-none tracking-[-0.03em] text-cream [text-wrap:balance]">
+            <h1 className="mx-auto max-w-3xl font-heading text-[clamp(2.5rem,8vw,4.2rem)] font-semibold leading-[1.05] tracking-[-0.025em] text-cream [text-wrap:balance]">
               Rate tes entretiens ici.{" "}
               <span className="text-amber-400">Réussis le vrai.</span>
             </h1>

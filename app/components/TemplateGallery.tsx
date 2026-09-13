@@ -143,16 +143,21 @@ export function TemplateGallery({
             key={t.id}
             type="button"
             onClick={() => onPick(t)}
-            className={`flex w-[150px] shrink-0 snap-start cursor-pointer flex-col items-start gap-2.5 rounded-2xl border bg-night-700 p-3.5 text-left transition-all duration-200 hover:-translate-y-0.5 sm:w-44 sm:gap-3 sm:p-4 ${
+            className={`flex w-[160px] shrink-0 snap-start cursor-pointer flex-col items-start gap-2.5 rounded-2xl border bg-night-700 p-3.5 text-left transition-all duration-200 hover:-translate-y-0.5 sm:w-48 sm:gap-3 sm:p-4 ${
               selectedId === t.id
                 ? "border-amber-400 bg-amber-400/10"
                 : "border-cream/15 hover:border-amber-400/70"
             }`}
           >
-            <span className="grid h-10 w-10 place-items-center rounded-xl bg-amber-400/10 text-amber-400">
-              <TemplateIcon id={t.id} />
+            {/* L'icône est dans la ligne du titre, pas dans une pastille posée
+                au-dessus : c'est ce qui distingue une carte composée d'une
+                carte de gabarit. */}
+            <span className="flex items-start gap-1.5">
+              <span className="mt-[3px] shrink-0 text-amber-400">
+                <TemplateIcon id={t.id} />
+              </span>
+              <span className="text-[15px] font-semibold leading-tight text-cream">{t.titre}</span>
             </span>
-            <span className="text-[15px] font-semibold leading-tight text-cream">{t.titre}</span>
             <span className="text-[11px] font-semibold uppercase tracking-[0.1em] text-faint">{t.sousTitre}</span>
           </button>
         ))}

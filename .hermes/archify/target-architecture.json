@@ -1,0 +1,76 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "InterviewSim — cible scalable & sécurisée",
+    "subtitle": "Évolution long terme : scale horizontal, observabilité, zéro-secret, queue, multi-tier",
+    "output": "interviewsim-target.html",
+    "quality_profile": "showcase",
+    "viewBox": [1380, 820],
+    "views": [
+      { "id": "main", "label": "Trafic principal", "focus": ["user", "cdn", "waf", "lb", "app1", "app2", "tts", "llm", "queue", "worker"] },
+      { "id": "data", "label": "Données & secrets", "focus": ["app1", "kong", "gotrue", "rest", "pg", "replica", "vault", "smtp"] }
+    ]
+  },
+  "components": [
+    { "id": "user", "type": "external", "label": "Utilisateur", "sublabel": "Web Speech", "pos": [40, 380], "size": [140, 60] },
+
+    { "id": "cdn", "type": "cloud", "label": "CDN edge", "sublabel": "Cloudflare / Bunny", "pos": [220, 380], "size": [150, 60], "tag": "cache statique" },
+    { "id": "waf", "type": "security", "label": "WAF + rate-limit", "sublabel": "anti-abuse L7", "pos": [220, 540], "size": [150, 60], "tag": "10 r/s par IP" },
+    { "id": "lb", "type": "cloud", "label": "Load Balancer", "sublabel": "round-robin TLS", "pos": [410, 380], "size": [150, 60], "tag": "health checks" },
+
+    { "id": "app1", "type": "backend", "label": "Next.js App #1", "sublabel": "Node 20 · standalone", "pos": [610, 290], "size": [150, 60], "tag": "Docker · 1 vCPU" },
+    { "id": "app2", "type": "backend", "label": "Next.js App #2", "sublabel": "Node 20 · standalone", "pos": [610, 470], "size": [150, 60], "tag": "Docker · 1 vCPU" },
+    { "id": "apicache", "type": "database", "label": "Redis", "sublabel": "rate-limit + cache LLM", "pos": [410, 680], "size": [150, 60], "tag": "TTL 60s" },
+
+    { "id": "vault", "type": "security", "label": "Vault (Doppler)", "sublabel": "secrets rotatifs", "pos": [810, 680], "size": [150, 60], "tag": "audit log" },
+
+    { "id": "tts", "type": "backend", "label": "TTS service", "sublabel": "msedge-tts pool", "pos": [810, 200], "size": [150, 60], "tag": "WS pool partagé" },
+    { "id": "llm", "type": "external", "label": "Groq API", "sublabel": "openai/gpt-oss-120b", "pos": [1010, 380], "size": [150, 60], "tag": "fallback OpenAI" },
+    { "id": "queue", "type": "messagebus", "label": "BullMQ + Redis", "sublabel": "jobs async", "pos": [810, 540], "size": [150, 60], "tag": "débriefs longs" },
+    { "id": "worker", "type": "backend", "label": "Worker Node", "sublabel": "débriefs cross-session", "pos": [1010, 540], "size": [150, 60], "tag": "auto-scale" },
+    { "id": "smtp", "type": "external", "label": "Mailgun / Brevo", "sublabel": "SMTP sortant", "pos": [1140, 680], "size": [150, 60], "tag": "DKIM + SPF" },
+
+    { "id": "kong", "type": "cloud", "label": "Supabase Kong", "sublabel": "API gateway", "pos": [610, 100], "size": [150, 60] },
+    { "id": "gotrue", "type": "security", "label": "GoTrue", "sublabel": "Auth (email/pwd)", "pos": [410, 100], "size": [150, 60] },
+    { "id": "rest", "type": "backend", "label": "PostgREST", "sublabel": "REST auto", "pos": [810, 100], "size": [150, 60] },
+    { "id": "pg", "type": "database", "label": "PostgreSQL primary", "sublabel": "RLS + tables", "pos": [1000, 100], "size": [150, 60], "tag": "WAL archiving" },
+    { "id": "replica", "type": "database", "label": "Postgres replica", "sublabel": "lecture seule", "pos": [1180, 100], "size": [150, 60], "tag": "read-after-write" }
+  ],
+  "boundaries": [
+    { "kind": "region", "label": "VPS Coolify (région EU)", "wraps": ["user", "cdn", "waf", "lb", "app1", "app2", "apicache", "tts", "queue", "worker", "kong", "gotrue", "rest", "pg", "replica", "vault", "smtp"] },
+    { "kind": "security-group", "label": "DMZ (public-facing)", "wraps": ["waf", "lb", "cdn"] },
+    { "kind": "security-group", "label": "App tier (privé)", "wraps": ["app1", "app2", "apicache", "tts", "queue", "worker", "vault"] },
+    { "kind": "security-group", "label": "Data tier (privé)", "wraps": ["kong", "gotrue", "rest", "pg", "replica"] }
+  ],
+  "connections": [
+    { "id": "u-to-cdn", "from": "user", "to": "cdn", "label": "HTTPS", "variant": "emphasis" },
+    { "id": "u-to-waf", "from": "user", "to": "waf", "label": "API", "fromSide": "left", "toSide": "left" },
+    { "id": "cdn-to-waf", "from": "cdn", "to": "waf", "fromSide": "bottom", "toSide": "top" },
+    { "id": "waf-to-lb", "from": "waf", "to": "lb", "label": "filtré", "labelDy": -28 },
+    { "id": "cdn-to-lb", "from": "cdn", "to": "lb" },
+    { "id": "lb-to-app1", "from": "lb", "to": "app1", "label": "rr", "labelDy": -22 },
+    { "id": "lb-to-app2", "from": "lb", "to": "app2", "label": "rr", "labelDy": 22 },
+
+    { "id": "app1-to-tts", "from": "app1", "to": "tts", "fromSide": "top", "toSide": "bottom" },
+    { "id": "app1-to-llm", "from": "app1", "to": "llm", "label": "HTTPS", "labelDy": -22 },
+    { "id": "app2-to-llm", "from": "app2", "to": "llm", "label": "HTTPS", "labelDy": 22 },
+    { "id": "app2-to-queue", "from": "app2", "to": "queue", "fromSide": "right", "toSide": "left", "label": "enqueue" },
+    { "id": "queue-to-worker", "from": "queue", "to": "worker" },
+
+    { "id": "app2-to-vault", "from": "app2", "to": "vault", "label": "secrets", "fromSide": "bottom", "toSide": "left" },
+
+    { "id": "app1-to-kong", "from": "app1", "to": "kong", "label": "REST", "labelDy": -22 },
+    { "id": "kong-to-rest", "from": "kong", "to": "rest" },
+    { "id": "kong-to-gotrue", "from": "kong", "to": "gotrue" },
+    { "id": "rest-to-pg", "from": "rest", "to": "pg", "label": "r/w" },
+    { "id": "pg-to-replica", "from": "pg", "to": "replica", "label": "stream", "labelDy": -22 }
+  ],
+  "cards": [
+    { "dot": "cyan", "title": "Edge durci", "items": ["CDN cache statique + WAF rate-limit (anti-abus Groq)", "HTTPS Let's Encrypt auto via Coolify"] },
+    { "dot": "emerald", "title": "Scalabilité", "items": ["2+ replicas Next.js derrière LB (horizontal)", "Worker dédié pour les jobs longs (débrief, cross-analysis)", "Queue BullMQ pour absorbtion des pics Groq"] },
+    { "dot": "amber", "title": "Données", "items": ["Postgres primary + replica lecture seule", "Backups PITR + WAL archiving vers S3", "Migrations versionnées dans supabase/migrations"] },
+    { "dot": "rose", "title": "Sécurité", "items": ["Vault (Doppler) pour tous les secrets, rotation 90j", "WAF anti-bot et rate-limit L7", "SMTP signé DKIM/SPF (Mailgun/Brevo) ; RLS strictes sur toutes les tables"] },
+    { "dot": "violet", "title": "Observabilité", "items": ["Logs structurés vers Loki + métriques Prometheus", "Sentry pour les erreurs Next.js", "Alerte sur rate 429 Groq et >80% CPU app"] }
+  ]
+}
