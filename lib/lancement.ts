@@ -13,8 +13,8 @@
  *    visible mais inerte. C'est le cas de la branche `production`, déployée sur
  *    l'environnement public, celui qu'on partage.
  *
- *  Cette valeur est donc la SEULE différence entre `main` et `production`.
- *  Pour publier une nouveauté : la mettre à `false` sur `production`, et à
- *  `true` sur `main`.
+ *  Cette valeur est la SEULE différence entre `main` et `production`.
+ *  Pour publier une nouveauté : fusionner `main` dans `production`, puis laisser
+ *  cette valeur à `false` ici — c'est le point d'entrée qu'on referme.
  */
-export const OUTIL_OUVERT = true;
+export const OUTIL_OUVERT = false;
