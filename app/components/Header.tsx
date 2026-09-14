@@ -6,18 +6,7 @@ import { useRouter } from "next/navigation";
 import { createBrowserSupabase } from "@/lib/supabase/client";
 import { ThemeToggle } from "@/app/components/ThemeToggle";
 import { OUTIL_OUVERT } from "@/lib/lancement";
-
-// Logo « Studio nuit » : micro sur pastille ambre.
-function Logo() {
-  return (
-    <svg width="30" height="30" viewBox="0 0 30 30" aria-hidden>
-      <rect width="30" height="30" rx="9" fill="var(--accent)" />
-      <rect x="12" y="6" width="6" height="11" rx="3" fill="var(--accent-ink)" />
-      <path d="M9 14a6 6 0 0 0 12 0" stroke="var(--accent-ink)" strokeWidth="2" fill="none" />
-      <line x1="15" y1="20" x2="15" y2="24" stroke="var(--accent-ink)" strokeWidth="2" />
-    </svg>
-  );
-}
+import { SpeechLoopMark } from "@/app/components/brand/SpeechLoopMark";
 
 export function Header() {
   const [email, setEmail] = useState<string | null>(null);
@@ -46,9 +35,9 @@ export function Header() {
   return (
     <header className="sticky top-0 z-20 bg-night-900/85 backdrop-blur-md">
       <div className="mx-auto flex max-w-5xl items-center justify-between gap-3 px-4 py-4 sm:px-5">
-        <Link href="/" className="-ml-1 flex min-h-[44px] min-w-[44px] shrink-0 items-center justify-center gap-2 rounded-pill px-1.5 font-heading text-sm font-extrabold tracking-tight text-cream transition-colors duration-studio ease-studio hover:bg-cream/5 sm:justify-start sm:gap-2.5 sm:text-lg">
-          <span className="transition-transform duration-200 group-hover:scale-105 group-hover:rotate-3">
-            <Logo />
+        <Link href="/" className="-ml-1 flex min-h-[44px] min-w-[44px] shrink-0 items-center justify-center gap-2 rounded-pill px-1.5 font-heading text-sm font-semibold tracking-tight text-cream transition-colors duration-studio ease-studio hover:bg-cream/5 sm:justify-start sm:gap-2.5 sm:text-lg">
+          <span className="text-amber-400 transition-transform duration-studio ease-studio group-hover:-rotate-3 group-hover:scale-105">
+            <SpeechLoopMark size={32} />
           </span>
           {/* Le nom complet revient à partir de 640 px. En dessous, mesuré :
               il provoque un débordement dès 414 px, et la pastille suffit à
