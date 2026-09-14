@@ -23,7 +23,7 @@ const mono = IBM_Plex_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "InterviewSim — Le jour J, vous l'aurez déjà répété",
+  title: "Say It Aloud — Le jour J, vous l'aurez déjà répété",
   description:
     "Entraînez-vous à vos entretiens avec un recruteur virtuel : il pose les questions de votre poste à partir de votre CV, écoute vos réponses et vous rend une note avec un débrief franc.",
 };

@@ -69,7 +69,7 @@ export function renderScoreCard(input: { poste: string; score: number }): Promis
   // Logo micro + wordmark, centrés en haut
   const logoS = 52;
   ctx.font = `800 34px ${heading}`;
-  const wordW = ctx.measureText("InterviewSim").width;
+  const wordW = ctx.measureText("Say It Aloud").width;
   const headerW = logoS + 14 + wordW;
   const logoX = (SIZE - headerW) / 2;
   const logoY = 64;
@@ -96,9 +96,9 @@ export function renderScoreCard(input: { poste: string; score: number }): Promis
   const wordX = logoX + logoS + 14;
   const wordY = logoY + logoS / 2;
   ctx.fillStyle = "#f2efe4";
-  ctx.fillText("Interview", wordX, wordY);
+  ctx.fillText("Say It ", wordX, wordY);
   ctx.fillStyle = "#ffb224";
-  ctx.fillText("Sim", wordX + ctx.measureText("Interview").width, wordY);
+  ctx.fillText("Aloud", wordX + ctx.measureText("Say It ").width, wordY);
 
   // Jauge circulaire
   const cx = SIZE / 2;
@@ -170,8 +170,8 @@ export async function shareScoreCard(blob: Blob): Promise<void> {
     try {
       await navigator.share({
         files: [file],
-        title: "Mon score InterviewSim",
-        text: "J'ai passé un entretien blanc sur InterviewSim 💪",
+        title: "Mon score Say It Aloud",
+        text: "J'ai passé un entretien blanc sur Say It Aloud 💪",
       });
     } catch (e) {
       if ((e as Error).name === "AbortError") return; // annulation = pas une erreur
