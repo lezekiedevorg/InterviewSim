@@ -54,7 +54,7 @@ export function Header() {
               il provoque un débordement dès 414 px, et la pastille suffit à
               porter la marque. */}
           <span className="hidden sm:inline">
-            Interview<span className="text-amber-400">Sim</span>
+            Say It <span className="text-amber-400">Aloud</span>
           </span>
         </Link>
         <nav className="flex items-center gap-2 text-sm sm:gap-3">

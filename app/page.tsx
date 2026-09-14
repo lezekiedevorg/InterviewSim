@@ -10,7 +10,7 @@ import {
 } from "@/app/components/landing/EtapeMockups";
 
 export const metadata: Metadata = {
-  title: "InterviewSim — Le jour J, vous l'aurez déjà répété",
+  title: "Say It Aloud — Le jour J, vous l'aurez déjà répété",
   description:
     "Un recruteur virtuel vous pose les questions de votre poste à partir de votre CV, écoute vos réponses et vous rend une note avec un débrief franc. Recommencez autant de fois qu'il vous faut.",
 };
@@ -210,7 +210,7 @@ export default function LandingPage() {
             </h1>
 
             <p className="mb-8 max-w-[33em] text-lg text-ink-muted">
-              InterviewSim joue le recruteur. Il vous pose les questions de{" "}
+              Say It Aloud joue le recruteur. Il vous pose les questions de{" "}
               <strong className="font-semibold text-ink">votre</strong>{" "}poste, à partir de votre
               propre CV, écoute vos réponses, puis vous rend une note avec un débrief qui ne vous
               épargne pas. Recommencez autant de fois qu&apos;il vous faut.
