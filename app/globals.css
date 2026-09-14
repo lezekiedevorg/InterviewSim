@@ -169,6 +169,25 @@ p { text-wrap: pretty; }
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 
+/* Marque : le trait reparcourt la boucle — « on recommence ».
+   Pas de rotation continue : ce serait un spinner, donc une attente. Ici le
+   geste a un début et une fin, comme un nouvel essai. Il ne se déclenche
+   qu'au survol du logo, jamais en boucle de fond. */
+@keyframes loop-replay {
+  from { stroke-dashoffset: 66.32; }
+  to   { stroke-dashoffset: 0; }
+}
+@keyframes loop-voice {
+  0%, 100% { opacity: 1; }
+  40%      { opacity: .35; }
+}
+.group:hover .loop-replay {
+  animation: loop-replay 620ms cubic-bezier(.65, 0, .35, 1);
+}
+.group:hover .loop-voice {
+  animation: loop-voice 620ms cubic-bezier(.65, 0, .35, 1);
+}
+
 /* Accessibilité : on coupe tout mouvement si l'utilisateur le demande */
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }

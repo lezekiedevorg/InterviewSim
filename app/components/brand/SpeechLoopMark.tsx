@@ -27,16 +27,23 @@ import type { CSSProperties } from "react";
  * La règle qui marche : base du triangle centrée sur la fin de l'arc, axe
  * aligné sur la tangente, pointe vers l'extérieur.
  */
+
+/** Longueur de l'arc : 2πR × (190/360) avec R=20. Sert au tracé animé. */
+const ARC_LENGTH = 66.32;
+
 export function SpeechLoopMark({
   size = 32,
   className = "",
   title,
   style,
+  animate = false,
 }: {
   size?: number;
   className?: string;
   title?: string;
   style?: CSSProperties;
+  /** Rejoue le tracé de la boucle : « on recommence ». Voir loop-replay. */
+  animate?: boolean;
 }) {
   const labelled = Boolean(title);
   // Le trait s'épaissit quand l'icône rétrécit : sans cela, l'onde et la
@@ -61,6 +68,15 @@ export function SpeechLoopMark({
         stroke="currentColor"
         strokeWidth={stroke}
         strokeLinecap="round"
+        className={animate ? "loop-replay" : undefined}
+        style={
+          animate
+            ? ({
+                strokeDasharray: ARC_LENGTH,
+                strokeDashoffset: 0,
+              } as CSSProperties)
+            : undefined
+        }
       />
       {/* Queue de la bulle, courte et anguleuse */}
       <path
@@ -78,16 +94,23 @@ export function SpeechLoopMark({
         stroke="currentColor"
         strokeWidth={stroke - 1}
         strokeLinecap="round"
+        className={animate ? "loop-voice" : undefined}
       />
     </svg>
   );
 }
 
 /** Wordmark officiel. Le nom et le symbole peuvent vivre séparément. */
-export function SayItAloudLogo({ compact = false }: { compact?: boolean }) {
+export function SayItAloudLogo({
+  compact = false,
+  animate = false,
+}: {
+  compact?: boolean;
+  animate?: boolean;
+}) {
   return (
     <span className="inline-flex items-center gap-2.5">
-      <SpeechLoopMark size={32} className="shrink-0 text-amber-400" />
+      <SpeechLoopMark size={32} animate={animate} className="shrink-0 text-amber-400" />
       {!compact && (
         <span className="font-heading text-lg font-semibold tracking-[-0.025em] text-cream">
           Say It <span className="text-amber-400">Aloud</span>
