@@ -22,10 +22,27 @@ const mono = IBM_Plex_Mono({
   display: "swap",
 });
 
+/* Sans metadataBase, Next résout og:image sur http://localhost:3000 — l'URL
+   part telle quelle dans le HTML de production et aucun réseau social ne peut
+   charger l'image. On prend l'URL publique fournie par Coolify quand elle
+   existe, sinon le domaine de production. */
+const siteUrl =
+  process.env.NEXT_PUBLIC_SITE_URL ??
+  (process.env.COOLIFY_URL ? process.env.COOLIFY_URL.split(",")[0] : null) ??
+  "https://sayitaloud.production.app-lezekie.dev";
+
 export const metadata: Metadata = {
+  metadataBase: new URL(siteUrl),
   title: "Say It Aloud — Le jour J, vous l'aurez déjà répété",
   description:
     "Entraînez-vous à vos entretiens avec un recruteur virtuel : il pose les questions de votre poste à partir de votre CV, écoute vos réponses et vous rend une note avec un débrief franc.",
+  openGraph: {
+    type: "website",
+    locale: "fr_FR",
+    siteName: "Say It Aloud",
+    url: siteUrl,
+  },
+  twitter: { card: "summary_large_image" },
 };
 
 /* Posé avant la première peinture, sinon on voit un flash crème avant le brun.

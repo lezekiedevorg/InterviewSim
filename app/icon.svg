@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <!-- Fond terracotta : l'icône doit rester reconnaissable dans un onglet
+       clair, sombre, ou sur un écran d'accueil multicolore. -->
+  <rect width="64" height="64" rx="15" fill="#C2410C"/>
+  <!-- Speech Loop. Trait épaissi (7) car la cible réelle est 16-32 px. -->
+  <g transform="translate(32 32) scale(0.82) translate(-32 -32)">
+    <path d="M25.2 48.8A20 20 0 1 1 42.0 12.7" stroke="#fff" stroke-width="7" stroke-linecap="round"/>
+    <path d="M25.2 48.8L17.5 52.5L26 49" stroke="#fff" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M37.8 20.0L52.8 18.9L46.2 5.3Z" fill="#fff"/>
+    <path d="M24 26v6M32 20v18M40 25v8" stroke="#fff" stroke-width="6" stroke-linecap="round"/>
+  </g>
+</svg>
