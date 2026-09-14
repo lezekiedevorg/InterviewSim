@@ -3,6 +3,11 @@ import type { Metadata } from "next";
 import { InterviewDemo } from "@/app/components/landing/InterviewDemo";
 import { Reveal } from "@/app/components/landing/Reveal";
 import { OUTIL_OUVERT } from "@/lib/lancement";
+import {
+  MaquettePreparation,
+  MaquetteEntretien,
+  MaquetteDebrief,
+} from "@/app/components/landing/EtapeMockups";
 
 export const metadata: Metadata = {
   title: "InterviewSim — Le jour J, vous l'aurez déjà répété",
@@ -31,33 +36,43 @@ const Arrow = () => (
   </svg>
 );
 
-const steps = [
+/* Le parcours : chaque étape porte la maquette de l'écran correspondant.
+   Une image vaut mieux qu'un paragraphe qui décrit l'interface. */
+const parcours = [
   {
-    title: "Décrivez le poste",
-    body: (
+    n: "01",
+    titre: "Décrivez le poste",
+    corps: (
       <>
         Intitulé, domaine, niveau, langue. Collez votre CV pour que les questions portent sur{" "}
         <em>votre</em>{" "}parcours — ou partez d&apos;un scénario prêt à l&apos;emploi.
       </>
     ),
+    maquette: <MaquettePreparation />,
   },
   {
-    title: "Passez l'entretien",
-    body: (
+    n: "02",
+    titre: "Passez l'entretien",
+    corps: (
       <>
-        Le recruteur vous pose une question, vous répondez à l&apos;écrit ou à voix haute.
-        Il rebondit sur ce que vous venez de dire. Le mode jury ajoute deux interlocuteurs.
+        Le recruteur vous pose une question, vous répondez à l&apos;écrit ou à voix haute, et il
+        rebondit sur ce que vous venez de dire. Le mode jury ajoute deux interlocuteurs qui se
+        relaient — c&apos;est là que beaucoup perdent le fil.
       </>
     ),
+    maquette: <MaquetteEntretien />,
   },
   {
-    title: "Lisez le débrief",
-    body: (
+    n: "03",
+    titre: "Lisez le débrief",
+    corps: (
       <>
-        Une note par critère, les passages qui ont convaincu, ceux qui ont coincé, et ce qu&apos;il
-        faut retravailler avant le prochain essai.
+        Une note par critère, ce qui a convaincu, ce qui a coincé, et ce qu&apos;il faut
+        retravailler avant le prochain essai. Pas un « bien joué » de politesse : ce que le
+        recruteur a réellement entendu.
       </>
     ),
+    maquette: <MaquetteDebrief />,
   },
 ];
 
@@ -244,35 +259,48 @@ export default function LandingPage() {
         <div className="mx-auto max-w-shell">
           <div className="rv mb-14 max-w-[44rem]">
             <span className="mb-3.5 block text-[12.5px] font-semibold uppercase tracking-[.09em] text-accent">
-              Trois temps
+              Le parcours
             </span>
             <h2 className="mb-4 text-[clamp(29px,3.6vw,41px)]">
               Un entretien, un débrief, et vous recommencez.
             </h2>
             <p className="text-[17px] text-ink-muted">
-              Rien à installer, rien à configurer. Vous décrivez le poste, vous parlez, vous lisez
-              ce qui n&apos;a pas marché.
+              Rien à installer, rien à configurer. Voici les trois écrans que vous traverserez —
+              et ce qu&apos;ils vous demandent.
             </p>
           </div>
 
-          <div className="grid gap-9 md:grid-cols-3 md:gap-0">
-            {steps.map((s, i) => (
-              <div key={s.title} className="rv group relative md:pr-8">
-                {/* Le trait qui relie les étapes : une progression, pas trois cartes isolées. */}
-                {i < steps.length - 1 && (
-                  <span
-                    className="absolute left-[46px] right-1.5 top-[21px] hidden h-[1.5px] bg-gradient-to-r from-border-strong to-transparent md:block"
-                    aria-hidden="true"
-                  />
-                )}
-                <div className="relative z-10 mb-5 grid h-[42px] w-[42px] place-items-center rounded-pill border-[1.5px] border-border-strong bg-surface font-heading text-[17px] font-semibold text-accent transition-all duration-studio ease-studio group-hover:-translate-y-0.5 group-hover:border-accent group-hover:bg-accent group-hover:text-accent-ink">
-                  {i + 1}
+          <ol className="relative space-y-14 md:space-y-24">
+            {/* Le fil qui relie les étapes — desktop uniquement : sur mobile il
+                traverserait le contenu sans rien apporter. */}
+            <span
+              className="absolute bottom-10 left-1/2 top-4 hidden w-[1.5px] -translate-x-1/2 bg-gradient-to-b from-border-strong via-border to-transparent md:block"
+              aria-hidden="true"
+            />
+
+            {parcours.map((e, i) => (
+              <li key={e.n} className="rv relative">
+                <div className="grid gap-7 md:grid-cols-2 md:items-center md:gap-16">
+                  {/* Le texte vient d'abord dans le DOM pour que l'ordre mobile
+                      soit titre puis maquette ; l'alternance ne joue qu'à partir
+                      du format tablette, où l'œil suit alors un vrai chemin. */}
+                  <div className={i % 2 === 0 ? "md:order-1" : "md:order-2"}>
+                    <div className="mb-5 flex items-center gap-3.5">
+                      <span className="grid h-[42px] w-[42px] shrink-0 place-items-center rounded-pill border-[1.5px] border-border-strong bg-surface font-heading text-[16px] font-semibold text-accent">
+                        {e.n}
+                      </span>
+                      <h3 className="text-[21px]">{e.titre}</h3>
+                    </div>
+                    <p className="text-[16px] text-ink-muted">{e.corps}</p>
+                  </div>
+
+                  <div className={i % 2 === 0 ? "md:order-2" : "md:order-1"}>
+                    {e.maquette}
+                  </div>
                 </div>
-                <h3 className="mb-2.5 text-xl">{s.title}</h3>
-                <p className="text-[15px] text-ink-muted">{s.body}</p>
-              </div>
+              </li>
             ))}
-          </div>
+          </ol>
         </div>
       </section>
 

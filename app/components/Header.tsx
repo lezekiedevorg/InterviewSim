@@ -46,11 +46,16 @@ export function Header() {
   return (
     <header className="sticky top-0 z-20 bg-night-900/85 backdrop-blur-md">
       <div className="mx-auto flex max-w-5xl items-center justify-between gap-3 px-4 py-4 sm:px-5">
-        <Link href="/" className="group flex min-w-0 items-center gap-2 font-heading text-sm font-extrabold tracking-tight text-cream sm:gap-2.5 sm:text-lg">
+        <Link href="/" className="-ml-1 flex min-h-[44px] min-w-[44px] shrink-0 items-center justify-center gap-2 rounded-pill px-1.5 font-heading text-sm font-extrabold tracking-tight text-cream transition-colors duration-studio ease-studio hover:bg-cream/5 sm:justify-start sm:gap-2.5 sm:text-lg">
           <span className="transition-transform duration-200 group-hover:scale-105 group-hover:rotate-3">
             <Logo />
           </span>
-          Interview<span className="text-amber-400">Sim</span>
+          {/* Le nom complet revient à partir de 640 px. En dessous, mesuré :
+              il provoque un débordement dès 414 px, et la pastille suffit à
+              porter la marque. */}
+          <span className="hidden sm:inline">
+            Interview<span className="text-amber-400">Sim</span>
+          </span>
         </Link>
         <nav className="flex items-center gap-2 text-sm sm:gap-3">
           {/* Tant que l'outil n'est pas ouvert, aucune entrée ne doit y mener :
@@ -59,7 +64,7 @@ export function Header() {
           {OUTIL_OUVERT && (
             <Link
               href="/entrainement"
-              className="whitespace-nowrap rounded-full px-2 py-1.5 text-[13px] font-semibold text-muted transition-colors duration-200 hover:bg-cream/10 hover:text-cream sm:px-3 sm:text-sm"
+              className="hidden min-h-[44px] items-center whitespace-nowrap rounded-full px-2 text-[13px] font-semibold text-muted transition-colors duration-studio ease-studio hover:bg-cream/10 hover:text-cream min-[360px]:inline-flex sm:px-3 sm:text-sm"
             >
               Entraînement
             </Link>
@@ -68,7 +73,7 @@ export function Header() {
             <>
               <Link
                 href="/progression"
-                className="whitespace-nowrap rounded-full px-2 py-1.5 text-[13px] font-semibold text-muted transition-colors duration-200 hover:bg-cream/10 hover:text-cream sm:px-3 sm:text-sm"
+                className="inline-flex min-h-[44px] items-center whitespace-nowrap rounded-full px-2 text-[13px] font-semibold text-muted transition-colors duration-studio ease-studio hover:bg-cream/10 hover:text-cream sm:px-3 sm:text-sm"
               >
                 Ma progression
               </Link>
@@ -90,7 +95,7 @@ export function Header() {
           ) : (
             <Link
               href="/login"
-              className="whitespace-nowrap rounded-full border border-cream/30 px-3 py-2 text-[13px] font-semibold text-cream transition-colors duration-200 hover:border-amber-400 hover:bg-amber-400/10 sm:px-4 sm:text-sm"
+              className="inline-flex min-h-[44px] items-center whitespace-nowrap rounded-full border-[1.5px] border-cream/30 px-3 text-[13px] font-semibold text-cream transition-colors duration-studio ease-studio hover:border-amber-400 hover:bg-amber-400/10 sm:px-4 sm:text-sm"
             >
               Se connecter
             </Link>

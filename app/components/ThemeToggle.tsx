@@ -53,7 +53,7 @@ export function ThemeToggle({ className = "" }: { className?: string }) {
       }
       aria-pressed={dark === true}
       title="Thème clair / sombre"
-      className={`grid h-10 w-10 shrink-0 place-items-center rounded-pill border-[1.5px] border-border bg-surface text-ink-muted transition-all duration-studio ease-studio hover:-translate-y-px hover:border-border-strong hover:text-ink focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-accent/20 ${className}`}
+      className={`grid h-11 w-11 shrink-0 place-items-center rounded-pill border-[1.5px] border-border bg-surface text-ink-muted transition-all duration-studio ease-studio hover:-translate-y-px hover:border-border-strong hover:text-ink focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-accent/20 ${className}`}
     >
       {/* Les deux icônes sont toujours rendues : le contraste est géré par
           l'opacité, donc pas de saut de mise en page au basculement. */}
